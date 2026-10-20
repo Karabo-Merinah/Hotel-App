@@ -1,0 +1,78 @@
+import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import connectionPool from "../config/database";
+
+//Creating login token  that takes user d and role
+const create_token = (userId: number, role: string) => {
+    return jwt.sign({ userId: userId, role: role },
+        process.env.JWT_CODE as string,
+        //sets the user token o expire after 2 days
+        { expiresIn: "2d" }
+    )
+}
+
+export const registerUser = async (req: Request, res: Response) => {
+    try {
+        const full_name = req.body.name
+        const email = req.body.email
+        const password = req.body.password
+        const confirm_password = req.body.confirm_password
+
+        //check if all fields are filled in 
+
+        if (!full_name) {
+            return res.status(400).json({ message: "Name is required" })
+        }
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" })
+        }
+        if (!password) {
+            return res.status(400).json({ message: "Password is required" })
+        }
+        if (!confirm_password) {
+            return res.status(400).json({ message: "Confirm password is required ." })
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ message: "Password  must be at least 8 characters ." })
+        }
+        if (confirm_password.length < 8) {
+            return res.status(400).json({ message: "Password  must be at least 8 characters ." })
+        }
+        //check if the emaail format is correct.
+        const email_re1 = email.includes("@")
+        const email_re2 = email.includes(".")
+        const email_re3 = email.includes(" ")
+
+        if (!email_re1 || !email_re2 || email_re3) {
+            return res.status(400).json({ message: "Enter an email with  valid email format ." })
+        }
+
+        //check  if the email is already used  
+        const email_stored = email.trim().toLowerCase()
+        const existing_user = await connectionPool.query(
+            "SELECT id FROM users WHERE email=$1", [email_stored]
+        )
+        if (existing_user.rows.length > 0) {
+            return res.status(409).json({ message: "An account with this email already exists. " })
+        }
+
+        //Hash password and save the user   
+
+        const hash_password = await bcrypt.hash(password, 10)
+        const result = await connectionPool.query(
+            "INSERT INTO users (name,email,password_hash) VALUES ($1,$2,$3)  RETURNING id,name,email,role",
+            [full_name.trim(), email_stored, hash_password]
+        )
+
+        const new_user = result.rows[0]
+        const token = create_token(new_user.id, new_user.role)
+
+        return res.status(201).json({ user: new_user, token: token })
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Couldn't register user" })
+    }
+}
