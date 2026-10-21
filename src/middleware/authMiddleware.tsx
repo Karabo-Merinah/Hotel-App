@@ -5,11 +5,11 @@ import jwt from "jsonwebtoken"
 
 export const requiresLogin = (req: Request, res: Response, next: NextFunction) => {
     const authorization_header = req.headers.authorization
-  
+
     //if there's no header or it doesn't have keyword "Bearer" throw message
-    
+
     if (!authorization_header || !authorization_header.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Please log in first" })
+        return res.status(401).json({ message: "Invalid token." })
     }
 
     //splits the bearer with space and keep the second part which is a token

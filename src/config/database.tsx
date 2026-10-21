@@ -1,21 +1,20 @@
-import {Pool} from "pg"
+import { Pool } from "pg"
 import dotenv from "dotenv"
 
 dotenv.config()
 
 //creating connection
-const connectionPool=new Pool({connectionString:process.env.DATABASE_URL})
-
+const connectionPool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 //testing connection 
 
-export const testConnection=async()=>{
-    try{
-        const client=await connectionPool.connect()
+export const testConnection = async () => {
+    try {
+        const client = await connectionPool.connect()
         console.log("Connected successfully")
-        client.release() 
+        client.release()
     }
-    catch(error){
+    catch (error) {
         console.log(error)
     }
 }
