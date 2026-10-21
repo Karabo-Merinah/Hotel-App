@@ -34,13 +34,22 @@ export const registerUser = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Confirm password is required ." })
         }
 
+        //checks if passwords minimum length is met 
+
         if (password.length < 8) {
             return res.status(400).json({ message: "Password  must be at least 8 characters ." })
         }
         if (confirm_password.length < 8) {
             return res.status(400).json({ message: "Password  must be at least 8 characters ." })
         }
-        //check if the emaail format is correct.
+
+        //checks if password and confirm password are the same 
+
+        if (password !== confirm_password) {
+            return res.status(400).json({ message: "Passwords do not match." })
+        }
+
+        //check if the email format is correct.
         const email_re1 = email.includes("@")
         const email_re2 = email.includes(".")
         const email_re3 = email.includes(" ")
@@ -73,6 +82,47 @@ export const registerUser = async (req: Request, res: Response) => {
     }
     catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Couldn't register user" })
+        return res.status(500).json({ message: "Could not  register user." })
+    }
+}
+
+export const loginUser = async (req: Request, res: Response) => {
+    try {
+
+        const email = req.body.email
+        const password = req.body.password
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required." })
+        }
+        if (!password) {
+            return res.status(400).json({ message: "Password is required." })
+        }
+        const login_results = await connectionPool.query(
+            "SELECT id,name,email,role,password_hash FROM users WHERE email=$1", [email.trim().toLowerCase()]
+        )
+        //if there are no result restrict authorization.
+        if (login_results.rows.length == 0) {
+            return res.status(401).json({ message: "Invalid email or password." })
+        }
+        const user = login_results.rows[0]
+
+        //users who signed up but have no password
+        if (!user.password_hash) {
+            return res.status(401).json({ message: "Invalid email or password" })
+        }
+
+        const password_hash_matches = await bcrypt.compare(password, user.password_hash)
+        if (!password_hash_matches) {
+            return res.status(401).json({ message: "Invalid email or password" })
+        }
+
+        const token = create_token(user.id, user.role)
+
+        res.status(200).json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, token: token })
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not login" })
     }
 }
