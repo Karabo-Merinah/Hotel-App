@@ -109,20 +109,43 @@ export const loginUser = async (req: Request, res: Response) => {
 
         //users who signed up but have no password
         if (!user.password_hash) {
-            return res.status(401).json({ message: "Invalid email or password" })
+            return res.status(401).json({ message: "Invalid email or password." })
         }
 
         const password_hash_matches = await bcrypt.compare(password, user.password_hash)
         if (!password_hash_matches) {
-            return res.status(401).json({ message: "Invalid email or password" })
+            return res.status(401).json({ message: "Invalid email or password." })
         }
 
         const token = create_token(user.id, user.role)
 
-        res.status(200).json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, token: token })
+        return res.status(200).json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, token: token })
     }
     catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Could not login" })
+    }
+}
+
+//Returns the logged in user 
+
+export const getCurrentLoggedUser = async (req: Request, res: Response) => {
+    try {
+
+        //Reads the user id that the middleware saved for the request.
+        const userId = res.locals.userId
+
+        //checks for the user in the database.
+        const result = await connectionPool.query(
+            "SELECT id,name,email,role FROM users WHERE id=$1", [userId]
+        )
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User not found." })
+        }
+        return res.status(200).json(result.rows[0])
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not get the user." })
     }
 }
