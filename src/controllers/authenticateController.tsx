@@ -7,8 +7,8 @@ import connectionPool from "../config/database";
 const create_token = (userId: number, role: string) => {
     return jwt.sign({ userId: userId, role: role },
         process.env.JWT_CODE as string,
-        //sets the user token o expire after 2 days
-        { expiresIn: "2d" }
+        //sets the user token o expire after  2 hours
+        { expiresIn: "2h" }
     )
 }
 
