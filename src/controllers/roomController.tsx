@@ -8,10 +8,11 @@ export const getHotelRooms = async (req: Request, res: Response) => {
     try {
         const hotel_id = Number(req.params.hotelId)
 
+        //checks if the hotel id is a number
         if (isNaN(hotel_id)) {
             return res.status(400).json({ message: "Hotel id must be a number." })
         }
-
+        // only get the rooms that is_active status is set to TRUE 
         const result = await connectionPool.query(
             "SELECT * FROM rooms WHERE hotel_id=$1 AND is_active=TRUE ORDER BY price_per_night", [hotel_id])
         return res.status(200).json(result.rows)
@@ -28,6 +29,7 @@ export const getRoomById = async (req: Request, res: Response) => {
     try {
         const room_id = Number(req.params.id)
 
+        //checks if room id is a number.
         if (isNaN(room_id)) {
             return res.status(400).json({ message: "Room id must be a number." })
         }
@@ -36,7 +38,7 @@ export const getRoomById = async (req: Request, res: Response) => {
             "SELECT * FROM rooms WHERE id=$1 AND is_active=TRUE",
             [room_id]
         )
-
+        //if there's no row retrieved then  no active room is found
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Room not found." })
         }
@@ -50,9 +52,10 @@ export const getRoomById = async (req: Request, res: Response) => {
 }
 
 
-//check room details sent by admin
+//check room details sent by admin and handles the errors.
 const getRoomDataErrors = (roomData: any) => {
 
+    //checks if the room's id and room type is not empty 
     if (!roomData.hotel_id || !roomData.room_type) {
         return "Hotel id and room type are required."
     }
@@ -97,11 +100,11 @@ export const createRoom = async (req: Request, res: Response) => {
             `INSERT INTO rooms(hotel_id,room_type,description,capacity,price_per_night,total_rooms) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
             [
                 roomData.hotel_id,
-                roomData.room_type,
+                roomData.room_type.trim(),
                 roomData.description,
-                roomData.capacity,
-                roomData.price_per_night,
-                roomData.total_rooms
+                parseInt(roomData.capacity),
+                Number(roomData.price_per_night),
+                parseInt(roomData.total_rooms)
             ]
         )
         return res.status(201).json(result.rows[0])
@@ -128,17 +131,21 @@ export const updateRoom = async (req: Request, res: Response) => {
         if (errorMessage !== "") {
             return res.status(400).json({ message: errorMessage })
         }
-
+        //if the admin doesn't send is_active then room keeps it's current value 
+        let isActive: boolean | null = null
+        if (roomData.is_active === true || roomData.is_active === false) {
+            isActive = roomData.is_active
+        }
         const result = await connectionPool.query(
-            `UPDATE rooms SET hotel_id=$1,room_type=$2,description=$3, capacity=$4,price_per_night=$5,total_rooms=$6,is_active=$7,updated_at=NOW()WHERE id=$8 RETURNING *`,
+            `UPDATE rooms SET hotel_id=$1,room_type=$2,description=$3, capacity=$4,price_per_night=$5,total_rooms=$6,is_active=COALESCE($7,is_active) WHERE id=$8 RETURNING *`,
             [
                 roomData.hotel_id,
                 roomData.room_type.trim(),
                 roomData.description,
                 parseInt(roomData.capacity),
-                parseInt(roomData.price_per_night),
+                Number(roomData.price_per_night),
                 parseInt(roomData.total_rooms),
-                roomData.is_active,
+                isActive,
                 room_id
             ]
         )
@@ -178,8 +185,6 @@ export const deleteRoom = async (req: Request, res: Response) => {
     }
     catch (error) {
         console.log(error)
-        return res.status(500).json({
-            message: "Could not delete room. It may have existing bookings."
-        })
+        return res.status(500).json({ message: "Could not delete room." })
     }
 }

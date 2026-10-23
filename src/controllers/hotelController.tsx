@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import connectionPool from "../config/database"
 
 
-//gets all hotels with the lowest room price .
+//gets all hotels with the lowest room price and the photo .
 export const getAllHotels = async (req: Request, res: Response) => {
 
     try {
@@ -55,7 +55,7 @@ export const getHotelById = async (req: Request, res: Response) => {
             "SELECT id,name FROM amenities WHERE id IN (SELECT amenity_id FROM hotel_amenities WHERE hotel_id=$1) ORDER BY name", [hotel_id]
         )
 
-        //gets the hotel rooms 
+        //gets the hotel rooms guests can book 
 
         const hotel_rooms = await connectionPool.query(
             "SELECT id,room_type,description,capacity,price_per_night FROM rooms WHERE hotel_id=$1 AND is_active=TRUE ORDER BY price_per_night", [hotel_id]
@@ -76,13 +76,16 @@ export const getHotelById = async (req: Request, res: Response) => {
     }
 }
 
-//checks the hotel details  sent by admin 
+//checks the hotel details  sent by admin  by handling possible errors.
 const getHotelDataErrors = (hotelData: any) => {
+    //checks if the hotel name,address,city are not empty . 
     if (!hotelData.name || !hotelData.address || !hotelData.city) {
         return "Name,address and city are required."
     }
     const latitude = parseFloat(hotelData.latitude)
     const longitude = parseFloat(hotelData.longitude)
+
+    //checks if the map coordinates are provided and their scale 
 
     if (isNaN(latitude) || isNaN(longitude)) {
         return "Latitude and longitude are required and must be a number."
@@ -142,10 +145,10 @@ export const updateHotel = async (req: Request, res: Response) => {
 
         const result = await connectionPool.query(
             `UPDATE hotels SET name=$1,description=$2,address=$3,city=$4,latitude=$5,longitude=$6,star_rating=$7,policies=$8 WHERE id=$9 RETURNING *`, [
-            hotelData.name,
+            hotelData.name.trim(),
             hotelData.description,
-            hotelData.address,
-            hotelData.city,
+            hotelData.address.trim(),
+            hotelData.city.trim(),
             parseFloat(hotelData.latitude),
             parseFloat(hotelData.longitude),
             parseInt(hotelData.star_rating),
@@ -153,7 +156,7 @@ export const updateHotel = async (req: Request, res: Response) => {
             hotel_id
         ]
         )
-        //if no row is returned 
+        //if no row is returned there's no hotel with that id.
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Hotel is not found." })
         }
@@ -179,7 +182,8 @@ export const deleteHotel = async (req: Request, res: Response) => {
         const result = await connectionPool.query(
             "DELETE FROM hotels WHERE id=$1 RETURNING id", [hotel_id]
         )
-
+        
+         //no hotel deleted it means there's no hotel with that id .
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Hotel not found." })
         }
