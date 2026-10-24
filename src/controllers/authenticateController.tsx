@@ -137,7 +137,7 @@ export const getCurrentLoggedUser = async (req: Request, res: Response) => {
 
         //checks for the user in the database.
         const result = await connectionPool.query(
-            "SELECT id,name,email,role FROM users WHERE id=$1", [userId]
+            "SELECT id,name,email,phone,role FROM users WHERE id=$1", [userId]
         )
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "User not found." })
