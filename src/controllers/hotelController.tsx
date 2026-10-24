@@ -7,12 +7,73 @@ export const getAllHotels = async (req: Request, res: Response) => {
 
     try {
 
-        const result = await connectionPool.query(
-            `SELECT id,name,city,address,star_rating,latitude,longitude,
-            (SELECT MIN(price_per_night) FROM rooms 
-            WHERE rooms.hotel_id=hotels.id AND  is_active=TRUE) AS price_from,
-            (SELECT image_url FROM hotel_images WHERE hotel_images.hotel_id =hotels.id ORDER BY id LIMIT 1) AS main_image FROM hotels ORDER BY name`
-        )
+        let query_text = `SELECT id,name,city,address,star_rating,latitude,longitude,
+        (SELECT MIN(price_per_night) FROM rooms 
+        WHERE rooms.hotel_id=hotels.id AND is_active=TRUE) AS price_from ,
+        (SELECT image_url FROM hotel_images WHERE hotel_images.hotel_id=hotels.id ORDER BY id LIMIT 1) AS main_image 
+        FROM hotels WHERE 1=1`
+
+        //filter values
+        const values: any[] = []
+
+        //filters on room 
+        let room_filters = ""
+
+        //filter by location 
+        if (req.query.city) {
+            values.push("%" + String(req.query.city).trim() + "%")
+            query_text = query_text + " AND (LOWER(city) LIKE LOWER($" + values.length + ") OR LOWER(address) LIKE LOWER($" + values.length + "))"
+        }
+
+        //filter by ratings 
+        if (req.query.stars) {
+            const stars = Number(req.query.stars)
+            if (isNaN(stars)) {
+                return res.status(400).json({ message: "Star ratings must be a number." })
+            }
+            values.push(stars)
+            query_text = query_text + " AND star_rating >= $" + values.length
+        }
+
+        //filter by lower price per night
+
+        if (req.query.minPrice) {
+            const minPrice = Number(req.query.minPrice)
+            if (isNaN(minPrice)) {
+                return res.status(400).json({ message: "Minimum price must be a number" })
+            }
+            values.push(minPrice)
+            room_filters = room_filters + " AND price_per_night >= $" + values.length
+        }
+
+        //filter by the highest price per night 
+        if (req.query.maxPrice) {
+            const maxPrice = Number(req.query.maxPrice)
+            if (isNaN(maxPrice)) {
+                return res.status(400).json({ message: "Maximum price must be a number." })
+            }
+            values.push(maxPrice)
+            room_filters = room_filters + " AND price_per_night <= $" + values.length
+        }
+
+        //filter by number of guests
+        if (req.query.guests) {
+            const guests = Number(req.query.guests)
+            if (isNaN(guests)) {
+                return res.status(400).json({ message: "Guests must be a number" })
+            }
+            values.push(guests)
+            room_filters = room_filters + " AND capacity>= $" + values.length
+
+        }
+
+        //returns filter results 
+        if (room_filters !== "") {
+            query_text = query_text + " AND id IN (SELECT hotel_id FROM rooms WHERE is_active=TRUE" + room_filters + ")"
+        }
+        query_text = query_text + " ORDER BY name"
+
+        const result = await connectionPool.query(query_text, values)
         return res.status(200).json(result.rows)
     }
     catch (error) {
@@ -182,8 +243,8 @@ export const deleteHotel = async (req: Request, res: Response) => {
         const result = await connectionPool.query(
             "DELETE FROM hotels WHERE id=$1 RETURNING id", [hotel_id]
         )
-        
-         //no hotel deleted it means there's no hotel with that id .
+
+        //no hotel deleted it means there's no hotel with that id .
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Hotel not found." })
         }
