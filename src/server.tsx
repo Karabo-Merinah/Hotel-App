@@ -7,6 +7,7 @@ import hotel_router from "./routes/hotelRoutes"
 import room_router from "./routes/roomRoutes"
 import booking_router from "./routes/bookingRoutes"
 import user_router from "./routes/userRoutes"
+import favourite_router from "./routes/favouritesRoutes"
 
 dotenv.config()
 
@@ -21,6 +22,7 @@ app.use("/api/hotels", hotel_router)
 app.use("/api/rooms", room_router)
 app.use("/bookings", booking_router)
 app.use("/me", user_router)
+app.use("/favourites",favourite_router)
 
 app.listen(port, async () => {
     console.log("Server running on http://localhost:" + port)
