@@ -98,7 +98,7 @@ export const getHotelById = async (req: Request, res: Response) => {
         //gets the hotel
 
         const hotel_results = await connectionPool.query(
-            "SELECT * FROM hotels WHERE id=$1", [hotel_id]
+            "SELECT * FROM hotels WHERE id=$1 AND is_active=TRUE ", [hotel_id]
         )
 
         if (hotel_results.rows.length === 0) {

@@ -55,16 +55,16 @@ const getBookingsErrors = (bookingData: any) => {
 }
 
 //checks number of rooms already booked of certain type by ignoring the provided booking id 
+const getBookedRooms = async (room_id: number, check_in: string, check_out: string, excluded_id: number, client: PoolClient) => {
 
-const getBookedRooms = async (room_id: number, check_in: string, check_out: string, excluded_id: number) => {
-
-    const result = await connectionPool.query(
-        `SELECT COALESCE(SUM(number_of_rooms),0) AS booked FROM bookings 
-        WHERE room_id=$1 AND status IN ('pending','confirmed') AND check_in<$3 AND check_out>$2 AND id<>$4`,
+    const result = await client.query(`SELECT COALESCE(SUM(number_of_rooms), 0) AS booked
+         FROM bookings WHERE room_id = $1 AND status IN ('pending', 'confirmed')
+         AND check_in < $3 AND check_out > $2 AND id <> $4`,
         [room_id, check_in, check_out, excluded_id]
     )
-    //converts booked sum  to a number 
-    return parseInt(result.rows[0].booked)
+
+    // converts it to the number format
+    return Number(result.rows[0].booked)
 }
 
 //Saves a notification for a user 
@@ -94,76 +94,107 @@ const getHotelNameByRoom = async (room_id: number) => {
 
 //create a booking for the logged in user 
 export const createBooking = async (req: Request, res: Response) => {
+
+    const client = await connectionPool.connect()
+
     try {
         const booking_data = req.body
-
-        // id comes from the user token 
-
         const user_id = res.locals.userId
 
-        const room_id = parseInt(booking_data.room_id)
-        if (isNaN(room_id)) {
-            return res.status(400).json({ message: "Room id is required and must be a number." })
+        const room_id = Number(booking_data.room_id)
+
+        if (!Number.isInteger(room_id) || room_id <= 0) {
+            return res.status(400).json({ message: "Room id must be a positive number." })
         }
+
         const errorMessage = getBookingsErrors(booking_data)
 
         if (errorMessage !== "") {
             return res.status(400).json({ message: errorMessage })
         }
+
         const check_in = String(booking_data.check_in)
         const check_out = String(booking_data.check_out)
-        const rooms_wanted = parseInt(booking_data.number_of_rooms)
-        const guests = parseInt(booking_data.number_of_guests)
+        const rooms_wanted = Number(booking_data.number_of_rooms)
+        const guests = Number(booking_data.number_of_guests)
 
+        // Start transaction
+        await client.query("BEGIN")
 
+        // Lock the selected room while checking availability
+        const room_result = await client.query(`SELECT * FROM rooms WHERE id = $1 AND is_active = TRUE
+             FOR UPDATE`, [room_id])
 
-        //Checks if room exist and is marked active 
-        const room_result = await connectionPool.query(`SELECT rooms.id,rooms.hotel_id,rooms.capacity,
-        rooms.price_per_night,rooms.total_rooms FROM rooms,hotels  WHERE rooms.hotel_id=hotels.id
-        AND rooms.id=$1 AND rooms.is_active=TRUE AND hotels.is_active=TRUE`, [room_id])
         if (room_result.rows.length === 0) {
-            return res.status(404).json({ message: "Room not found." })
+            await client.query("ROLLBACK")
+
+            return res.status(404).json({
+                message: "Room not found."
+            })
         }
 
         const room = room_result.rows[0]
 
-        //All guests fit in the rooms 
+        // Check if the hotel is active
+        const hotel_result = await client.query(`SELECT id FROM hotels WHERE id = $1 AND is_active = TRUE`,
+            [room.hotel_id])
+
+        if (hotel_result.rows.length === 0) {
+            await client.query("ROLLBACK")
+
+            return res.status(404).json({ message: "Hotel not found." })
+        }
+
+        // Check guest capacity
         if (guests > room.capacity * rooms_wanted) {
-            return res.status(400).json({ message: "This room type fits " + room.capacity + " guest(s) per room. Choose more rooms or fewer guests" })
+            await client.query("ROLLBACK")
+
+            return res.status(400).json({ message: "The selected rooms cannot accommodate all guests." })
         }
 
-        //checks if the room is already booked and rooms wanted are not more than what the hotel has
+        // Check available rooms
+        const booked = await getBookedRooms(room_id, check_in, check_out, 0, client)
 
-        const booked = await getBookedRooms(room_id, check_in, check_out, 0)
         if (booked + rooms_wanted > room.total_rooms) {
-            return res.status(409).json({ message: "Not enough rooms are available for the dates." })
+            await client.query("ROLLBACK")
+
+            return res.status(409).json({ message: "Not enough rooms available for these dates." })
         }
-        //calculates the price
+
+        // Calculate total price
         const nights = getNights(check_in, check_out)
+
         const total_price = Math.round(Number(room.price_per_night) * nights * rooms_wanted * 100) / 100
 
-
-        //booking status is set to pending until admin approves it 
-
-        const results = await connectionPool.query(
-            `INSERT INTO bookings(user_id,room_id,check_in,check_out,number_of_rooms,number_of_guests,total_price,status)
-            VALUES($1,$2,$3,$4,$5,$6,$7,'pending') RETURNING id`, [user_id, room_id, check_in, check_out, rooms_wanted, guests, total_price]
+        // Save booking
+        const result = await client.query(
+            `INSERT INTO bookings (user_id, room_id, check_in, check_out,
+             number_of_rooms, number_of_guests, total_price, status) VALUES ($1,$2,$3,$4,$5,$6,$7,'pending') RETURNING id`,
+            [user_id, room_id, check_in, check_out, rooms_wanted, guests, total_price]
         )
 
+        // Complete transaction
+        await client.query("COMMIT")
+
+        const booking_id = result.rows[0].id
+
+        // Send notification
         const hotel_name = await getHotelNameByRoom(room_id)
-        await addNotification(user_id, "Your booking at " + hotel_name + " is waiting for approval")
 
-        //Send back the full booking,with the hotel and room name 
+        await addNotification(user_id, "Your booking at " + hotel_name + " is waiting for approval.")
 
-        const new_booking = await connectionPool.query(
-            select_booking + "WHERE id=$1", [results.rows[0].id]
-        )
+        // Return booking details
+        const new_booking = await connectionPool.query(select_booking + "WHERE id = $1", [booking_id])
+
         return res.status(201).json(new_booking.rows[0])
 
-    }
-    catch (error) {
+    } catch (error) {
+        await client.query("ROLLBACK")
         console.log(error)
-        return res.status(500).json({ message: "Could not create the booking" })
+        return res.status(500).json({ message: "Could not create the booking." })
+
+    } finally {
+        client.release()
     }
 }
 //gets the bookings of the logged in user  putting new bookings on top 
@@ -172,9 +203,7 @@ export const getMyBookings = async (req: Request, res: Response) => {
     try {
         const user_id = res.locals.userId
 
-        const result = await connectionPool.query(
-            select_booking + "WHERE user_id=$1 ORDER BY check_in DESC", [user_id]
-        )
+        const result = await connectionPool.query(select_booking + "WHERE user_id=$1 ORDER BY check_in DESC", [user_id])
         return res.status(200).json(result.rows)
     }
     catch (error) {
@@ -301,86 +330,131 @@ export const updateBookingStatus = async (req: Request, res: Response) => {
 
 //updates booking
 
+// Update an existing booking
 export const updateBooking = async (req: Request, res: Response) => {
+    const booking_id = Number(req.params.id)
+
+    if (!Number.isInteger(booking_id) || booking_id <= 0) {
+        return res.status(400).json({ message: "Booking id must be a positive number." })
+    }
+
+    const bookingData = req.body
+    const room_id = Number(bookingData.room_id)
+
+    if (!Number.isInteger(room_id) || room_id <= 0) {
+        return res.status(400).json({ message: "Room id must be a positive number." })
+    }
+
+    const errorMessage = getBookingsErrors(bookingData)
+
+    if (errorMessage !== "") {
+        return res.status(400).json({ message: errorMessage })
+    }
+
+    const check_in = String(bookingData.check_in)
+    const check_out = String(bookingData.check_out)
+    const rooms_wanted = Number(bookingData.number_of_rooms)
+    const guests = Number(bookingData.number_of_guests)
+
+    let client: PoolClient | undefined
+
     try {
-        const booking_id = Number(req.params.id)
+        client = await connectionPool.connect()
 
-        if (isNaN(booking_id)) {
-            return res.status(400).json({ message: "Booking id must be a number." })
-        }
+        await client.query("BEGIN")
 
-        const bookingData = req.body
-
-        const room_id = parseInt(bookingData.room_id)
-        if (isNaN(room_id)) {
-            return res.status(400).json({ message: "Room id is required and must be a number." })
-        }
-
-        const errorMessage = getBookingsErrors(bookingData)
-        if (errorMessage !== "") {
-            return res.status(400).json({ message: errorMessage })
-        }
-
-        const check_in = String(bookingData.check_in)
-        const check_out = String(bookingData.check_out)
-        const rooms_wanted = parseInt(bookingData.number_of_rooms)
-        const guests = parseInt(bookingData.number_of_guests)
-
-        //The booking must exist and must not be cancelled
-        const booking_result = await connectionPool.query(
-            "SELECT id,user_id,status FROM bookings WHERE id=$1", [booking_id]
+        // Lock the booking before updating it
+        const booking_result = await client.query("SELECT * FROM bookings WHERE id=$1 FOR UPDATE", [booking_id]
         )
+
         if (booking_result.rows.length === 0) {
+            await client.query("ROLLBACK")
+
             return res.status(404).json({ message: "Booking not found." })
         }
+
         const booking = booking_result.rows[0]
 
-        if (booking.status === "cancelled") {
-            return res.status(400).json({ message: "A cancelled booking cannot be changed." })
+        // Cancelled or completed bookings cannot be updated
+        if (booking.status === "cancelled" ||
+            booking.status === "completed") {
+
+            await client.query("ROLLBACK")
+
+            return res.status(400).json({ message: "This booking cannot be updated." })
         }
-        if (booking.status === "completed") {
-            return res.status(400).json({ message: "A completed booking cannot be changed." })
-        }
-        //The room must exist and be switched on
-        const room_result = await connectionPool.query(`SELECT rooms.id,rooms.hotel_id,rooms.capacity,
-        rooms.price_per_night,rooms.total_rooms FROM rooms,hotels  WHERE rooms.hotel_id=hotels.id
-        AND rooms.id=$1 AND rooms.is_active=TRUE AND hotels.is_active=TRUE`, [room_id])
+
+        // Lock the selected room
+        const room_result = await client.query(
+            `SELECT rooms.* FROM rooms, hotels WHERE rooms.hotel_id = hotels.id
+             AND rooms.id = $1 AND rooms.is_active = TRUE
+             AND hotels.is_active = TRUE FOR UPDATE OF rooms`,
+            [room_id])
+
         if (room_result.rows.length === 0) {
-            return res.status(404).json({ message: "Room not found." })
+            await client.query("ROLLBACK")
+
+            return res.status(404).json({ message: "Room not found or hotel is inactive." })
         }
+
         const room = room_result.rows[0]
 
+        // Check guest capacity
         if (guests > room.capacity * rooms_wanted) {
-            return res.status(400).json({ message: "This room type fits " + room.capacity + " guest(s) per room. Choose more rooms or fewer guests." })
+            await client.query("ROLLBACK")
+
+            return res.status(400).json({
+                message: "The selected rooms cannot accommodate all guests."
+            })
         }
 
-        //Same availability check as creating, but this booking's own rooms are not counted twice
-        const booked = await getBookedRooms(room_id, check_in, check_out, booking_id)
+        // Check available rooms
+        const booked = await getBookedRooms(room_id, check_in, check_out, booking_id, client)
+
         if (booked + rooms_wanted > room.total_rooms) {
-            return res.status(409).json({ message: "Not enough rooms are available for these dates." })
+            await client.query("ROLLBACK")
+
+            return res.status(409).json({ message: "Not enough rooms available for these dates." })
         }
 
-        //Work out the new price
+        // Calculate booking price
         const nights = getNights(check_in, check_out)
+
         const total_price = Math.round(Number(room.price_per_night) * nights * rooms_wanted * 100) / 100
 
-        await connectionPool.query(
-            `UPDATE bookings SET room_id=$1,check_in=$2,check_out=$3,number_of_rooms=$4,number_of_guests=$5,total_price=$6,updated_at=NOW()
-             WHERE id=$7`,
+        // Update booking information
+        await client.query(`UPDATE bookings SET room_id=$1,check_in=$2,check_out=$3,
+                 number_of_rooms=$4,number_of_guests=$5,total_price=$6,updated_at=NOW()WHERE id=$7`,
             [room_id, check_in, check_out, rooms_wanted, guests, total_price, booking_id]
         )
 
-        const hotel_name = await getHotelNameByRoom(room_id)
-        await addNotification(booking.user_id, "Your booking at " + hotel_name + " was changed. Please check the new details.")
+        // Save changes
+        await client.query("COMMIT")
 
-        const updated_booking = await connectionPool.query(
-            select_booking + "WHERE id=$1", [booking_id]
-        )
+        // Notify the user
+        try {
+            const hotel_name = await getHotelNameByRoom(room_id);
+
+            await addNotification(booking.user_id, "Your booking at " + hotel_name + " was updated.")
+        } catch (error) {
+            console.log("Notification error:", error)
+        }
+
+        // Return updated booking
+        const updated_booking = await connectionPool.query(select_booking + "WHERE id=$1", [booking_id])
+
         return res.status(200).json(updated_booking.rows[0])
-    }
-    catch (error) {
+
+    } catch (error) {
+        if (client) {
+            await client.query("ROLLBACK").catch(console.log)
+        }
         console.log(error)
         return res.status(500).json({ message: "Could not update the booking." })
+    } finally {
+        if (client) {
+            client.release()
+        }
     }
 }
 
