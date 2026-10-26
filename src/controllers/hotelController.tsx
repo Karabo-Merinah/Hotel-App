@@ -11,7 +11,7 @@ export const getAllHotels = async (req: Request, res: Response) => {
         (SELECT MIN(price_per_night) FROM rooms 
         WHERE rooms.hotel_id=hotels.id AND is_active=TRUE) AS price_from ,
         (SELECT image_url FROM hotel_images WHERE hotel_images.hotel_id=hotels.id ORDER BY id LIMIT 1) AS main_image 
-        FROM hotels WHERE 1=1`
+        FROM hotels WHERE hotels.is_active=TRUE`
 
         //filter values
         const values: any[] = []

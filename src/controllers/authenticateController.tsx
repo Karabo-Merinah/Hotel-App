@@ -12,7 +12,7 @@ const create_token = (userId: number, role: string) => {
     )
 }
 
-export const registerUser = async (req: Request, res: Response) => { 
+export const registerUser = async (req: Request, res: Response) => {
     try {
         const full_name = req.body.name
         const email = req.body.email
@@ -55,7 +55,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const email_re3 = email.includes(" ")
 
         if (!email_re1 || !email_re2 || email_re3) {
-            return res.status(400).json({ message: "Enter an email with  valid email format ." })
+            return res.status(400).json({ message: "Enter an email with  valid email format.example:example@gmail.com" })
         }
 
         //check  if the email is already used  
