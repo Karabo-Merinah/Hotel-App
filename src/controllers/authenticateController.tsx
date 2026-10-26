@@ -12,7 +12,7 @@ const create_token = (userId: number, role: string) => {
     )
 }
 
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUser = async (req: Request, res: Response) => { 
     try {
         const full_name = req.body.name
         const email = req.body.email

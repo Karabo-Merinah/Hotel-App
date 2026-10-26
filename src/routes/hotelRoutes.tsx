@@ -6,8 +6,9 @@ import { getAllAmenties, addHotelImage, deleteHotelImage, setHotelAmenities } fr
 const hotel_router = Router();
 
 hotel_router.get("/", getAllHotels);
-hotel_router.get("/:id", getHotelById);
 hotel_router.get("/amenities/list", getAllAmenties)
+hotel_router.get("/:id", getHotelById);
+
 
 hotel_router.post("/", requiresLogin, requiresAdmin, createHotel);
 hotel_router.put("/:id", requiresLogin, requiresAdmin, updateHotel);

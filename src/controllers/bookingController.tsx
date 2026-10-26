@@ -1,13 +1,15 @@
 import { Request, Response } from "express"
 import connectionPool from "../config/database"
+import { PoolClient } from "pg"
 
 const select_booking = `SELECT id,user_id,room_id,TO_CHAR(check_in,'YYYY-MM-DD') AS check_in,
-TO_CHAR(check_out,'YYYY-MM-DD') AS check_out,number_of_rooms,number_of_guests,total_price,status,created_at,
-(SELECT name FROM users WHERE users.id=bookings.user_id) AS guest_name,
-(SELECT email FROM users WHERE users.id=bookings.user_id) AS guest_email,
-(SELECT room_type FROM rooms WHERE rooms.id=bookings.room_id) AS room_type,
-(SELECT name FROM hotels WHERE hotels.id=(SELECT hotel_id FROM rooms WHERE rooms.id=bookings.room_id)) AS hotel_name
-FROM bookings `
+              TO_CHAR(check_out,'YYYY-MM-DD') AS check_out,number_of_rooms,number_of_guests,total_price,status,created_at,
+              (SELECT name FROM users WHERE users.id=bookings.user_id) AS guest_name,
+              (SELECT email FROM users WHERE users.id=bookings.user_id) AS guest_email,
+              (SELECT room_type FROM rooms WHERE rooms.id=bookings.room_id) AS room_type,
+              (SELECT name FROM hotels WHERE hotels.id=(SELECT hotel_id FROM rooms WHERE rooms.id=bookings.room_id)) AS hotel_name
+               FROM bookings `
+
 
 //checks the dates ,rooms and guest sent in booking.
 
@@ -30,6 +32,10 @@ const getBookingsErrors = (bookingData: any) => {
     if (check_out <= check_in) {
         return "Check out date must be after check in"
     }
+    //ensure that the booking date is not time of past 
+    if (check_in < new Date().toISOString().slice(0, 10)) {
+        return "Check in cannot be in the past "
+    }
 
     const rooms_wanted = Number(bookingData.number_of_rooms)
     const guests = Number(bookingData.number_of_guests)
@@ -50,16 +56,15 @@ const getBookingsErrors = (bookingData: any) => {
 
 //checks number of rooms already booked of certain type by ignoring the provided booking id 
 
-const getBookedRooms = async (room_id: number, check_in: string, check_out: string, not_counted_booking: number) => {
+const getBookedRooms = async (room_id: number, check_in: string, check_out: string, excluded_id: number) => {
 
     const result = await connectionPool.query(
         `SELECT COALESCE(SUM(number_of_rooms),0) AS booked FROM bookings 
-        WHERE room_id=$1 AND status<>'cancelled' AND check_in<$3 AND check_out>$2 AND id<>$4`,
-        [room_id, check_in, check_out, not_counted_booking]
+        WHERE room_id=$1 AND status IN ('pending','confirmed') AND check_in<$3 AND check_out>$2 AND id<>$4`,
+        [room_id, check_in, check_out, excluded_id]
     )
-
     //converts booked sum  to a number 
-    return Number(result.rows[0].booked)
+    return parseInt(result.rows[0].booked)
 }
 
 //Saves a notification for a user 
@@ -96,7 +101,7 @@ export const createBooking = async (req: Request, res: Response) => {
 
         const user_id = res.locals.userId
 
-        const room_id = Number(booking_data.room_id)
+        const room_id = parseInt(booking_data.room_id)
         if (isNaN(room_id)) {
             return res.status(400).json({ message: "Room id is required and must be a number." })
         }
@@ -107,20 +112,15 @@ export const createBooking = async (req: Request, res: Response) => {
         }
         const check_in = String(booking_data.check_in)
         const check_out = String(booking_data.check_out)
-        const rooms_wanted = Number(booking_data.number_of_rooms)
-        const guests = Number(booking_data.number_of_guests)
+        const rooms_wanted = parseInt(booking_data.number_of_rooms)
+        const guests = parseInt(booking_data.number_of_guests)
 
-        //ensure that the booking date is not time of past 
-        const today = new Date().toISOString().split("T")[0]
-        if (check_in < today) {
-            return res.status(400).json({ message: "Check in cannot be in the past." })
-        }
+
 
         //Checks if room exist and is marked active 
-        const room_result = await connectionPool.query(
-            "SELECT id,hotel_id,capacity,price_per_night,total_rooms FROM rooms WHERE id=$1 AND is_active=TRUE",
-            [room_id]
-        )
+        const room_result = await connectionPool.query(`SELECT rooms.id,rooms.hotel_id,rooms.capacity,
+        rooms.price_per_night,rooms.total_rooms FROM rooms,hotels  WHERE rooms.hotel_id=hotels.id
+        AND rooms.id=$1 AND rooms.is_active=TRUE AND hotels.is_active=TRUE`, [room_id])
         if (room_result.rows.length === 0) {
             return res.status(404).json({ message: "Room not found." })
         }
@@ -168,7 +168,7 @@ export const createBooking = async (req: Request, res: Response) => {
 }
 //gets the bookings of the logged in user  putting new bookings on top 
 
-export const getMyBookings = async (res: Response) => {
+export const getMyBookings = async (req: Request, res: Response) => {
     try {
         const user_id = res.locals.userId
 
@@ -221,8 +221,8 @@ export const getAllBookings = async (req: Request, res: Response) => {
         const status = req.query.status
 
         if (status) {
-            if (status !== "pending" && status !== "confirmed" && status !== "cancelled") {
-                return res.status(400).json({ message: "Status must be pending,confirmed or cancelled." })
+            if (status !== "pending" && status !== "confirmed" && status !== "cancelled" && status !== "completed") {
+                return res.status(400).json({ message: "Status must be pending,confirmed,completed or cancelled." })
             }
             const filtered = await connectionPool.query(
                 select_booking + "WHERE status=$1 ORDER BY check_in DESC", [status]
@@ -268,11 +268,14 @@ export const updateBookingStatus = async (req: Request, res: Response) => {
         if (booking.status === "cancelled") {
             return res.status(400).json({ message: "A cancelled booking cannot be changed." })
         }
+        if (booking.status === "completed") {
+            return res.status(400).json({ message: "A completed booking cannot be changed." })
+        }
         if (booking.status === new_status) {
             return res.status(400).json({ message: "The booking is already " + new_status })
         }
 
-        await connectionPool.query("UPDATE bookings SET status=$1 WHERE id=$2", [new_status, booking_id])
+        await connectionPool.query("UPDATE bookings SET status=$1 , updated_at=NOW() WHERE id=$2", [new_status, booking_id])
 
         //gives user feedback 
         const hotel_name = await getHotelNameByRoom(booking.room_id)
@@ -288,6 +291,7 @@ export const updateBookingStatus = async (req: Request, res: Response) => {
         )
         return res.status(200).json(updated_booking.rows[0])
     }
+
     catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Could not update the booking status." })
@@ -307,7 +311,7 @@ export const updateBooking = async (req: Request, res: Response) => {
 
         const bookingData = req.body
 
-        const room_id = Number(bookingData.room_id)
+        const room_id = parseInt(bookingData.room_id)
         if (isNaN(room_id)) {
             return res.status(400).json({ message: "Room id is required and must be a number." })
         }
@@ -319,8 +323,8 @@ export const updateBooking = async (req: Request, res: Response) => {
 
         const check_in = String(bookingData.check_in)
         const check_out = String(bookingData.check_out)
-        const rooms_wanted = Number(bookingData.number_of_rooms)
-        const guests = Number(bookingData.number_of_guests)
+        const rooms_wanted = parseInt(bookingData.number_of_rooms)
+        const guests = parseInt(bookingData.number_of_guests)
 
         //The booking must exist and must not be cancelled
         const booking_result = await connectionPool.query(
@@ -334,12 +338,13 @@ export const updateBooking = async (req: Request, res: Response) => {
         if (booking.status === "cancelled") {
             return res.status(400).json({ message: "A cancelled booking cannot be changed." })
         }
-
+        if (booking.status === "completed") {
+            return res.status(400).json({ message: "A completed booking cannot be changed." })
+        }
         //The room must exist and be switched on
-        const room_result = await connectionPool.query(
-            "SELECT id,hotel_id,capacity,price_per_night,total_rooms FROM rooms WHERE id=$1 AND is_active=TRUE",
-            [room_id]
-        )
+        const room_result = await connectionPool.query(`SELECT rooms.id,rooms.hotel_id,rooms.capacity,
+        rooms.price_per_night,rooms.total_rooms FROM rooms,hotels  WHERE rooms.hotel_id=hotels.id
+        AND rooms.id=$1 AND rooms.is_active=TRUE AND hotels.is_active=TRUE`, [room_id])
         if (room_result.rows.length === 0) {
             return res.status(404).json({ message: "Room not found." })
         }
@@ -360,7 +365,7 @@ export const updateBooking = async (req: Request, res: Response) => {
         const total_price = Math.round(Number(room.price_per_night) * nights * rooms_wanted * 100) / 100
 
         await connectionPool.query(
-            `UPDATE bookings SET room_id=$1,check_in=$2,check_out=$3,number_of_rooms=$4,number_of_guests=$5,total_price=$6
+            `UPDATE bookings SET room_id=$1,check_in=$2,check_out=$3,number_of_rooms=$4,number_of_guests=$5,total_price=$6,updated_at=NOW()
              WHERE id=$7`,
             [room_id, check_in, check_out, rooms_wanted, guests, total_price, booking_id]
         )
