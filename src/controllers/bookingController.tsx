@@ -136,8 +136,7 @@ export const createBooking = async (req: Request, res: Response) => {
         const room = room_result.rows[0]
 
         // Check if the hotel is active
-        const hotel_result = await client.query(`SELECT id FROM hotels WHERE id = $1 AND is_active = TRUE`,
-            [room.hotel_id])
+        const hotel_result = await client.query(`SELECT id FROM hotels WHERE id = $1 AND is_active = TRUE`, [room.hotel_id])
 
         if (hotel_result.rows.length === 0) {
             await client.query("ROLLBACK")
@@ -148,7 +147,6 @@ export const createBooking = async (req: Request, res: Response) => {
         // Check guest capacity
         if (guests > room.capacity * rooms_wanted) {
             await client.query("ROLLBACK")
-
             return res.status(400).json({ message: "The selected rooms cannot accommodate all guests." })
         }
 

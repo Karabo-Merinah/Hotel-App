@@ -6,22 +6,22 @@ import connectionPool from "../config/database"
 //get all active rooms belonging to a hotel
 export const getHotelRooms = async (req: Request, res: Response) => {
     try {
-        const hotel_id = Number(req.params.hotelId);
+        const hotel_id = Number(req.params.hotelId)
 
         if (!Number.isInteger(hotel_id) || hotel_id <= 0) {
-            return res.status(400).json({ message: "Hotel id must be a positive number." });
+            return res.status(400).json({ message: "Hotel id must be a positive number." })
         }
 
         const result = await connectionPool.query(
             `SELECT rooms.* FROM rooms, hotels
         WHERE rooms.hotel_id = hotels.id AND rooms.hotel_id = $1
         AND rooms.is_active = TRUE AND hotels.is_active = TRUE
-        ORDER BY rooms.price_per_night;`, [hotel_id]);
-        return res.status(200).json(result.rows);
+        ORDER BY rooms.price_per_night;`, [hotel_id])
+        return res.status(200).json(result.rows)
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: "Could not get hotel rooms." });
+        return res.status(500).json({ message: "Could not get hotel rooms." })
     }
 };
 
@@ -34,33 +34,27 @@ export const getRoomById = async (req: Request, res: Response) => {
         if (!Number.isInteger(room_id) || room_id <= 0) {
             return res.status(400).json({
                 message: "Room id must be a positive number."
-            });
+            })
         }
 
         // Get room information
         const result = await connectionPool.query(
             `SELECT rooms.* FROM rooms, hotels WHERE rooms.hotel_id = hotels.id
-            AND rooms.id = $1 AND rooms.is_active = TRUE
-            AND hotels.is_active = TRUE;`, [room_id]);
+            AND rooms.id = $1 AND rooms.is_active = TRUE  AND hotels.is_active = TRUE;`, [room_id])
 
         if (result.rows.length === 0) {
-            return res.status(404).json({
-                message: "Room not found."
-            });
+            return res.status(404).json({ message: "Room not found."})
         }
 
         // Get pictures belonging to this room
         const images = await connectionPool.query(
-            `SELECT id, image_url FROM room_images
-             WHERE room_id = $1 ORDER BY id`, [room_id]);
+            `SELECT id, image_url FROM room_images WHERE room_id = $1 ORDER BY id`, [room_id])
 
-        return res.status(200).json({
-            ...result.rows[0], images: images.rows
-        });
+        return res.status(200).json({...result.rows[0], images: images.rows})
 
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Could not get room details." });
+        console.log(error)
+        return res.status(500).json({ message: "Could not get room details." })
     }
 }
 
