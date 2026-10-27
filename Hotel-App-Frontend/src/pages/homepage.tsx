@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Texts } from "../components/Texts/texts"
+import { Search } from "lucide-react"
 
 interface Hotel {
     id: number,
@@ -17,6 +18,9 @@ const Home = () => {
     const [city, setCity] = useState("")
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+    const [checkIn, setCheckIn] = useState("")
+    const [checkOut, setCheckOut] = useState("")
+    const [guests, setGuests] = useState(1)
     const navigate = useNavigate()
 
     const getHotels = async (searchCity: string = "") => {
@@ -51,12 +55,18 @@ const Home = () => {
 
     //search for hotels using the entered city 
     const handleSearch = () => {
+        if (checkIn && checkOut && checkOut <= checkIn) {
+            setError("Check-out date must be after check-in date.")
+            return
+        }
         getHotels(city.trim())
     }
-
     //clear the search and display all hotels
     const clearSearch = () => {
         setCity("")
+        setCheckIn("")
+        setCheckOut("")
+        setGuests(1)
         getHotels()
     }
 
@@ -67,10 +77,29 @@ const Home = () => {
                 <Texts variant="p">find your perfect stays.</Texts>
             </div>
             <div className="home-search">
-                <Texts variant="h2">Find a hotel</Texts>
-                <input className="home-search-input" type="text" placeholder="Enter city e.g Polokwane" value={city} onChange={(e) => setCity(e.target.value)} />
-                <button className="home-search-button" onClick={handleSearch}><search></search></button>
-                <button className="home-clear-button" onClick={clearSearch}>Clear</button>
+                <Texts variant="h2">Find a Hotel</Texts>
+                <div className="home-search-fields">
+                    <div className="search-location">
+                        <Texts variant="span">Location</Texts>
+                        <input className="home-search-input" type="text" placeholder="Enter city e.g. Polokwane" value={city} onChange={(e) => setCity(e.target.value)} />
+                    </div>
+                    <div className="search-check-in">
+                        <Texts variant="span">Check-in</Texts>
+                        <input className="home-check-in-input" type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
+                    </div>
+                    <div className="search-check-out">
+                        <Texts variant="span">Check-out</Texts>
+                        <input className="home-check-out-input" type="date" min={checkIn} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
+                    </div>
+                    <div className="search-guests">
+                        <Texts variant="span">Guests</Texts>
+                        <input className="home-guests-input" type="number" min="1" value={guests} onChange={(e) => setGuests(Math.max(1, parseInt(e.target.value) || 1))} />
+                    </div>
+                    <div className="home-search-actions">
+                        <button className="home-search-button" onClick={handleSearch}><Search size={20} /></button>
+                        <button className="home-clear-button" onClick={clearSearch}>Clear</button>
+                    </div>
+                </div>
             </div>
             <div className="home-hotels">
                 <Texts variant="h2">Our hotel branches</Texts>
@@ -80,6 +109,9 @@ const Home = () => {
                 {error &&
                     <Texts variant="p">{error}</Texts>
                 }
+                {!loading && !error && hotels.length === 0 &&
+                    <Texts variant="p">No hotels found.</Texts>
+                }
                 {!loading && !error && hotels.map((hotel) => (
                     <div className="hotel-card" key={hotel.id}>
                         <Texts variant="h3">{hotel.name}</Texts>
@@ -88,7 +120,7 @@ const Home = () => {
                         <Texts variant="p">{hotel.description}</Texts>
                         <Texts variant="span">Rating: {hotel.star_rating} Stars</Texts>
                         <div className="hotel-card-actions">
-                        <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`)}>View Hotel</button>
+                            <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`)}>View Hotel</button>
                         </div>
                         <hr />
                     </div>
