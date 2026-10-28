@@ -6,3 +6,12 @@ export interface Hotel {
     city: string
     star_rating: number
 }
+export interface Room {
+    id: number
+    hotel_id: number
+    room_type: string
+    description: string
+    capacity: number
+    price_per_night: number
+    total_rooms: number
+}
