@@ -4,15 +4,8 @@ import axios from "axios"
 import { Texts } from "../components/Texts/texts"
 import { Search } from "lucide-react"
 import "../styles/Home.css"
+import type { Hotel } from "../types/hotel"
 
-interface Hotel {
-    id: number,
-    name: string,
-    description: string,
-    address: string,
-    city: string,
-    star_rating: number
-}
 const Home = () => {
 
     const [hotels, setHotels] = useState<Hotel[]>([])
