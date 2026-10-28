@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Texts } from "../components/Texts/texts"
 import { Search } from "lucide-react"
+import "../styles/Home.css"
 
 interface Hotel {
     id: number,
@@ -56,20 +57,42 @@ const Home = () => {
         getHotels()
     }, [])
 
-    //search for hotels using the entered city 
     const handleSearch = () => {
 
-        //check that check in is not time in the past 
-        if (checkIn && checkIn < today) {
-            setError("Check in date cannot be in the past.")
+        // Check if location is empty
+        if (city.trim() === "") {
+            setError("Please enter a location.")
             return
         }
-        //check that the check out date is after check in date 
-        if (checkIn && checkOut && checkOut <= checkIn) {
-            setError("Check-out date must be after check in date.")
+
+        // Check if check-in date is empty
+        if (checkIn === "") {
+            setError("Please select a check-in date.")
             return
         }
-        //search hotels by city
+
+        // Check if check-out date is empty
+        if (checkOut === "") {
+            setError("Please select a check-out date.")
+            return
+        }
+
+        // Check that check-in is not in the past
+        if (checkIn < today) {
+            setError("Check-in date cannot be in the past.")
+            return
+        }
+
+        // Check that check-out is after check-in
+        if (checkOut <= checkIn) {
+            setError("Check-out date must be after check-in date.")
+            return
+        }
+
+        // Clear previous errors
+        setError("")
+
+        // Search hotels by city
         getHotels(city.trim())
     }
     //clear the search and display all hotels
@@ -78,9 +101,9 @@ const Home = () => {
         setCheckIn("")
         setCheckOut("")
         setGuests(1)
+        setError("")
         getHotels()
     }
-
     return (
         <div className="home-container">
             <div className="home-welcome">
@@ -114,19 +137,17 @@ const Home = () => {
                         <button className="home-clear-button" onClick={clearSearch}>Clear</button>
                     </div>
                 </div>
+                {error && <Texts variant="p">{error}</Texts>}
             </div>
             <div className="home-hotels">
                 <Texts variant="h2">Our hotel branches</Texts>
                 {loading &&
                     <Texts variant="p">Loading hotels ..</Texts>
                 }
-                {error &&
-                    <Texts variant="p">{error}</Texts>
-                }
                 {!loading && !error && hotels.length === 0 &&
                     <Texts variant="p">No hotels found.</Texts>
                 }
-                {!loading && !error && hotels.map((hotel) => (
+                {!loading && hotels.map((hotel) => (
                     <div className="hotel-card" key={hotel.id}>
                         <Texts variant="h3">{hotel.name}</Texts>
                         <Texts variant="p">City: {hotel.city}</Texts>
@@ -134,7 +155,7 @@ const Home = () => {
                         <Texts variant="p">{hotel.description}</Texts>
                         <Texts variant="span">Rating: {hotel.star_rating} Stars</Texts>
                         <div className="hotel-card-actions">
-                         <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests } })}>View Hotel</button>
+                            <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests } })}>View Hotel</button>
                         </div>
                         <hr />
                     </div>
