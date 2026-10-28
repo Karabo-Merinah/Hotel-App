@@ -23,6 +23,9 @@ const Home = () => {
     const [guests, setGuests] = useState(1)
     const navigate = useNavigate()
 
+    //get today's date 
+    const today = new Date().toLocaleDateString("en-CA")
+
     const getHotels = async (searchCity: string = "") => {
         try {
             setLoading(true)
@@ -55,10 +58,18 @@ const Home = () => {
 
     //search for hotels using the entered city 
     const handleSearch = () => {
-        if (checkIn && checkOut && checkOut <= checkIn) {
-            setError("Check-out date must be after check-in date.")
+
+        //check that check in is not time in the past 
+        if (checkIn && checkIn < today) {
+            setError("Check in date cannot be in the past.")
             return
         }
+        //check that the check out date is after check in date 
+        if (checkIn && checkOut && checkOut <= checkIn) {
+            setError("Check-out date must be after check in date.")
+            return
+        }
+        //search hotels by city
         getHotels(city.trim())
     }
     //clear the search and display all hotels
@@ -74,7 +85,7 @@ const Home = () => {
         <div className="home-container">
             <div className="home-welcome">
                 <Texts variant="h1">Welcome to wander Inn</Texts>
-                <Texts variant="p">find your perfect stays.</Texts>
+                <Texts variant="p">Find your perfect stays.</Texts>
             </div>
             <div className="home-search">
                 <Texts variant="h2">Find a Hotel</Texts>
@@ -85,11 +96,14 @@ const Home = () => {
                     </div>
                     <div className="search-check-in">
                         <Texts variant="span">Check-in</Texts>
-                        <input className="home-check-in-input" type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
+                        <input className="home-check-in-input" min={today} type="date" value={checkIn} onChange={(e) => {
+                            setCheckIn(e.target.value)
+                            setCheckOut("")
+                        }} />
                     </div>
                     <div className="search-check-out">
                         <Texts variant="span">Check-out</Texts>
-                        <input className="home-check-out-input" type="date" min={checkIn} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
+                        <input className="home-check-out-input" min={checkIn || today} type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
                     </div>
                     <div className="search-guests">
                         <Texts variant="span">Guests</Texts>
@@ -120,7 +134,7 @@ const Home = () => {
                         <Texts variant="p">{hotel.description}</Texts>
                         <Texts variant="span">Rating: {hotel.star_rating} Stars</Texts>
                         <div className="hotel-card-actions">
-                            <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`)}>View Hotel</button>
+                         <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests } })}>View Hotel</button>
                         </div>
                         <hr />
                     </div>
