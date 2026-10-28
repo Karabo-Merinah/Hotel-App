@@ -51,6 +51,14 @@ CREATE TABLE rooms (
     is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+CREATE TABLE room_images (
+    id SERIAL PRIMARY KEY,
+    room_id INTEGER NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    alt_text TEXT,
+    sort_order INTEGER DEFAULT 0
+);
+
 CREATE TABLE bookings (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users (id),
