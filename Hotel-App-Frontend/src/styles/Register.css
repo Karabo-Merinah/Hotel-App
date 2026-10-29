@@ -1,0 +1,41 @@
+.register-container {
+    width: 100%;
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.register-name,
+.register-email,
+.register-password,
+.register-confirm-password {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.register-name-input,
+.register-email-input,
+.register-password-input,
+.register-confirm-input {
+    width: 100%;
+    height: 40px;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.register-button,
+.google-register-button {
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
+}
