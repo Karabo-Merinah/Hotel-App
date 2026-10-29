@@ -174,29 +174,77 @@ export const updateRoom = async (req: Request, res: Response) => {
     }
 }
 
-
 //delete a room
 export const deleteRoom = async (req: Request, res: Response) => {
     try {
         const room_id = Number(req.params.id)
-
         if (isNaN(room_id)) {
             return res.status(400).json({ message: "Room id must be a number." })
         }
-
-        const result = await connectionPool.query(
-            "DELETE FROM rooms WHERE id=$1 RETURNING id",
-            [room_id]
-        )
-
+        //A room that has bookings can't be deleted  so it is set to not active.
+        const has_bookings = await connectionPool.query("SELECT 1 FROM bookings WHERE room_id=$1 LIMIT 1", [room_id])
+        if (has_bookings.rows.length > 0) {
+            const hidden = await connectionPool.query("UPDATE rooms SET is_active=FALSE WHERE id=$1 RETURNING id", [room_id])
+            if (hidden.rows.length === 0) {
+                return res.status(404).json({ message: "Room not found." })
+            }
+            return res.status(200).json({ message: "This room has bookings, so it is deactivated instead of deleted." })
+        }
+        const result = await connectionPool.query("DELETE FROM rooms WHERE id=$1 RETURNING id",[room_id] )
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Room not found." })
         }
-
         return res.status(200).json({ message: "Room deleted successfully." })
     }
     catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Could not delete room." })
+    }
+}
+//admin adds a picture to a room 
+export const addRoomImage = async (req: Request, res: Response) => {
+    try {
+        const room_id = Number(req.params.id)
+        if (!Number.isInteger(room_id) || room_id <= 0) {
+            return res.status(400).json({ message: "Room id must be a positive number." })
+        }
+        const image_url = String(req.body.image_url || "").trim()
+        //link must start with http and have a maximum of 255 characters 
+        if (!image_url.startsWith("http") || image_url.length > 255) {
+            return res.status(400).json({ message: "Image link must start with http and be maximum of 255 characters." })
+        }
+        const alt_text = req.body.alt_text ? String(req.body.alt_text).trim().slice(0, 100) : null
+        const room = await connectionPool.query("SELECT id FROM rooms WHERE id=$1", [room_id])
+        if (room.rows.length === 0) {
+            return res.status(404).json({ message: "Room not found." })
+        }
+        const result = await connectionPool.query(
+            "INSERT INTO room_images (room_id,image_url,alt_text) VALUES ($1,$2,$3) RETURNING id,room_id,image_url,alt_text",
+            [room_id, image_url, alt_text]
+        )
+        return res.status(201).json(result.rows[0])
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not add the room picture." })
+    }
+}
+//admin deletes a room picture 
+export const deleteRoomImage = async (req: Request, res: Response) => {
+    try {
+        const image_id = Number(req.params.imageId)
+
+        if (!Number.isInteger(image_id) || image_id <= 0) {
+            return res.status(400).json({ message: "Image id must be a positive number." })
+        }
+        const result = await connectionPool.query("DELETE FROM room_images WHERE id=$1 RETURNING id", [image_id])
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Picture not found." })
+        }
+        return res.status(200).json({ message: "Picture deleted." })
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not delete the room picture." })
     }
 }

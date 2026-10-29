@@ -1,4 +1,3 @@
-
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -20,9 +19,9 @@ CREATE TABLE hotels (
     longitude NUMERIC(9, 6) NOT NULL CHECK ( longitude BETWEEN -180 AND 180),
     star_rating INTEGER CHECK (star_rating BETWEEN 1 AND 5),
     policies TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-
 CREATE TABLE hotel_images (
     id SERIAL PRIMARY KEY,
     hotel_id INTEGER NOT NULL REFERENCES hotels (id) ON DELETE CASCADE,
@@ -31,7 +30,7 @@ CREATE TABLE hotel_images (
 
 CREATE TABLE amenities (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(80) NOT NULL 
+    name VARCHAR(80) NOT NULL UNIQUE
 );
 
 CREATE TABLE hotel_amenities (
@@ -68,8 +67,9 @@ CREATE TABLE bookings (
     number_of_rooms INTEGER NOT NULL CHECK (number_of_rooms > 0),
     number_of_guests INTEGER NOT NULL CHECK (number_of_guests > 0),
     total_price NUMERIC(10, 2) NOT NULL,
-    status VARCHAR(15) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','confirmed','cancelled')),
+    status VARCHAR(15) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','confirmed','cancelled','completed')),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CHECK (check_out > check_in)
 );
 
@@ -77,9 +77,11 @@ CREATE TABLE payments (
     id SERIAL PRIMARY KEY,
     booking_id INTEGER NOT NULL REFERENCES bookings (id),
     amount NUMERIC(10, 2) NOT NULL,
-    status VARCHAR(10) NOT NULL CHECK (status IN ('paid', 'failed')),
+    currency VARCHAR(3) NOT NULL DEFAULT 'ZAR',
+    status VARCHAR(10) NOT NULL CHECK (status IN ('pending', 'paid', 'failed', 'refunded')),
     payment_reference VARCHAR(100),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE favourites (
@@ -104,6 +106,19 @@ CREATE TABLE notifications (
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+--helps with the speed when searching for data 
+CREATE UNIQUE INDEX payments_reference_unique ON payments (payment_reference) WHERE payment_reference IS NOT NULL;
+CREATE UNIQUE INDEX users_provider_unique ON users (provider, provider_id) WHERE provider IS NOT NULL;
+CREATE INDEX idx_hotels_city ON hotels (city);
+CREATE INDEX idx_rooms_hotel ON rooms (hotel_id);
+CREATE INDEX idx_hotel_images_hotel ON hotel_images (hotel_id);
+CREATE INDEX idx_room_images_room ON room_images (room_id);
+CREATE INDEX idx_bookings_user ON bookings (user_id);
+CREATE INDEX idx_bookings_room_dates ON bookings (room_id, check_in, check_out);
+CREATE INDEX idx_payments_booking ON payments (booking_id);
+CREATE INDEX idx_reviews_hotel ON reviews (hotel_id);
+CREATE INDEX idx_notifications_user ON notifications (user_id, is_read);
 
 -- data for insert statements 
 
@@ -132,18 +147,18 @@ INSERT INTO amenities (name)VALUES('Free WiFi'),('Swimming pool'),('Parking'),('
 
 INSERT INTO hotel_amenities (hotel_id, amenity_id) SELECT hotels.id, amenities.id FROM hotels, amenities
 WHERE hotels.name IN ( 'Wander Inn Polokwane','Wander Inn Pretoria','Wander Inn Johannesburg')
-AND amenities.name IN ('Free WiFi','Parking','Breakfast included','Air conditioning')
+AND amenities.name IN ('Free WiFi','Parking','Breakfast included','Air conditioning');
 
 
 -- Additional amenities for Pretoria
 INSERT INTO hotel_amenities (hotel_id, amenity_id) SELECT hotels.id, amenities.id FROM hotels, amenities
-WHERE hotels.name = 'Wander Inn Pretoria' AND amenities.name IN ('Gym','Restaurant')
+WHERE hotels.name = 'Wander Inn Pretoria' AND amenities.name IN ('Gym','Restaurant');
 
 
 -- Additional amenities for Johannesburg
 INSERT INTO hotel_amenities (hotel_id, amenity_id) SELECT hotels.id, amenities.id
 FROM hotels, amenities WHERE hotels.name = 'Wander Inn Johannesburg'
-AND amenities.name IN ('Swimming pool','Gym','Restaurant','Airport shuttle')
+AND amenities.name IN ('Swimming pool','Gym','Restaurant','Airport shuttle');
 
 
 --inserting rooms in different branches 

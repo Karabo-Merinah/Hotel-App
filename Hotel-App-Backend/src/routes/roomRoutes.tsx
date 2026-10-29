@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {getHotelRooms,getRoomById,createRoom,updateRoom,deleteRoom} from "../controllers/roomController";
+import {getHotelRooms,getRoomById,createRoom,updateRoom,deleteRoom, addRoomImage} from "../controllers/roomController";
 import { requiresLogin,requiresAdmin} from "../middleware/authMiddleware";
 
 const room_router = Router();
@@ -12,5 +12,6 @@ room_router.get("/:id", getRoomById);
 room_router.post("/", requiresLogin, requiresAdmin, createRoom);
 room_router.put("/:id", requiresLogin, requiresAdmin, updateRoom);
 room_router.delete("/:id", requiresLogin, requiresAdmin, deleteRoom);
+room_router.post("/:id/images",requiresLogin,requiresAdmin,addRoomImage)
 
 export default room_router;

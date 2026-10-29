@@ -101,5 +101,25 @@ export const getHotelReviews = async (req: Request, res: Response) => {
         console.log(error)
         return res.status(500).json({ message: "Could not get the reviews." })
     }
+}
 
+
+//user deletes their own review and admin  can delete any review.
+export const deleteReview = async (req: Request, res: Response) => {
+    try {
+        const review_id = Number(req.params.id)
+        if (!Number.isInteger(review_id) || review_id <= 0) {
+            return res.status(400).json({ message: "Review id must be a positive number." })
+        }
+        const result = res.locals.role === "admin" ? await connectionPool.query("DELETE FROM reviews WHERE id=$1 RETURNING id", [review_id])
+            : await connectionPool.query("DELETE FROM reviews WHERE id=$1 AND user_id=$2 RETURNING id", [review_id, res.locals.userId])
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Review not found." })
+        }
+        return res.status(200).json({ message: "Review deleted." })
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not delete the review." })
+    }
 }

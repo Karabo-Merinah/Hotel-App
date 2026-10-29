@@ -456,3 +456,35 @@ export const updateBooking = async (req: Request, res: Response) => {
     }
 }
 
+//logged in user cancels their own booking  before the check in date
+export const cancelMyBooking = async (req: Request, res: Response) => {
+    try {
+        const booking_id = Number(req.params.id)
+        if (!Number.isInteger(booking_id) || booking_id <= 0) {
+            return res.status(400).json({ message: "Booking id must be a positive number." })
+        }
+        const result = await connectionPool.query(
+            "SELECT id,user_id,room_id,status,TO_CHAR(check_in,'YYYY-MM-DD') AS check_in FROM bookings WHERE id=$1", [booking_id]
+        )
+        if (result.rows.length === 0 || result.rows[0].user_id !== res.locals.userId) {
+            return res.status(404).json({ message: "Booking not found." })
+        }
+        const booking = result.rows[0]
+        if (booking.status !== "pending" && booking.status !== "confirmed") {
+            return res.status(400).json({ message: "Only pending or confirmed bookings can be cancelled." })
+        }
+        if (booking.check_in <= new Date().toISOString().slice(0, 10)) {
+            return res.status(400).json({ message: "A booking that has already started can't be cancelled online. Please contact the hotel." })
+        }
+        await connectionPool.query("UPDATE bookings SET status='cancelled', updated_at=NOW() WHERE id=$1", [booking_id])
+        const hotel_name = await getHotelNameByRoom(booking.room_id)
+        await addNotification(booking.user_id, "Your booking at " + hotel_name + " was cancelled.")
+        const updated_booking = await connectionPool.query(select_booking + "WHERE id=$1", [booking_id])
+        return res.status(200).json(updated_booking.rows[0])
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not cancel the booking." })
+    }
+}
+
