@@ -6,6 +6,7 @@ import Booking from "./pages/Booking";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
   return (
@@ -15,9 +16,10 @@ function App() {
         <Route path="/hotels/:id" element={<HotelDetails />} />
         <Route path="/rooms/:id" element={<RoomDetails />} />
         <Route path="/bookings/new/:roomId" element={<Booking />} />
-        <Route path="/register" element={<Register/>}/>
-        <Route path="/login" element={<Login/>}/>
-        <Route path="/profile" element={<Profile/>}/>
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/edit" element={<EditProfile />} />
       </Routes>
     </BrowserRouter>
   )
