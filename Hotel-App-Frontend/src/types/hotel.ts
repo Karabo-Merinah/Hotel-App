@@ -14,4 +14,11 @@ export interface Room {
     capacity: number
     price_per_night: number
     total_rooms: number
+    images?: RoomImage[]
+}
+export interface RoomImage {
+    id: number
+    room_id: number
+    image_url: string
+    alt_text: string
 }

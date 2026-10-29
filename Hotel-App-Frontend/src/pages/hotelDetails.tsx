@@ -1,6 +1,6 @@
 import type { Hotel, Room } from "../types/hotel"
 import { useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate,useLocation } from "react-router-dom"
 import axios from "axios"
 import { Texts } from "../components/Texts/texts"
 
@@ -8,7 +8,9 @@ const HotelDetails = () => {
 
     const { id } = useParams()
     const navigate = useNavigate()
-
+    const location=useLocation()
+    //getting search details from home page 
+    const {checkIn="",checkOut="",guests=1}=location.state || {}
     const [hotel, setHotel] = useState<Hotel | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
@@ -77,7 +79,7 @@ const HotelDetails = () => {
                             <Texts variant="p">{room.description}</Texts>
                             <Texts variant="p">Capacity: {room.capacity} guests</Texts>
                             <Texts variant="p">Price: R{room.price_per_night} per night</Texts>
-                            <button onClick={() => navigate(`/rooms/${room.id}`)}>View Room</button>
+                            <button onClick={() => navigate(`/rooms/${room.id}`,{state:{checkIn,checkOut,guests}})}>View Room</button>
                         </div>
                     ))
                 )}
