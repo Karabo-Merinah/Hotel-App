@@ -47,3 +47,9 @@ export interface FavouriteHotel {
     price_from: number | string | null
     main_image: string | null
 }
+export interface Notification {
+    id: number
+    message: string
+    is_read: boolean
+    created_at: string
+}

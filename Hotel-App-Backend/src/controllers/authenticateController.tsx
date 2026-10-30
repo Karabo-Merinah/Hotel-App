@@ -66,9 +66,7 @@ export const registerUser = async (req: Request, res: Response) => {
         if (existing_user.rows.length > 0) {
             return res.status(409).json({ message: "An account with this email already exists. " })
         }
-
         //Hash password and save the user   
-
         const hash_password = await bcrypt.hash(password, 10)
         const result = await connectionPool.query(
             "INSERT INTO users (name,email,password_hash) VALUES ($1,$2,$3)  RETURNING id,name,email,role",

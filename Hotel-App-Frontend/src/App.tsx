@@ -10,7 +10,7 @@ import EditProfile from "./pages/EditProfile";
 import MyBookings from "./pages/MyBookings";
 import BookingDetails from "./pages/BookingDetails";
 import Favourites from "./pages/Favourites";
-
+import Notifications from "./pages/Notifications";
 function App() {
   return (
     <BrowserRouter>
@@ -23,9 +23,10 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/edit" element={<EditProfile />} />
-        <Route path="/bookings" element={<MyBookings/>}/>
+        <Route path="/bookings" element={<MyBookings />} />
         <Route path="/bookings/:id" element={<BookingDetails />} />
         <Route path="/favourites" element={<Favourites />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Routes>
     </BrowserRouter>
   )
