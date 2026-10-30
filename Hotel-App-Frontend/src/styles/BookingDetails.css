@@ -1,0 +1,52 @@
+.booking-details-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+.booking-details-container > button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+.booking-details-card {
+    background: white;
+    border: 1px solid #c9bdb0;
+    border-radius: 10px;
+    padding: 30px;
+    margin-top: 25px;
+}
+.booking-details-card p {
+    margin: 15px 0;
+}
+@media (max-width: 600px) {
+    .booking-details-container {
+        margin: 20px auto;
+    }
+    .booking-details-card {
+        padding: 20px;
+    }
+}
+
+.cancel-booking-button {
+    background-color: #fff;
+    color: #c0392b;
+    border: 1px solid #c0392b;
+    border-radius: 5px;
+    padding: 12px 20px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+.cancel-booking-button:hover {
+    background-color: #fff0ee;
+}
+
+.cancel-booking-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.booking-success {
+    color: green;
+    margin-top: 15px;
+}

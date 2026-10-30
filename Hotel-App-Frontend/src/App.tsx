@@ -8,6 +8,8 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import MyBookings from "./pages/MyBookings";
+import BookingDetails from "./pages/BookingDetails";
+import Favourites from "./pages/Favourites";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/edit" element={<EditProfile />} />
         <Route path="/bookings" element={<MyBookings/>}/>
+        <Route path="/bookings/:id" element={<BookingDetails />} />
+        <Route path="/favourites" element={<Favourites />} />
       </Routes>
     </BrowserRouter>
   )

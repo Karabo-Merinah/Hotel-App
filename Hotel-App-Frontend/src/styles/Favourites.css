@@ -1,0 +1,103 @@
+.favourites-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+}
+.favourites-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+.favourites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 25px;
+}
+.favourite-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 25px;
+    background: white;
+    border: 1px solid #c9bdb0;
+    border-radius: 9px;
+}
+.favourite-info h2 {
+    margin-bottom: 12px;
+}
+.favourite-info p {
+    margin-bottom: 8px;
+}
+.favourite-actions {
+    display: flex;
+    gap: 12px;
+}
+.favourite-actions button,
+.favourites-empty button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 120px;
+    height: 40px;
+    padding: 0 15px;
+    background: #f7dec2;
+    border: 1px solid #c9bdb0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.favourite-actions .remove-favourite {
+    background: white;
+    color: #b45f5f;
+    border-color: #b45f5f;
+}
+.favourite-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.favourites-error {
+    color: red;
+    margin-top: 20px;
+}
+.favourites-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 50px 20px;
+    margin-top: 25px;
+    border: 1px solid #c9bdb0;
+    border-radius: 9px;
+}
+.favourites-empty svg {
+    color: #b89572;
+    margin-bottom: 20px;
+}
+.favourites-empty h2 {
+    margin-bottom: 10px;
+}
+.favourites-empty p {
+    margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+    .favourites-container {
+        margin: 20px auto;
+    }
+    .favourite-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+    }
+    .favourite-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    .favourite-actions button {
+        width: 100%;
+    }
+}
