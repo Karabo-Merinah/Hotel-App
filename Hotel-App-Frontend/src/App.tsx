@@ -11,6 +11,7 @@ import MyBookings from "./pages/MyBookings";
 import BookingDetails from "./pages/BookingDetails";
 import Favourites from "./pages/Favourites";
 import Notifications from "./pages/Notifications";
+import WriteReview from "./pages/WriteReview";
 function App() {
   return (
     <BrowserRouter>
@@ -27,6 +28,7 @@ function App() {
         <Route path="/bookings/:id" element={<BookingDetails />} />
         <Route path="/favourites" element={<Favourites />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/hotels/:hotelId/review" element={<WriteReview/>}/>
       </Routes>
     </BrowserRouter>
   )

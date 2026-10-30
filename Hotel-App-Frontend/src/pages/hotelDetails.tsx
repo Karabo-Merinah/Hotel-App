@@ -1,4 +1,4 @@
-import type { Hotel, Room } from "../types/hotel"
+import type { Hotel, Room, HotelReviews } from "../types/hotel"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import axios from "axios"
@@ -19,6 +19,8 @@ const HotelDetails = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [rooms, setRooms] = useState<Room[]>([])
+    const [hotelReviews, setHotelReviews] = useState<HotelReviews | null>(null)
+    const [reviewsError, setReviewsError] = useState("")
     const [roomsLoading, setRoomsLoading] = useState(false)
     const [isFavourite, setIsFavourite] = useState(false)
 
@@ -54,6 +56,7 @@ const HotelDetails = () => {
     useEffect(() => {
         getHotel()
         getRooms()
+        getHotelReviews()
     }, [id])
 
     //checks if the hotel is already saved 
@@ -105,8 +108,7 @@ const HotelDetails = () => {
     const shareHotel = async () => {
         if (!hotel) return
 
-        const hotel_url = window.location.href
-
+        const hotel_url = `${window.location.origin}/hotels/${hotel.id}`
         try {
             if (navigator.share) {
                 await navigator.share({ title: hotel.name, text: `Check out ${hotel.name} on Wander Inn! `, url: hotel_url })
@@ -121,6 +123,18 @@ const HotelDetails = () => {
         }
     }
 
+    const getHotelReviews = async () => {
+        try {
+            setReviewsError("")
+            setHotelReviews(null)
+            const response = await axios.get(`http://localhost:5000/api/reviews/hotel/${id}`)
+            setHotelReviews(response.data)
+        }
+        catch (error) {
+            console.log(error)
+            setReviewsError("Could not load hotel reviews.")
+        }
+    }
     if (loading) {
         return <Texts variant="p">Loading hotel details...</Texts>
     }
@@ -161,6 +175,35 @@ const HotelDetails = () => {
                         </div>
                     ))
                 )}
+            </div>
+            <div className="hotel-reviews">
+                <Texts variant="h2">Guest Reviews</Texts>
+                {reviewsError && (
+                    <Texts variant="p">{reviewsError}</Texts>
+                )}
+                {!reviewsError && !hotelReviews && (
+                    <Texts variant="p">Loading reviews...</Texts>
+                )}
+
+                {hotelReviews && (
+                    <>
+                        <Texts variant="p"> Average Rating: {hotelReviews.average_rating || 0}/5</Texts>
+                        <Texts variant="p">{hotelReviews.reviews_count} reviews</Texts>
+                        {hotelReviews.reviews.length === 0 ? (
+                            <Texts variant="p">No reviews yet.</Texts>
+                        ) : (
+                            hotelReviews.reviews.map((review) => (
+                                <div className="review-card" key={review.id}>
+                                    <Texts variant="h3">{review.reviewer_name} </Texts>
+                                    <Texts variant="p">Rating: {review.rating}/5</Texts>
+                                    <Texts variant="p">{review.comment}</Texts>
+                                    <Texts variant="p"> {new Date(review.created_at).toLocaleDateString()}</Texts>
+                                </div>
+                            ))
+                        )}
+                    </>
+                )}
+                <button type="button" onClick={() => navigate(`/hotels/${hotel.id}/review`)}> Write a Review</button>
             </div>
         </div>
     )

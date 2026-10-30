@@ -53,3 +53,16 @@ export interface Notification {
     is_read: boolean
     created_at: string
 }
+export interface Review {
+    id: number
+    rating: number
+    comment: string
+    created_at: string
+    reviewer_name: string
+}
+
+export interface HotelReviews {
+    average_rating: number
+    reviews_count: number
+    reviews: Review[]
+}

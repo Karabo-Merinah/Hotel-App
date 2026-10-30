@@ -1,0 +1,45 @@
+.write-review-container {
+    max-width: 650px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.write-review-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.review-stars {
+    display: flex;
+    gap: 8px;
+}
+
+.review-stars button {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.write-review-container textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.write-review-container button[type="submit"] {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.write-review-container button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
