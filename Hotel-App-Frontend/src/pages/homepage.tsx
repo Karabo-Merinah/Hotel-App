@@ -24,18 +24,14 @@ const Home = () => {
         try {
             setLoading(true)
             setError("")
-
             let url = "http://localhost:5000/api/hotels"
-
             //if the user enter a city add it to the URL 
             if (searchCity !== "") {
                 url = `${url}?city=${encodeURIComponent(searchCity)}`
             }
             const response = await axios.get(url)
-
             //store the hotels that are returned 
             setHotels(response.data)
-
         }
         catch (error) {
             console.log(error)
@@ -51,40 +47,33 @@ const Home = () => {
     }, [])
 
     const handleSearch = () => {
-
         // Check if location is empty
         if (city.trim() === "") {
             setError("Please enter a location.")
             return
         }
-
         // Check if check-in date is empty
         if (checkIn === "") {
             setError("Please select a check-in date.")
             return
         }
-
         // Check if check-out date is empty
         if (checkOut === "") {
             setError("Please select a check-out date.")
             return
         }
-
         // Check that check-in is not in the past
         if (checkIn < today) {
             setError("Check-in date cannot be in the past.")
             return
         }
-
         // Check that check-out is after check-in
         if (checkOut <= checkIn) {
             setError("Check-out date must be after check-in date.")
             return
         }
-
         // Clear previous errors
         setError("")
-
         // Search hotels by city
         getHotels(city.trim())
     }

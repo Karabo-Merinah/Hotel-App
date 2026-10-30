@@ -4,14 +4,8 @@ import axios from "axios"
 import { Heart } from "lucide-react"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Favourites.css"
+import type { FavouriteHotel } from "../types/hotel"
 
-interface FavouriteHotel {
-    id: number
-    name: string
-    city: string
-    address: string
-    star_rating: number
-}
 const Favourites = () => {
     const navigate = useNavigate()
     const [favourites, setFavourites] = useState<FavouriteHotel[]>([])
@@ -28,9 +22,7 @@ const Favourites = () => {
         try {
             setLoading(true)
             setError("")
-            const response = await axios.get(
-                "http://localhost:5000/api/favourites",{headers: {Authorization: `Bearer ${token}`}}
-            )
+            const response = await axios.get("http://localhost:5000/api/favourites", { headers: { Authorization: `Bearer ${token}` } })
             setFavourites(response.data)
         }
         catch (error) {
@@ -50,8 +42,7 @@ const Favourites = () => {
         try {
             setRemovingId(hotelId)
             setError("")
-            await axios.delete(`http://localhost:5000/api/favourites/${hotelId}`,{headers: {Authorization: `Bearer ${token}`}}
-            )
+            await axios.delete(`http://localhost:5000/api/favourites/${hotelId}`, { headers: { Authorization: `Bearer ${token}` } })
             setFavourites(favourites.filter((hotel) => hotel.id !== hotelId))
         }
         catch (error) {
@@ -92,6 +83,8 @@ const Favourites = () => {
                                 <Texts variant="h2">{hotel.name}</Texts>
                                 <Texts variant="p">{hotel.city}</Texts>
                                 <Texts variant="p">{hotel.address}</Texts>
+                                {hotel.price_from !== null && (
+                                    <Texts variant="p">From R{Number(hotel.price_from).toFixed(2)} per night</Texts>)}
                                 <Texts variant="p">{hotel.star_rating} Star Hotel</Texts>
                             </div>
                             <div className="favourite-actions">

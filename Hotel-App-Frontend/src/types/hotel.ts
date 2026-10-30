@@ -36,3 +36,14 @@ export interface Booking {
     status: string
     created_at: string
 }
+export interface FavouriteHotel {
+    id: number
+    name: string
+    city: string
+    address: string
+    star_rating: number
+    latitude: number | null
+    longitude: number | null
+    price_from: number | string | null
+    main_image: string | null
+}

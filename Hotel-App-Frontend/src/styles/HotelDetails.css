@@ -1,0 +1,39 @@
+.hotel-share-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.hotel-share-button:hover {
+    background: #f8f5f1;
+}
+.hotel-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.hotel-favourite-button,
+.hotel-share-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.hotel-favourite-button:hover,
+.hotel-share-button:hover {
+    background: #f8f5f1;
+}
