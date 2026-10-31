@@ -32,15 +32,32 @@ export const createPayment = async (req: Request, res: Response) => {
         if (booking.status !== "pending") {
             return res.status(409).json({ message: "Only pending bookings can be paid." })
         }
-        // Check if the booking already has a pending or completed payment
         const existing_payment = await connectionPool.query(
-            `SELECT id FROM payments WHERE booking_id = $1 AND status IN ('pending', 'paid')`,
+            `SELECT payment_reference, status FROM payments
+     WHERE booking_id = $1 AND status IN ('pending', 'paid')
+     ORDER BY id DESC LIMIT 1`,
             [booking_id]
         )
 
-        // Prevent another payment from being created for the same booking
         if (existing_payment.rows.length > 0) {
-            return res.status(409).json({ message: "This booking already has a payment in progress or completed." })
+            const payment = existing_payment.rows[0]
+
+            if (payment.status === "paid") {
+                return res.status(409).json({ message: "This booking has already been paid." })
+            }
+
+            const paystack = await paystackRequest(`/transaction/verify/${encodeURIComponent(payment.payment_reference)}`, "GET"
+            )
+
+            if (paystack.status === "success") {
+                return res.status(409).json({ message: "Payment was successful. Please verify your payment before trying again." })
+            }
+
+            if (paystack.status !== "failed" && paystack.status !== "abandoned") {
+                return res.status(409).json({ message: "A payment is already in progress. Please complete or resolve it before trying again." })
+            }
+
+            await markPaymentFailed(payment.payment_reference)
         }
 
         // Get the booking amount from the database

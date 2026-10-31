@@ -31,12 +31,12 @@ export const createReview = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "Hotel not found." })
         }
         // Users can review a hotel after completing their stay
-        const booking_result = await connectionPool.query(`SELECT id FROM booking  WHERE user_id=$1 AND status='confirmed'
+        const booking_result = await connectionPool.query(`SELECT id FROM bookings  WHERE user_id=$1 AND status='confirmed'
         AND check_out <= CURRENT_DATE AND room_id IN (SELECT id FROM rooms WHERE hotel_id=$2)`,
             [user_id, hotel_id]
         )
         if (booking_result.rows.length === 0) {
-            return res.status(403).json({message: "You can only review a hotel after completing your stay." })
+            return res.status(403).json({ message: "You can only review a hotel after completing your stay." })
         }
         //only review per user per hotel 
         const existing = await connectionPool.query(

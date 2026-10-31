@@ -13,23 +13,23 @@ export const updateProfile = async (req: Request, res: Response) => {
         if (!name || String(name).trim() === "") {
             return res.status(400).json({ message: "Name is required." })
         }
-        //checks if the number it is entered as it is optional 
-
+        // Check phone number if provided, since it is optional
         let cellphone_number: string | null = null
+
         if (phone_number) {
             cellphone_number = String(phone_number).trim()
 
-            if (cellphone_number.length > 20) {
-                return res.status(400).json({ message: "Phone number is too long." })
+            if (cellphone_number.length !== 10) {
+                return res.status(400).json({ message: "Phone number must contain exactly 10 digits." })
             }
-            const allowed_characters = "0123456789+"
+            if (!cellphone_number.startsWith("0")) {
+                return res.status(400).json({ message: "Phone number must start with 0." })
+            }
+            const allowed_characters = "0123456789"
             for (let i = 0; i < cellphone_number.length; i++) {
-
                 const character = cellphone_number.charAt(i)
-
-                //if the current character is not in the defined list 
                 if (!allowed_characters.includes(character)) {
-                    return res.status(400).json({ message: "Phone number can only be digits and + sign" })
+                    return res.status(400).json({ message: "Phone number must contain digits only." })
                 }
             }
         }
