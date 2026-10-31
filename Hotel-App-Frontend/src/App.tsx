@@ -16,6 +16,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import BookingPayment from "./pages/BookingPayments"
+import Navbar from "./components/Navbar"
 
 const ProtectedBooking = () => {
   const location = useLocation()
@@ -28,9 +29,15 @@ const ProtectedBooking = () => {
   return <Booking />
 }
 
-function App() {
+
+const UserLayout = () => {
+  const location = useLocation()
+
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/register"
+
   return (
-    <BrowserRouter>
+    <>
+      {!hideNavbar && <Navbar />}
       <Routes>
         {/* public pages  */}
 
@@ -47,12 +54,20 @@ function App() {
         <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
         <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
         <Route path="/bookings/new/:roomId" element={<ProtectedBooking />} />
-        <Route path="/bookings/:id/payment" element={<ProtectedRoute><BookingPayment/></ProtectedRoute>}/>
+        <Route path="/bookings/:id/payment" element={<ProtectedRoute><BookingPayment /></ProtectedRoute>} />
         <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
         <Route path="/favourites" element={<ProtectedRoute><Favourites /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/hotels/:hotelId/review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
       </Routes>
+    </>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <UserLayout />
     </BrowserRouter>
   )
 }
