@@ -74,6 +74,9 @@ const MyBookings = () => {
                             <Texts variant="p">Total: R{Number(booking.total_price).toFixed(2)}</Texts>
                             <div className="booking-buttons">
                                 <button type="button" onClick={() => navigate(`/bookings/${booking.id}`)}>View Booking</button>
+                                {booking.status === "pending" && (
+                                    <button type="button" onClick={() => navigate(`/bookings/${booking.id}/payment`)}>Pay Now</button>
+                                )}
                             </div>
                         </div>
                     ))}

@@ -13,6 +13,11 @@ const BookingDetails = () => {
     const [message, setMessage] = useState("")
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+
+    const today = new Date().toLocaleDateString("en-CA")
+    const canReview =
+        booking?.status === "confirmed" &&
+        booking.check_out <= today
     const getBooking = async () => {
         const token = localStorage.getItem("token")
         if (!token) {
@@ -52,7 +57,7 @@ const BookingDetails = () => {
             setCancelling(true)
             setError("")
             setMessage("")
-            const response = await axios.put(`http://localhost:5000/api/bookings/${booking.id}/cancel`,{},{ headers: { Authorization: `Bearer ${token}` } }
+            const response = await axios.put(`http://localhost:5000/api/bookings/${booking.id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } }
             )
             setBooking(response.data)
             setMessage("Your booking has been cancelled successfully.")
@@ -87,11 +92,18 @@ const BookingDetails = () => {
                     <Texts variant="p">Status: {booking.status}</Texts>
                     <Texts variant="h2">Total: R{Number(booking.total_price).toFixed(2)}</Texts>
                     {booking.status === "pending" && (
+                        <button type="button" onClick={() => navigate(`/bookings/${booking.id}/payment`)}>Pay Now</button>
+                    )}
+                    {(booking.status === "pending" || booking.status === "confirmed") && booking.check_in > new Date().toLocaleDateString("en-CA") && (
                         <button type="button" className="cancel-booking-button" onClick={cancelBooking} disabled={cancelling}>{cancelling ? "Cancelling..." : "Cancel Booking"}</button>
+                    )}
+                    {canReview && (
+                        <button type="button" onClick={() => navigate(`/hotels/${booking.hotel_id}/review`)}>Write a Review</button>
                     )}
                 </div>
             )}
         </div>
+
     )
 }
 export default BookingDetails

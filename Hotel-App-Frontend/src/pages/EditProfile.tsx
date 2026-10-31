@@ -58,14 +58,17 @@ const EditProfile = () => {
         }
         try {
             setSaving(true)
-            const response = await axios.put(
-                "http://localhost:5000/api/users/me", { name: name.trim(), phone }, { headers: { Authorization: `Bearer ${token}` } })
+            const response = await axios.put("http://localhost:5000/api/users/me", { name: name.trim(), phone }, { headers: { Authorization: `Bearer ${token}` } })
             localStorage.setItem("user", JSON.stringify(response.data))
             // Return to the profile overview after saving
             navigate("/profile")
         } catch (error) {
             console.log(error)
-            setError("Could not update your profile.")
+            if (axios.isAxiosError(error)) {
+                setError(error.response?.data?.message || "Could not update your profile.")
+            } else {
+                setError("Could not update your profile.")
+            }
         } finally {
             setSaving(false)
         }
@@ -97,7 +100,7 @@ const EditProfile = () => {
                 </div>
                 <div className="edit-profile-phone">
                     <label htmlFor="edit-profile-phone">Phone Number</label>
-                    <input id="edit-profile-phone" type="tel" placeholder="Not provided" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} />
+                    <input id="edit-profile-phone" type="tel" placeholder="0821234567" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={10} />
                 </div>
                 {error && <Texts variant="p" className="edit-profile-error">{error}</Texts>}
                 <div className="edit-profile-buttons">

@@ -13,7 +13,7 @@ const HotelDetails = () => {
     const navigate = useNavigate()
     const location = useLocation()
     //getting search details from home page 
-    const { checkIn = "", checkOut = "", guests = 1 } = location.state || {}
+    const { checkIn = "", checkOut = "", guests = 1,numberOfRooms=1} = location.state || {}
 
     const [hotel, setHotel] = useState<Hotel | null>(null)
     const [loading, setLoading] = useState(true)
@@ -42,7 +42,7 @@ const HotelDetails = () => {
     const getRooms = async () => {
         try {
             setRoomsLoading(true)
-            const response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`)
+            const response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`,{params:{checkIn,checkOut,guests,numberOfRooms}})
             setRooms(response.data)
         }
         catch (error) {
@@ -171,7 +171,7 @@ const HotelDetails = () => {
                             <Texts variant="p">{room.description}</Texts>
                             <Texts variant="p">Capacity: {room.capacity} guests</Texts>
                             <Texts variant="p">Price: R{room.price_per_night} per night</Texts>
-                            <button onClick={() => navigate(`/rooms/${room.id}`, { state: { checkIn, checkOut, guests } })}>View Room</button>
+                            <button onClick={() => navigate(`/rooms/${room.id}`, { state: { checkIn, checkOut, guests,numberOfRooms} })}>View Room</button>
                         </div>
                     ))
                 )}
@@ -203,7 +203,6 @@ const HotelDetails = () => {
                         )}
                     </>
                 )}
-                <button type="button" onClick={() => navigate(`/hotels/${hotel.id}/review`)}> Write a Review</button>
             </div>
         </div>
     )

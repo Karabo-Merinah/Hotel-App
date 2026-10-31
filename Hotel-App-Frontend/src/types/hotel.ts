@@ -26,6 +26,7 @@ export interface Booking {
     id: number
     user_id: number
     room_id: number
+    hotel_id: number
     hotel_name: string
     room_type: string
     check_in: string

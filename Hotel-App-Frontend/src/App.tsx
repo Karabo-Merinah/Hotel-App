@@ -15,6 +15,7 @@ import WriteReview from "./pages/WriteReview";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import BookingPayment from "./pages/BookingPayments"
 
 const ProtectedBooking = () => {
   const location = useLocation()
@@ -46,6 +47,7 @@ function App() {
         <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
         <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
         <Route path="/bookings/new/:roomId" element={<ProtectedBooking />} />
+        <Route path="/bookings/:id/payment" element={<ProtectedRoute><BookingPayment/></ProtectedRoute>}/>
         <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
         <Route path="/favourites" element={<ProtectedRoute><Favourites /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />

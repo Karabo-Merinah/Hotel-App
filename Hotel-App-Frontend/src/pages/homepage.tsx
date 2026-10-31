@@ -15,6 +15,7 @@ const Home = () => {
     const [checkIn, setCheckIn] = useState("")
     const [checkOut, setCheckOut] = useState("")
     const [guests, setGuests] = useState(1)
+    const [numberOfRooms, setNumberOfRooms] = useState(1)
     const navigate = useNavigate()
 
     //get today's date 
@@ -83,6 +84,7 @@ const Home = () => {
         setCheckIn("")
         setCheckOut("")
         setGuests(1)
+        setNumberOfRooms(1)
         setError("")
         getHotels()
     }
@@ -114,6 +116,10 @@ const Home = () => {
                         <Texts variant="span">Guests</Texts>
                         <input className="home-guests-input" type="number" min="1" value={guests} onChange={(e) => setGuests(Math.max(1, parseInt(e.target.value) || 1))} />
                     </div>
+                    <div className="search-rooms">
+                        <Texts variant="span">Rooms</Texts>
+                        <input className="home-rooms-input" type="number" min="1" value={numberOfRooms} onChange={(e) => setNumberOfRooms(parseInt(e.target.value) || 1)} />
+                    </div>
                     <div className="home-search-actions">
                         <button className="home-search-button" onClick={handleSearch}><Search size={20} /></button>
                         <button className="home-clear-button" onClick={clearSearch}>Clear</button>
@@ -137,7 +143,7 @@ const Home = () => {
                         <Texts variant="p">{hotel.description}</Texts>
                         <Texts variant="span">Rating: {hotel.star_rating} Stars</Texts>
                         <div className="hotel-card-actions">
-                            <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests } })}>View Hotel</button>
+                            <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests,numberOfRooms } })}>View Hotel</button>
                         </div>
                         <hr />
                     </div>

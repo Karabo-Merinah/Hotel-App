@@ -9,7 +9,7 @@ const RoomDetails = () => {
     const navigate = useNavigate()
     const location=useLocation()
     //gets the search details from home page 
-    const {checkIn="",checkOut="",guests=1}=location.state || {}
+    const {checkIn="",checkOut="",guests=1,numberOfRooms=1}=location.state || {}
     const [room, setRoom] = useState<Room | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
@@ -46,21 +46,21 @@ const RoomDetails = () => {
    // Checks if the room can accommodate the selected guests
 const checkRoomCapacity = () => {
     if (!room) return
-    if (guests > room.capacity) {
-        setError(`This room can only accommodate ${room.capacity} guests.`)
-        return
-    }
+    if (guests > room.capacity * numberOfRooms) {
+    setError("The selected rooms cannot accommodate all guests.")
+    return
+}
     // Check if the user is logged in
     const token = localStorage.getItem("token")
     // Booking page route
     const bookingPath = `/bookings/new/${room.id}`
     if (!token) {
         // Redirect user to login first
-        navigate("/login", {state: {from: bookingPath,checkIn,checkOut,guests}})
+        navigate("/login", {state: {from: bookingPath,checkIn,checkOut,guests,numberOfRooms}})
         return
     }
     // User is logged in, continue to booking
-    navigate(bookingPath, {state: {checkIn,checkOut,guests}})
+    navigate(bookingPath, {state: {checkIn,checkOut,guests,numberOfRooms}})
 }
     return (
         <div className="room-details">
