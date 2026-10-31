@@ -150,6 +150,23 @@ export const createBooking = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "The selected rooms cannot accommodate all guests." })
         }
 
+        // Check if the user already has the same pending booking
+        const existingBooking = await client.query(`SELECT id FROM bookings  WHERE user_id = $1
+     AND room_id = $2 AND check_in = $3 AND check_out = $4
+     AND number_of_rooms = $5 AND number_of_guests = $6 AND status='pending' ORDER BY id DESC LIMIT 1`,
+            [user_id, room_id, check_in, check_out, rooms_wanted, guests]
+        )
+
+        if (existingBooking.rows.length > 0) {
+            const booking_id = existingBooking.rows[0].id
+            await client.query("COMMIT")
+            const booking = await connectionPool.query(
+                select_booking + "WHERE id = $1",
+                [booking_id]
+            )
+
+            return res.status(200).json(booking.rows[0])
+        }
         // Check available rooms
         const booked = await getBookedRooms(room_id, check_in, check_out, 0, client)
 
