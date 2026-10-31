@@ -3,27 +3,44 @@ import { Request, Response } from "express"
 import connectionPool from "../config/database"
 
 
-//get all active rooms belonging to a hotel
+// Get available rooms belonging to a hotel
 export const getHotelRooms = async (req: Request, res: Response) => {
     try {
         const hotel_id = Number(req.params.hotelId)
+        const guests = parseInt(String(req.query.guests))
+        const numberOfRooms = parseInt(String(req.query.numberOfRooms))
+        const checkIn = String(req.query.checkIn || "")
+        const checkOut = String(req.query.checkOut || "")
 
-        if (!Number.isInteger(hotel_id) || hotel_id <= 0) {
-            return res.status(400).json({ message: "Hotel id must be a positive number." })
+        if (isNaN(hotel_id) || hotel_id <= 0) {
+            return res.status(400).json({ message: "Invalid hotel id." })
+        }
+        if (isNaN(guests) || guests < 1 || isNaN(numberOfRooms) || numberOfRooms < 1) {
+            return res.status(400).json({ message: "Enter valid guests and rooms." })
         }
 
-        const result = await connectionPool.query(
-            `SELECT rooms.* FROM rooms, hotels
-        WHERE rooms.hotel_id = hotels.id AND rooms.hotel_id = $1
-        AND rooms.is_active = TRUE AND hotels.is_active = TRUE
-        ORDER BY rooms.price_per_night;`, [hotel_id])
-        return res.status(200).json(result.rows)
+        if (!checkIn || !checkOut || isNaN(Date.parse(checkIn)) ||
+            isNaN(Date.parse(checkOut)) || checkOut <= checkIn ||
+            checkIn < new Date().toISOString().slice(0, 10)) {
+            return res.status(400).json({ message: "Enter valid booking dates." })
+        }
 
-    } catch (error) {
-        console.log(error);
+        const result = await connectionPool.query(`SELECT rooms.* FROM rooms, hotels WHERE rooms.hotel_id = hotels.id
+             AND rooms.hotel_id = $1 AND rooms.is_active = TRUE
+             AND hotels.is_active = TRUE AND rooms.capacity * $2 >= $3
+             AND rooms.total_rooms - (SELECT COALESCE(SUM(number_of_rooms), 0) FROM bookings
+                 WHERE bookings.room_id = rooms.id AND bookings.status IN ('pending', 'confirmed')
+                 AND bookings.check_in < $5 AND bookings.check_out > $4) >= $2 ORDER BY rooms.price_per_night`,
+            [hotel_id, numberOfRooms, guests, checkIn, checkOut]
+        )
+
+        return res.status(200).json(result.rows)
+    }
+    catch (error) {
+        console.log(error)
         return res.status(500).json({ message: "Could not get hotel rooms." })
     }
-};
+}
 
 //get a room by its id with the pictures
 export const getRoomById = async (req: Request, res: Response) => {
@@ -43,14 +60,14 @@ export const getRoomById = async (req: Request, res: Response) => {
             AND rooms.id = $1 AND rooms.is_active = TRUE  AND hotels.is_active = TRUE;`, [room_id])
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Room not found."})
+            return res.status(404).json({ message: "Room not found." })
         }
 
         // Get pictures belonging to this room
         const images = await connectionPool.query(
             `SELECT id, image_url FROM room_images WHERE room_id = $1 ORDER BY id`, [room_id])
 
-        return res.status(200).json({...result.rows[0], images: images.rows})
+        return res.status(200).json({ ...result.rows[0], images: images.rows })
 
     } catch (error) {
         console.log(error)
@@ -190,7 +207,7 @@ export const deleteRoom = async (req: Request, res: Response) => {
             }
             return res.status(200).json({ message: "This room has bookings, so it is deactivated instead of deleted." })
         }
-        const result = await connectionPool.query("DELETE FROM rooms WHERE id=$1 RETURNING id",[room_id] )
+        const result = await connectionPool.query("DELETE FROM rooms WHERE id=$1 RETURNING id", [room_id])
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Room not found." })
         }
