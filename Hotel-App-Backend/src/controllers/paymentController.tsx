@@ -134,7 +134,7 @@ export const verifyPayment = async (req: Request, res: Response) => {
             paystack.currency !== payment.currency
         ) {
             // Update the payment if Paystack reports a failed transaction
-            if (paystack.status === "failed") {
+            if (paystack.status === "failed" || paystack.status === "abandoned") {
                 await markPaymentFailed(reference)
             }
             return res.status(200).json({
