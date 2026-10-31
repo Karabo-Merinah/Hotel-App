@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Texts } from "../components/Texts/texts";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Register.css"
 
 const Register = () => {
 
     const navigate = useNavigate()
-
+    const location = useLocation()
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -61,8 +61,11 @@ const Register = () => {
             localStorage.setItem("user", JSON.stringify(response.data.user))
 
             setSuccess("Registration successful.")
-            //take user to the home page 
-            navigate("/")
+            // Redirect the user to the page they wanted to visit
+            const from = location.state?.from || "/"
+            navigate(from, {
+                replace: true, state: { checkIn: location.state?.checkIn, checkOut: location.state?.checkOut, guests: location.state?.guests }
+            })
         }
         catch (error) {
             if (axios.isAxiosError(error)) {
@@ -112,7 +115,7 @@ const Register = () => {
             </div>
             <div className="register-login">
                 <Texts variant="p">Already have an account?</Texts>
-                <button className="register-login-button" onClick={() => navigate("/login")}>Login</button>
+                <button className="register-login-button" onClick={() => navigate("/login", { state: location.state })}>Login</button>
             </div>
 
         </div>

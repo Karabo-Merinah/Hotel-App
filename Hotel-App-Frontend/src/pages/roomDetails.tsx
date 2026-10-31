@@ -42,16 +42,26 @@ const RoomDetails = () => {
     if (!room) {
         return <Texts variant="p">Room not found.</Texts>
     }
-    //checks if the room can accomodate the selected guests 
-    const  checkRoomCapacity=()=>{
-        if(!room) return 
-        if(guests > room.capacity){
-            setError(`This room can only accomodate ${room.capacity} guets.`)
-            return 
-        }
-        navigate(`/bookings/new/${room.id}`,{state:{checkIn,checkOut,guests}})
-    }
 
+   // Checks if the room can accommodate the selected guests
+const checkRoomCapacity = () => {
+    if (!room) return
+    if (guests > room.capacity) {
+        setError(`This room can only accommodate ${room.capacity} guests.`)
+        return
+    }
+    // Check if the user is logged in
+    const token = localStorage.getItem("token")
+    // Booking page route
+    const bookingPath = `/bookings/new/${room.id}`
+    if (!token) {
+        // Redirect user to login first
+        navigate("/login", {state: {from: bookingPath,checkIn,checkOut,guests}})
+        return
+    }
+    // User is logged in, continue to booking
+    navigate(bookingPath, {state: {checkIn,checkOut,guests}})
+}
     return (
         <div className="room-details">
             <Texts variant="h1">{room.room_type}</Texts>

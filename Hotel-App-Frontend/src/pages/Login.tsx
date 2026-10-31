@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate,useLocation } from "react-router-dom"
 import axios from "axios"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Login.css"
@@ -7,6 +7,7 @@ import "../styles/Login.css"
 const Login = () => {
 
     const navigate = useNavigate()
+    const location=useLocation()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
@@ -38,8 +39,10 @@ const Login = () => {
             localStorage.setItem("token", response.data.token)
             localStorage.setItem("user", JSON.stringify(response.data.user))
 
-            // Redirect the user to the home page
-            navigate("/")
+            // Redirect the user to the page they wanted to visit 
+            const from=location.state?.from || "/"
+
+            navigate(from,{replace:true,state:{checkIn:location.state?.checkIn,checkOut:location.state?.checkOut,guests:location.state?.guests}})
 
         } catch (error) {
             console.log(error)
@@ -82,7 +85,7 @@ const Login = () => {
             {/* Navigate to registration if the user has no account */}
             <div className="login-register">
                 <Texts variant="p">Don't have an account?</Texts>
-                <button className="login-register-button" type="button" onClick={() => navigate("/register")}>Register</button>
+                <button className="login-register-button" type="button" onClick={() => navigate("/register", {state:location.state})}>Register</button>
             </div>
         </div>
     )
