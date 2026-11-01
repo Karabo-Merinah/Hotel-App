@@ -36,3 +36,65 @@ export const getDashboardStats = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Failed to load dashboard statistics." })
     }
 }
+
+export const getAllAdminBookings = async (req: Request, res: Response) => {
+    try {
+        const result = await connectionPool.query(`SELECT bookings.*, users.name AS guest_name, users.email AS guest_email,
+                    rooms.room_type, hotels.name AS hotel_name
+             FROM bookings, users, rooms, hotels WHERE bookings.user_id = users.id
+             AND bookings.room_id = rooms.id AND rooms.hotel_id = hotels.id
+             ORDER BY bookings.id DESC`
+        )
+        return res.status(200).json(result.rows)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not load reservations." })
+    }
+}
+
+export const getAdminBookingById = async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id as string)
+
+        const result = await connectionPool.query(`SELECT bookings.*, users.name AS guest_name,users.email AS guest_email,
+                    rooms.room_type,hotels.name AS hotel_name
+             FROM bookings, users, rooms, hotels  WHERE bookings.user_id = users.id
+             AND bookings.room_id = rooms.id AND rooms.hotel_id = hotels.id AND bookings.id = $1`,
+            [id]
+        )
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Reservation not found." })
+        }
+        return res.status(200).json(result.rows[0])
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not load reservation details." })
+    }
+}
+
+export const updateAdminBookingStatus = async (req: Request, res: Response) => {
+    try {
+        const id = parseInt(req.params.id as string)
+        const { status } = req.body
+
+        if (status !== "confirmed" && status !== "cancelled") {
+            return res.status(400).json({ message: "Invalid reservation status." })
+        }
+
+        const result = await connectionPool.query(
+            `UPDATE bookings SET status = $1
+             WHERE id = $2 AND status = 'pending' RETURNING *`,
+            [status, id]
+        )
+
+        if (result.rows.length === 0) {
+            return res.status(409).json({ message: "Reservation not found or no longer pending." })
+        }
+
+        return res.status(200).json({ message: "Reservation updated successfully.", booking: result.rows[0] })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not update reservation." })
+    }
+}
