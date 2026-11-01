@@ -20,7 +20,9 @@ import Navbar from "./components/Navbar"
 import AdminRoute from "./components/AdminRoute"
 import AdminDashboard from "./pages/admin/AdminDashboard"
 import AdminNavbar from "./components/AdminNavbar"
-
+import ManageHotels from "./pages/admin/ManageHotels"
+import HotelForm from "./pages/admin/HotelForm"
+import ManageBookings from "./pages/admin/ManageBookings"
 
 const ProtectedBooking = () => {
   const location = useLocation()
@@ -36,7 +38,7 @@ const ProtectedBooking = () => {
 
 const UserLayout = () => {
   const location = useLocation()
-  const hideNavbar = location.pathname === "/login" || location.pathname === "/register"|| location.pathname.startsWith("/admin")
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/register" || location.pathname.startsWith("/admin")
 
   return (
     <>
@@ -62,7 +64,11 @@ const UserLayout = () => {
         <Route path="/favourites" element={<ProtectedRoute><Favourites /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/hotels/:hotelId/review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
-        <Route path="/admin" element={<AdminRoute><AdminNavbar/><AdminDashboard/></AdminRoute>}/>
+        <Route path="/admin" element={<AdminRoute><AdminNavbar /><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/hotels" element={<AdminRoute><AdminNavbar /><ManageHotels /></AdminRoute>} />
+        <Route path="/admin/hotels/new" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
+        <Route path="/admin/hotels/:id/edit" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
+        <Route path="/admin/bookings" element={<AdminRoute><AdminNavbar /><ManageBookings /></AdminRoute>} />
       </Routes>
     </>
   )

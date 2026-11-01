@@ -71,9 +71,7 @@ const AdminDashboard = () => {
                                     <strong>Reservation #{booking.id}</strong>
                                     <p>Room #{booking.room_id}</p>
                                 </div>
-                                <span className="admin-reservation-status">
-                                    {booking.status}
-                                </span>
+                                <span className="admin-reservation-status">{booking.status} </span>
                             </div>
                         ))}
                     </div>
