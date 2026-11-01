@@ -17,6 +17,10 @@ import PublicRoute from "./routes/PublicRoute";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import BookingPayment from "./pages/BookingPayments"
 import Navbar from "./components/Navbar"
+import AdminRoute from "./components/AdminRoute"
+import AdminDashboard from "./pages/admin/AdminDashboard"
+import AdminNavbar from "./components/AdminNavbar"
+
 
 const ProtectedBooking = () => {
   const location = useLocation()
@@ -32,8 +36,7 @@ const ProtectedBooking = () => {
 
 const UserLayout = () => {
   const location = useLocation()
-
-  const hideNavbar = location.pathname === "/login" || location.pathname === "/register"
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/register"|| location.pathname.startsWith("/admin")
 
   return (
     <>
@@ -59,6 +62,7 @@ const UserLayout = () => {
         <Route path="/favourites" element={<ProtectedRoute><Favourites /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/hotels/:hotelId/review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute><AdminNavbar/><AdminDashboard/></AdminRoute>}/>
       </Routes>
     </>
   )
