@@ -19,7 +19,7 @@ const AdminBookingDetails = () => {
             setLoading(true)
             setError("")
             const token = localStorage.getItem("token")
-            const response = await axios.get(`http://localhost:5000/api/admin/bookings/${id}`,{headers: {Authorization: `Bearer ${token}`}}
+            const response = await axios.get(`http://localhost:5000/api/admin/bookings/${id}`, { headers: { Authorization: `Bearer ${token}` } }
             )
 
             setBooking(response.data)
@@ -48,14 +48,18 @@ const AdminBookingDetails = () => {
             setSaving(true)
             setError("")
             const token = localStorage.getItem("token")
-            await axios.put(`http://localhost:5000/api/admin/bookings/${booking.id}/status`, { status },
-                {headers: {Authorization: `Bearer ${token}`}}
+            const response = await axios.put(`http://localhost:5000/api/admin/bookings/${booking.id}/status`, { status },
+                { headers: { Authorization: `Bearer ${token}` } }
             )
 
-            await getBooking()
+            setBooking(response.data)
         } catch (error) {
             console.log(error)
-            setError("Could not update reservation.")
+            if (axios.isAxiosError(error)) {
+                setError(error.response?.data?.message || "Could not update reservation.")
+            } else {
+                setError("Could not update reservation.")
+            }
         } finally {
             setSaving(false)
         }
@@ -113,8 +117,8 @@ const AdminBookingDetails = () => {
             <div className="admin-booking-detail-actions">
                 {booking.status === "pending" && (
                     <>
-                        <button onClick={() => updateStatus("confirmed")}disabled={saving} >Approve</button>
-                        <button  onClick={() => updateStatus("cancelled")}disabled={saving}>Cancel</button>
+                        <button onClick={() => updateStatus("confirmed")} disabled={saving} >Approve</button>
+                        <button onClick={() => updateStatus("cancelled")} disabled={saving}>Cancel</button>
                     </>
                 )}
                 <button onClick={() => navigate("/admin/bookings")}>Back to Reservations</button>

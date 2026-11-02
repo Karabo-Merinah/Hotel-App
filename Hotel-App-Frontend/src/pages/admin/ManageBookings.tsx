@@ -43,7 +43,11 @@ const ManageBookings = () => {
             await getBookings()
         } catch (error) {
             console.log(error)
-            setError("Could not update reservation.")
+            if (axios.isAxiosError(error)) {
+                setError(error.response?.data?.message || "Could not update reservation.")
+            } else {
+                setError("Could not update reservation.")
+            }
         }
     }
     useEffect(() => {
@@ -53,7 +57,7 @@ const ManageBookings = () => {
         return date.split("T")[0]
     }
     return (
-        <main className="manage-bookings">
+        <div className="manage-bookings">
             <h1>Reservations</h1>
             {loading && <p>Loading reservations...</p>}
             {error && <p>{error}</p>}
@@ -63,7 +67,7 @@ const ManageBookings = () => {
             {!loading && bookings.length > 0 && (
                 <div className="admin-bookings-list">
                     {bookings.map((booking) => (
-                        <article className="admin-booking-card" key={booking.id}>
+                        <div className="admin-booking-card" key={booking.id}>
                             <div className="admin-booking-details">
                                 <h3>{booking.guest_name}</h3>
                                 <p>{booking.hotel_name} / {booking.room_type}</p>
@@ -76,16 +80,16 @@ const ManageBookings = () => {
                                 {booking.status === "pending" && (
                                     <button onClick={() => updateStatus(booking.id, "confirmed")}>Approve</button>
                                 )}
-                                <button onClick={() => navigate(`/admin/bookings/${booking.id}`)}>{booking.status === "pending" ? "Modify" : "View"}</button>
+                                <button onClick={() => navigate(`/admin/bookings/${booking.id}`)}>View Details</button>
                                 {booking.status === "pending" && (
                                     <button onClick={() => updateStatus(booking.id, "cancelled")}>Cancel</button>
                                 )}
                             </div>
-                        </article>
+                        </div>
                     ))}
                 </div>
             )}
-        </main>
+        </div>
     )
 }
 

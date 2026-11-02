@@ -72,12 +72,11 @@ const Booking = () => {
         try {
             setLoading(true)
             // Save the booking in the database
-            const bookingResponse = await axios.post(
-                "http://localhost:5000/api/bookings", { room_id: parseInt(roomId), check_in: checkIn, check_out: checkOut, number_of_rooms: numberOfRooms, number_of_guests: guests },
+            const bookingResponse = await axios.post("http://localhost:5000/api/bookings", { room_id: parseInt(roomId), check_in: checkIn, check_out: checkOut, number_of_rooms: numberOfRooms, number_of_guests: guests },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             // Navigate to the booking confirmation page
-            navigate(`/bookings/${bookingResponse.data.id}/payment`)
+         navigate(`/bookings/${bookingResponse.data.id}`)
         }
         catch (error) {
             console.log(error)
@@ -144,7 +143,7 @@ const Booking = () => {
                     <label htmlFor="numberOfRooms">Number of Rooms</label>
                     <input type="number" id="numberOfRooms" min="1" value={numberOfRooms} onChange={(e) => setNumberOfRooms(parseInt(e.target.value) || 1)} required />
                 </div>
-                <button type="button" onClick={() => navigate(`/rooms/${roomId}`, { state: { checkIn, checkOut, guests } })}>Back to Room</button>
+                <button type="button" onClick={() => navigate(`/rooms/${roomId}`, { state: { checkIn, checkOut, guests,numberOfRooms } })}>Back to Room</button>
                 <button type="submit" disabled={loading}> {loading ? "Processing..." : "Review Booking"}</button>
             </form>
 

@@ -42,7 +42,7 @@ const Login = () => {
             // Redirect the user to the page they wanted to visit 
             const from=location.state?.from || "/"
 
-            navigate(from,{replace:true,state:{checkIn:location.state?.checkIn,checkOut:location.state?.checkOut,guests:location.state?.guests}})
+            navigate(from,{replace:true,state:{checkIn:location.state?.checkIn,checkOut:location.state?.checkOut,guests:location.state?.guests,numberOfRooms:location.state?.numberOfRooms}})
 
         } catch (error) {
             console.log(error)

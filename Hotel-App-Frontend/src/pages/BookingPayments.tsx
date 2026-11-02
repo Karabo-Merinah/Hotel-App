@@ -8,7 +8,8 @@ const BookingPayment = () => {
     const { id } = useParams()
     const [booking, setBooking] = useState<BookingType | null>(null)
     const [error, setError] = useState("")
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [processing, setProcessing] = useState(false)
 
 
     const getBooking = async () => {
@@ -23,6 +24,9 @@ const BookingPayment = () => {
             console.log(error)
             setError("Could not load booking.")
         }
+        finally {
+            setLoading(false)
+        }
     }
     useEffect(() => {
         getBooking()
@@ -31,7 +35,7 @@ const BookingPayment = () => {
     const handlePayment = async () => {
         if (!booking || booking.status !== "pending") return
         try {
-            setLoading(true)
+            setProcessing(true)
             setError("")
             const token = localStorage.getItem("token")
             const response = await axios.post("http://localhost:5000/api/payments", { booking_id: booking.id },
@@ -47,8 +51,12 @@ const BookingPayment = () => {
             }
         }
         finally {
-            setLoading(false)
+            setProcessing(false)
         }
+    }
+
+    if (loading) {
+        return <Texts variant="p">Loading booking details...</Texts>
     }
 
     return (
@@ -65,7 +73,7 @@ const BookingPayment = () => {
                     <Texts variant="p">Guests: {booking.number_of_guests}</Texts>
                     <Texts variant="h2"> Total: R{Number(booking.total_price).toFixed(2)}</Texts>
                     {booking.status === "pending" && (
-                        <button onClick={handlePayment} disabled={loading}>{loading ? "Processing..." : "Proceed to Payment"}</button>
+                        <button onClick={handlePayment} disabled={processing}>{processing ? "Processing..." : "Proceed to Payment"}</button>
                     )}
                     {booking.status !== "pending" && (
                         <Texts variant="p">Booking status: {booking.status}</Texts>

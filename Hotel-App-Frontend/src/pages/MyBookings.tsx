@@ -15,6 +15,7 @@ const MyBookings = () => {
     const getBookings = async () => {
         const token = localStorage.getItem("token")
         if (!token) {
+            setLoading(false)
             navigate("/login")
             return
         }
@@ -35,9 +36,29 @@ const MyBookings = () => {
             setLoading(false)
         }
     }
+    const cancelBooking = async (id: number) => {
+        if (!window.confirm("Are you sure you want to cancel this booking?")) return
+        const token = localStorage.getItem("token")
+        try {
+            setError("")
+            await axios.put(`http://localhost:5000/api/bookings/${id}/cancel`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            await getBookings()
+        } catch (error) {
+            console.log(error)
+            if (axios.isAxiosError(error)) {
+                setError(error.response?.data?.message || "Could not cancel booking.")
+            } else {
+                setError("Could not cancel booking.")
+            }
+        }
+    }
     useEffect(() => {
         getBookings()
     }, [])
+
+
     if (loading) {
         return <Texts variant="p">Loading bookings...</Texts>
     }
@@ -74,9 +95,10 @@ const MyBookings = () => {
                             <Texts variant="p">Total: R{Number(booking.total_price).toFixed(2)}</Texts>
                             <div className="booking-buttons">
                                 <button type="button" onClick={() => navigate(`/bookings/${booking.id}`)}>View Booking</button>
-                                {booking.status === "pending" && (
-                                    <button type="button" onClick={() => navigate(`/bookings/${booking.id}/payment`)}>Pay Now</button>
-                                )}
+                                {(booking.status === "pending" || booking.status === "confirmed") &&
+                                    booking.check_in > new Date().toISOString().slice(0, 10) && (
+                                        <button type="button" onClick={() => cancelBooking(booking.id)}>Cancel Booking</button>
+                                    )}
                             </div>
                         </div>
                     ))}
