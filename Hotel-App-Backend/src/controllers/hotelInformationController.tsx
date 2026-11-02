@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import connectionPool from "../config/database";
+import cloudinary from "../config/cloudinary"
+import { Readable } from "stream"
 
 //get full list of amenties 
 
@@ -16,41 +18,47 @@ export const getAllAmenties = async (req: Request, res: Response) => {
     }
 }
 
-//add a photo to a hotel 
+
+// Upload hotel image
 export const addHotelImage = async (req: Request, res: Response) => {
     try {
-        const hotel_id = Number(req.params.id)
-
+        const hotel_id = parseInt(req.params.id as string)
         if (isNaN(hotel_id)) {
             return res.status(400).json({ message: "Hotel id must be a number." })
         }
-
-        if (!req.body.image_url) {
-            return res.status(400).json({ message: "Image link is required." })
-        }
-        const image_url = String(req.body.image_url).trim()
-
-        //like must start with http and have maximum of 255 characters 
-
-        if (!image_url.startsWith("http") || image_url.length > 255) {
-            return res.status(400).json({ message: "Image link must start with http and be maximum of 255 characters." })
+        if (!req.file) {
+            return res.status(400).json({ message: "Please select an image." })
         }
 
-        const hotel_result = await connectionPool.query(
-            "SELECT id FROM hotels WHERE id=$1", [hotel_id]
+        const hotel = await connectionPool.query(
+            "SELECT id FROM hotels WHERE id=$1 AND is_active=TRUE",
+            [hotel_id]
         )
-        if (hotel_result.rows.length === 0) {
+        if (hotel.rows.length === 0) {
             return res.status(404).json({ message: "Hotel not found." })
         }
-        const result = await connectionPool.query(
-            "INSERT INTO hotel_images (hotel_id,image_url) VALUES($1,$2) RETURNING id,hotel_id,image_url",
+        const image_url = await new Promise<string>((resolve, reject) => {
+            const upload = cloudinary.uploader.upload_stream(
+                { folder: "wander-inn/hotels" },
+                (error, result) => {
+                    if (error) {
+                        reject(error)
+                    } else if (result) {
+                        resolve(result.secure_url)
+                    } else {
+                        reject(new Error("Image upload failed."))
+                    }
+                }
+            )
+            Readable.from(req.file!.buffer).pipe(upload)
+        })
+        const result = await connectionPool.query(`INSERT INTO hotel_images(hotel_id, image_url)  VALUES ($1, $2) RETURNING *`,
             [hotel_id, image_url]
         )
-        return res.status(201).json(result.rows[0])
-    }
-    catch (error) {
+        return res.status(201).json({ message: "Hotel image uploaded successfully.", image: result.rows[0] })
+    } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Could not add the photo." })
+        return res.status(500).json({ message: "Could not upload hotel image." })
     }
 }
 

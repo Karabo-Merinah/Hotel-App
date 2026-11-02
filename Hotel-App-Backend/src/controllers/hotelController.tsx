@@ -1,7 +1,6 @@
 import { Request, Response } from "express"
 import connectionPool from "../config/database"
 
-
 //gets all hotels with the lowest room price and the photo .
 export const getAllHotels = async (req: Request, res: Response) => {
 
@@ -267,7 +266,3 @@ export const deleteHotel = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Could not delete the hotel." })
     }
 }
-
-
-
-
