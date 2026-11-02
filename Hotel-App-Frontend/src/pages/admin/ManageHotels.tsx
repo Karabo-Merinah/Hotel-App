@@ -35,33 +35,33 @@ const ManageHotels = () => {
     }
 
     return (
-        <main className="manage-hotels">
+        <div className="manage-hotels">
             <div className="manage-hotels-header">
                 <div>
                     <Texts variant="h1">Accommodations</Texts>
-                    <p>Manage Wander Inn hotels and their details.</p>
+                    <Texts variant="p">Manage Wander Inn hotels and their details.</Texts>
                 </div>
                 <button onClick={() => navigate("/admin/hotels/new")}>Add Hotel</button>
             </div>
-            {error && <p>{error}</p>}
+            {error && <Texts variant="p">{error}</Texts>}
             {!error && hotels.length === 0 && (
-                <p>No hotels found.</p>
+                <Texts variant="p">No hotels found.</Texts>
             )}
             <div className="manage-hotels-list">
                 {hotels.map((hotel) => (
                     <div className="manage-hotel-card" key={hotel.id}>
                         <div className="manage-hotel-info">
-                            <h3>{hotel.name}</h3>
-                            <p>{hotel.city}</p>
+                            <Texts variant="h3">{hotel.name}</Texts>
+                            <Texts variant="p">{hotel.city}</Texts>
                         </div>
                         <div className="manage-hotel-actions">
                             <button onClick={() => navigate(`/admin/hotels/${hotel.id}/edit`)}>Edit</button>
-                            <button onClick={() => navigate(`/admin/hotels/${hotel.id}`)}>View Details </button>
+                            <button onClick={() => navigate(`/hotels/${hotel.id}`)}>View Details</button>
                         </div>
                     </div>
                 ))}
             </div>
-        </main>
+        </div>
     )
 }
 

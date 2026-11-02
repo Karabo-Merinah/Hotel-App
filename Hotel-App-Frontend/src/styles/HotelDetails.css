@@ -37,3 +37,16 @@
 .hotel-share-button:hover {
     background: #f8f5f1;
 }
+.hotel-images {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.hotel-images img {
+    width: 250px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}

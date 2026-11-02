@@ -1,3 +1,8 @@
+export interface HotelImage {
+    id: number
+    image_url: string
+}
+
 export interface Hotel {
     id: number
     name: string
@@ -5,6 +10,7 @@ export interface Hotel {
     address: string
     city: string
     star_rating: number
+    images?: HotelImage[]
 }
 export interface Room {
     id: number

@@ -6,7 +6,7 @@ import "../../styles/ManageRooms.css"
 import { Texts } from "../../components/Texts/texts"
 
 
-    const ManageRooms = () => {
+const ManageRooms = () => {
     const [hotels, setHotels] = useState<Hotel[]>([])
     const [rooms, setRooms] = useState<AdminRoom[]>([])
     const [hotelId, setHotelId] = useState("")
@@ -20,6 +20,8 @@ import { Texts } from "../../components/Texts/texts"
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [message, setMessage] = useState("")
+    const [selectedImages, setSelectedImages] = useState<File[]>([])
+    const [existingImages, setExistingImages] = useState<{ id: number, image_url: string }[]>([])
 
     const token = localStorage.getItem("token")
 
@@ -31,6 +33,8 @@ import { Texts } from "../../components/Texts/texts"
         setTotalRooms("")
         setPrice("")
         setIsActive(true)
+        setSelectedImages([])
+        setExistingImages([])
     }
 
     const getHotels = async () => {
@@ -42,7 +46,6 @@ import { Texts } from "../../components/Texts/texts"
             setError("Could not load hotels.")
         }
     }
-
     const getRooms = async (id: string) => {
         try {
             const response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`)
@@ -56,6 +59,15 @@ import { Texts } from "../../components/Texts/texts"
     useEffect(() => {
         getHotels()
     }, [])
+    const getRoomImages = async (id: string) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/rooms/${id}`)
+            setExistingImages(response.data.images)
+        } catch (error) {
+            console.log(error)
+            setError("Could not load room images.")
+        }
+    }
 
     const selectHotel = (id: string) => {
         setHotelId(id)
@@ -88,53 +100,85 @@ import { Texts } from "../../components/Texts/texts"
             setTotalRooms(String(room.total_rooms))
             setPrice(String(room.price_per_night))
             setIsActive(room.is_active)
+            getRoomImages(id)
+            setSelectedImages([])
+        }
+    }
+    const uploadRoomImages = async (id: number) => {
+        for (const image of selectedImages) {
+            const formData = new FormData()
+            formData.append("image", image)
+
+            await axios.post(`http://localhost:5000/api/rooms/${id}/images`, formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        }
+    }
+
+    const deleteRoomImage = async (imageId: number) => {
+        if (!window.confirm("Are you sure you want to delete this image?")) {
+            return
+        }
+
+        try {
+            setError("")
+
+            await axios.delete(`http://localhost:5000/api/rooms/images/${imageId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            setExistingImages(existingImages.filter(image => image.id !== imageId))
+            setMessage("Room image deleted successfully.")
+        } catch (error) {
+            console.log(error)
+            setError("Could not delete room image.")
         }
     }
 
     const saveRoom = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-
         if (!hotelId) {
             setError("Please select a hotel.")
             return
         }
-
         setLoading(true)
         setError("")
         setMessage("")
 
-        const roomData = {
-            hotel_id: parseInt(hotelId),
-            room_type: roomType,
-            description,
-            capacity: parseInt(capacity),
-            total_rooms: parseInt(totalRooms),
-            price_per_night: parseFloat(price),
-            is_active: isActive
-        }
-
         try {
-            if (roomId) {
-                await axios.put(`http://localhost:5000/api/rooms/${roomId}`, roomData, {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
-            } else {
-                await axios.post("http://localhost:5000/api/rooms", roomData, {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
+            const roomData = {
+                hotel_id: parseInt(hotelId),
+                room_type: roomType, description,
+                capacity: parseInt(capacity),
+                total_rooms: parseInt(totalRooms),
+                price_per_night: parseFloat(price),
+                is_active: isActive
             }
 
-            setMessage("Room saved successfully.")
+            let savedRoomId = parseInt(roomId)
+            if (roomId) {
+                await axios.put(`http://localhost:5000/api/rooms/${roomId}`, roomData, { headers: { Authorization: `Bearer ${token}` } })
+            } else {
+                const response = await axios.post("http://localhost:5000/api/rooms", roomData, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                savedRoomId = response.data.id
+            }
+            if (selectedImages.length > 0) {
+                await uploadRoomImages(savedRoomId)
+            }
+            setMessage(roomId ? "Room updated successfully." : "Room added successfully.")
             clearForm()
-            await getRooms(hotelId)
-        } catch (error) {
+            getRooms(hotelId)
+        }
+        catch (error) {
             console.log(error)
-            setError("Could not save room.")
-        } finally {
+            setError("Could not save room or upload images.")
+        }
+        finally {
             setLoading(false)
         }
     }
-
     return (
         <div className="admin-room-page">
             <Texts variant="h1">Room & Pricing</Texts>
@@ -148,7 +192,6 @@ import { Texts } from "../../components/Texts/texts"
                         ))}
                     </select>
                 </div>
-
                 <div className="admin-room-field">
                     <label htmlFor="admin-room">Select room</label>
                     <select id="admin-room" value={roomId} onChange={(e) => selectRoom(e.target.value)} disabled={!hotelId}>
@@ -178,6 +221,25 @@ import { Texts } from "../../components/Texts/texts"
                     <label htmlFor="admin-room-description">Description</label>
                     <textarea id="admin-room-description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
                 </div>
+
+                <div className="admin-room-field admin-room-description">
+                    <label htmlFor="room-images">Room images</label>
+                    <input id="room-images" type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={(e) => setSelectedImages(Array.from(e.target.files || []))} />
+                </div>
+
+                {existingImages.length > 0 && (
+                    <div className="admin-room-field admin-room-description">
+                        <label>Existing room images</label>
+                        <div className="admin-room-images">
+                            {existingImages.map((image) => (
+                                <div className="admin-room-image" key={image.id}>
+                                    <img src={image.image_url} alt="Room" />
+                                    <button type="button" onClick={() => deleteRoomImage(image.id)}>Delete image</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <div className="admin-room-active">
                     <input id="admin-room-active" type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
                     <label htmlFor="admin-room-active">Room type is active</label>

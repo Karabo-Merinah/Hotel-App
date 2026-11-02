@@ -13,7 +13,7 @@ const HotelDetails = () => {
     const navigate = useNavigate()
     const location = useLocation()
     //getting search details from home page 
-    const { checkIn = "", checkOut = "", guests = 1,numberOfRooms=1} = location.state || {}
+    const { checkIn = "", checkOut = "", guests = 1, numberOfRooms = 1 } = location.state || {}
 
     const [hotel, setHotel] = useState<Hotel | null>(null)
     const [loading, setLoading] = useState(true)
@@ -22,6 +22,7 @@ const HotelDetails = () => {
     const [hotelReviews, setHotelReviews] = useState<HotelReviews | null>(null)
     const [reviewsError, setReviewsError] = useState("")
     const [roomsLoading, setRoomsLoading] = useState(false)
+    const [roomsError, setRoomsError] = useState("")
     const [isFavourite, setIsFavourite] = useState(false)
 
     const getHotel = async () => {
@@ -42,23 +43,26 @@ const HotelDetails = () => {
     const getRooms = async () => {
         try {
             setRoomsLoading(true)
-            const response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`,{params:{checkIn,checkOut,guests,numberOfRooms}})
+            setRoomsError("")
+            let response
+            if (checkIn && checkOut) {
+                response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`, {
+                    params: { checkIn, checkOut, guests, numberOfRooms }
+                })
+            }
+            else {
+                response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`)
+            }
             setRooms(response.data)
         }
         catch (error) {
             console.log(error)
-            setError("Could not load hotel rooms.")
+            setRoomsError("Could not load hotel rooms.")
         }
         finally {
             setRoomsLoading(false)
         }
     }
-    useEffect(() => {
-        getHotel()
-        getRooms()
-        getHotelReviews()
-    }, [id])
-
     //checks if the hotel is already saved 
     const checkFavourite = async () => {
         const token = localStorage.getItem("token")
@@ -135,6 +139,11 @@ const HotelDetails = () => {
             setReviewsError("Could not load hotel reviews.")
         }
     }
+    useEffect(() => {
+        getHotel()
+        getRooms()
+        getHotelReviews()
+    }, [id])
     if (loading) {
         return <Texts variant="p">Loading hotel details...</Texts>
     }
@@ -147,6 +156,11 @@ const HotelDetails = () => {
     return (
         <div className="hotel-details">
             <Texts variant="h1">{hotel.name}</Texts>
+            <div className="hotel-images">
+                {hotel.images && hotel.images.map((image) => (
+                    <img key={image.id} src={image.image_url} alt={hotel.name} />
+                ))}
+            </div>
             <div className="hotel-actions">
                 <button type="button" className="hotel-favourite-button" onClick={toggleFavourite}
                     title={isFavourite ? "Remove from Favourites" : "Add to Favourites"} aria-label={isFavourite ? "Remove from Favourites" : "Add to Favourites"}>
@@ -160,9 +174,10 @@ const HotelDetails = () => {
             <Texts variant="p">Rating: {hotel.star_rating} Stars</Texts>
             <div className="hotel-rooms">
                 <Texts variant="h2">Our Rooms</Texts>
+                {roomsError && <Texts variant="p">{roomsError}</Texts>}
                 {roomsLoading ? (
                     <Texts variant="p">Loading rooms...</Texts>
-                ) : rooms.length === 0 ? (
+                ) : roomsError ? null : rooms.length === 0 ? (
                     <Texts variant="p">No rooms available.</Texts>
                 ) : (
                     rooms.map((room) => (
@@ -171,7 +186,7 @@ const HotelDetails = () => {
                             <Texts variant="p">{room.description}</Texts>
                             <Texts variant="p">Capacity: {room.capacity} guests</Texts>
                             <Texts variant="p">Price: R{room.price_per_night} per night</Texts>
-                            <button onClick={() => navigate(`/rooms/${room.id}`, { state: { checkIn, checkOut, guests,numberOfRooms} })}>View Room</button>
+                            <button onClick={() => navigate(`/rooms/${room.id}`, { state: { checkIn, checkOut, guests, numberOfRooms } })}>View Room</button>
                         </div>
                     ))
                 )}

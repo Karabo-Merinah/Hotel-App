@@ -1,8 +1,9 @@
-
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import "../../styles/HotelForm.css"
+import { Texts } from "../../components/Texts/texts"
+import type { HotelImage } from "../../types/hotel"
 
 const HotelForm = () => {
     const { id } = useParams()
@@ -14,14 +15,18 @@ const HotelForm = () => {
     const [city, setCity] = useState("")
     const [latitude, setLatitude] = useState("")
     const [longitude, setLongitude] = useState("")
-    const [starRating, setStarRating] = useState("3")
+    const [starRating, setStarRating] = useState("1")
     const [policies, setPolicies] = useState("")
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+    const [selectedImages, setSelectedImages] = useState<File[]>([])
+    const [uploading, setUploading] = useState(false)
+    const [imageError, setImageError] = useState("")
+    const [existingImages, setExistingImages] = useState<HotelImage[]>([])
+    const [deletingImage, setDeletingImage] = useState(false)
 
     useEffect(() => {
         if (!id) return
-
         const getHotel = async () => {
             try {
                 const response = await axios.get(`http://localhost:5000/api/hotels/${id}`
@@ -33,8 +38,9 @@ const HotelForm = () => {
                 setCity(hotel.city || "")
                 setLatitude(String(hotel.latitude || ""))
                 setLongitude(String(hotel.longitude || ""))
-                setStarRating(String(hotel.star_rating || 3))
+                setStarRating(String(hotel.star_rating || 1))
                 setPolicies(hotel.policies || "")
+                setExistingImages(hotel.images || [])
             } catch (error) {
                 console.log(error)
                 setError("Could not load hotel details.")
@@ -44,11 +50,33 @@ const HotelForm = () => {
         getHotel()
     }, [id])
 
+    const deleteHotelImage = async (imageId: number) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this image?")
+        if (!confirmDelete) {
+            return
+        }
+        try {
+            setDeletingImage(true)
+            setImageError("")
+            const token = localStorage.getItem("token")
+            await axios.delete(`http://localhost:5000/api/hotels/images/${imageId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            setExistingImages(existingImages.filter((image) => image.id !== imageId))
+        }
+        catch (error) {
+            console.log(error)
+            setImageError("Could not delete hotel image.")
+        }
+        finally {
+            setDeletingImage(false)
+        }
+    }
     const saveHotel = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setError("")
+        setImageError("")
         setLoading(true)
-
         const token = localStorage.getItem("token")
 
         const hotelData = {
@@ -58,33 +86,60 @@ const HotelForm = () => {
             star_rating: parseInt(starRating),
             policies
         }
-
         try {
             if (id) {
                 await axios.put(`http://localhost:5000/api/hotels/${id}`, hotelData, {
                     headers: { Authorization: `Bearer ${token}` }
-                }
-                )
+                })
+                await uploadHotelImages(parseInt(id))
             } else {
-                await axios.post("http://localhost:5000/api/hotels", hotelData, { headers: { Authorization: `Bearer ${token}` } }
+                const response = await axios.post("http://localhost:5000/api/hotels", hotelData, { headers: { Authorization: `Bearer ${token}` } }
                 )
+                await uploadHotelImages(response.data.id)
             }
             navigate("/admin/hotels")
         } catch (error) {
             console.log(error)
-            setError("Could not save hotel.")
+            setError("Could not complete saving the hotel. Check whether the hotel was already saved before retrying.")
         } finally {
             setLoading(false)
         }
     }
+
+    const uploadHotelImages = async (hotelId: number) => {
+        if (selectedImages.length === 0) {
+            return
+        }
+        try {
+            setUploading(true)
+            setImageError("")
+
+            const token = localStorage.getItem("token")
+            for (const image of selectedImages) {
+                const formData = new FormData()
+                formData.append("image", image)
+                await axios.post(`http://localhost:5000/api/hotels/${hotelId}/images`, formData, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            }
+            setSelectedImages([])
+        } catch (error) {
+            console.log(error)
+            setImageError("Could not upload hotel images. The hotel may already have been saved.")
+            throw error
+        } finally {
+            setUploading(false)
+        }
+    }
+
     return (
-        <main className="admin-hotel-form-page">
+        <div className="admin-hotel-form-page">
             <div className="admin-hotel-form-header">
-                <h1>{id ? "Edit Hotel" : "Add Hotel"}</h1>
-                <p>Manage accommodation details and information.</p>
+                <Texts variant="h1">{id ? "Edit Hotel" : "Add Hotel"}</Texts>
+                <Texts variant="p">Manage accommodation details and information.</Texts>
             </div>
             <form className="admin-hotel-form" onSubmit={saveHotel}>
-                <h2>Hotel Information</h2>
+                <Texts variant="h2">Hotel Information</Texts>
                 <label htmlFor="hotel-name">Hotel Name</label>
                 <input id="hotel-name" value={name} onChange={(e) => setName(e.target.value)} required />
                 <label htmlFor="hotel-description">Description</label>
@@ -93,6 +148,32 @@ const HotelForm = () => {
                 <input id="hotel-address" value={address} onChange={(e) => setAddress(e.target.value)} required />
                 <label htmlFor="hotel-city">City</label>
                 <input id="hotel-city" value={city} onChange={(e) => setCity(e.target.value)} required />
+                <div className="hotel-form-images">
+                    <Texts variant="h3">Hotel Images</Texts>
+                    {existingImages.length > 0 && (
+                        <div className="hotel-existing-images">
+                            {existingImages.map((image) => (
+                                <div className="hotel-existing-image" key={image.id}>
+                                    <img src={image.image_url} alt="Hotel" />
+                                    <button type="button" onClick={() => deleteHotelImage(image.id)} disabled={deletingImage}>Delete Image</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <label htmlFor="hotel-images">Upload hotel pictures</label>
+                    <input id="hotel-images" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => setSelectedImages(Array.from(e.target.files || []))} />
+                    <Texts variant="p">You can select multiple hotel images.</Texts>
+                    {selectedImages.length > 0 && (
+                        <div className="hotel-selected-images">
+                            {selectedImages.map((image, index) => (
+                                <div key={index}>
+                                    <Texts variant="p">{image.name}</Texts>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {imageError && <Texts variant="p">{imageError}</Texts>}
+                </div>
                 <div className="admin-hotel-form-row">
                     <div>
                         <label htmlFor="hotel-latitude">Latitude</label>
@@ -115,11 +196,15 @@ const HotelForm = () => {
                 <textarea id="hotel-policies" value={policies} onChange={(e) => setPolicies(e.target.value)} rows={4} />
                 <div className="admin-hotel-form-actions">
                     <button type="button" className="admin-hotel-cancel" onClick={() => navigate("/admin/hotels")}>Cancel</button>
-                    <button type="submit" disabled={loading}>{loading ? "Saving..." : id ? "Save Changes" : "Add Hotel"}</button>
+                    <button type="submit" disabled={loading || uploading}>{loading || uploading ? "Saving..." : id ? "Save Changes" : "Add Hotel"}</button>
                 </div>
-                {error && <p className="admin-hotel-error">{error}</p>}
+                {error && (
+                    <div className="admin-hotel-error">
+                        <Texts variant="p">{error}</Texts>
+                    </div>
+                )}
             </form>
-        </main>
+        </div>
     )
 }
 

@@ -83,6 +83,35 @@
     color: #276749;
 }
 
+.admin-room-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.admin-room-image {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-room-image img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.admin-room-image button {
+    padding: 8px;
+    border: 1px solid #d1a77c;
+    border-radius: 5px;
+    background: #f7dec2;
+    color: #2e2924;
+    cursor: pointer;
+}
+
 @media (max-width: 600px) {
     .admin-room-page {
         padding: 26px 20px;

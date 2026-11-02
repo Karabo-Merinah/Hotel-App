@@ -96,6 +96,40 @@
     color: #b42318;
 }
 
+.hotel-existing-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.hotel-existing-image {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hotel-existing-image img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.hotel-existing-image button {
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background-color: #2e2924;
+    color: white;
+    cursor: pointer;
+}
+
+.hotel-existing-image button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
     .admin-hotel-form-page {
         padding: 24px 16px;
