@@ -1,0 +1,111 @@
+
+.admin-room-page {
+    min-height: calc(100vh - 67px);
+    background: #faf7f2;
+    padding: 36px 5%;
+    color: #2e2924;
+}
+
+.admin-room-page h1 {
+    font-size: 27px;
+    margin: 0 0 32px;
+}
+
+.admin-room-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 34px;
+    max-width: 1030px;
+}
+
+.admin-room-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: white;
+    border: 1px solid #c9bdb0;
+    border-radius: 7px;
+}
+
+.admin-room-field label {
+    font-size: 14px;
+}
+
+.admin-room-field input,
+.admin-room-field select,
+.admin-room-field textarea {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #c9bdb0;
+    border-radius: 5px;
+    background: white;
+    color: #2e2924;
+    font: inherit;
+}
+
+.admin-room-description {
+    grid-column: span 2;
+}
+
+.admin-room-active {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-room-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.admin-room-actions button {
+    background: #f7dec2;
+    color: #2e2924;
+    border: 1px solid #d1a77c;
+    border-radius: 7px;
+    padding: 11px 22px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.admin-room-actions button:disabled {
+    opacity: 0.6;
+}
+
+.admin-room-error {
+    color: #b42318;
+}
+
+.admin-room-success {
+    color: #276749;
+}
+
+@media (max-width: 600px) {
+    .admin-room-page {
+        padding: 26px 20px;
+    }
+
+    .admin-room-page h1 {
+        font-size: 22px;
+    }
+
+    .admin-room-form {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .admin-room-description {
+        grid-column: span 1;
+    }
+
+    .admin-room-field {
+        padding: 12px 15px;
+    }
+
+    .admin-room-actions button {
+        width: 100%;
+    }
+}

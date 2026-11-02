@@ -30,3 +30,19 @@ export interface AdminReservation {
     total_price: string
     status: string
 }
+export interface AdminRoom {
+    id: number
+    hotel_id: number
+    room_type: string
+    description: string
+    capacity: number
+    total_rooms: number
+    price_per_night: string
+    is_active: boolean
+}
+export interface AdminProfile {
+    id: number
+    name: string
+    email: string
+    role: string
+}

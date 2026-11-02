@@ -1,0 +1,144 @@
+.admin-booking-details-page {
+    min-height: calc(100vh - 67px);
+    padding: 36px 5%;
+    background: #faf7f2;
+    color: #383029;
+}
+
+.admin-booking-details-page h1 {
+    font-size: 30px;
+    margin: 0 0 12px;
+}
+
+.admin-booking-reference {
+    font-size: 15px;
+    margin-bottom: 36px;
+}
+
+.admin-booking-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    max-width: 1032px;
+    margin-bottom: 40px;
+}
+
+.admin-booking-summary>div {
+    background: white;
+    border-radius: 10px;
+    padding: 20px 17px;
+    min-height: 110px;
+}
+
+.admin-booking-summary p {
+    margin: 0 0 20px;
+    font-size: 15px;
+}
+
+.admin-booking-summary h3 {
+    font-size: 20px;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.admin-booking-details-page h2 {
+    font-size: 23px;
+    margin-bottom: 24px;
+}
+
+.admin-booking-information {
+    max-width: 1032px;
+    background: white;
+    padding: 14px 18px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-booking-information>div {
+    background: #f2ebe0;
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.admin-booking-detail-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+}
+
+.admin-booking-detail-actions button {
+    padding: 11px 20px;
+    border: 1px solid #c9bdb0;
+    border-radius: 7px;
+    background: #f7dec2;
+    color: #2e2924;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.admin-booking-detail-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.admin-booking-error {
+    color: #b42318;
+}
+
+@media (max-width: 600px) {
+    .admin-booking-details-page {
+        padding: 26px 20px;
+    }
+
+    .admin-booking-details-page h1 {
+        font-size: 22px;
+    }
+
+    .admin-booking-summary {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .admin-booking-summary>div {
+        min-height: auto;
+        padding: 18px 15px;
+        border: 1px solid #c9bdb0;
+    }
+
+    .admin-booking-summary p {
+        margin-bottom: 8px;
+        font-size: 13px;
+    }
+
+    .admin-booking-summary h3 {
+        font-size: 16px;
+    }
+
+    .admin-booking-information {
+        padding: 0;
+        background: transparent;
+    }
+
+    .admin-booking-information>div {
+        background: white;
+        border: 1px solid #c9bdb0;
+        padding: 18px 15px;
+        font-size: 13px;
+    }
+
+    .admin-booking-detail-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .admin-booking-detail-actions button {
+        padding: 10px 6px;
+        font-size: 12px;
+    }
+}

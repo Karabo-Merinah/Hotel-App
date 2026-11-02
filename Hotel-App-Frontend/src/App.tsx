@@ -23,6 +23,9 @@ import AdminNavbar from "./components/AdminNavbar"
 import ManageHotels from "./pages/admin/ManageHotels"
 import HotelForm from "./pages/admin/HotelForm"
 import ManageBookings from "./pages/admin/ManageBookings"
+import AdminBookingDetails from "./pages/admin/AdminBookingDetails"
+import ManageRooms from "./pages/admin/ManageRooms"
+import AdminProfilePage from "./pages/admin/AdminProfile"
 
 const ProtectedBooking = () => {
   const location = useLocation()
@@ -34,7 +37,6 @@ const ProtectedBooking = () => {
   }
   return <Booking />
 }
-
 
 const UserLayout = () => {
   const location = useLocation()
@@ -53,7 +55,6 @@ const UserLayout = () => {
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 
         {/* protected pages  */}
-
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
@@ -69,6 +70,9 @@ const UserLayout = () => {
         <Route path="/admin/hotels/new" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
         <Route path="/admin/hotels/:id/edit" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
         <Route path="/admin/bookings" element={<AdminRoute><AdminNavbar /><ManageBookings /></AdminRoute>} />
+        <Route path="/admin/bookings/:id" element={<AdminRoute><AdminNavbar /><AdminBookingDetails /></AdminRoute>} />
+        <Route path="/admin/rooms" element={<AdminRoute><AdminNavbar /><ManageRooms /></AdminRoute>} />
+        <Route path="/admin/profile" element={<AdminRoute><AdminNavbar /><AdminProfilePage /></AdminRoute>} />
       </Routes>
     </>
   )
