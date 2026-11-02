@@ -1,7 +1,6 @@
-
 import { Request, Response } from "express"
 import connectionPool from "../config/database"
-
+import cloudinary from "../config/cloudinary"
 
 // Get rooms belonging to a hotel
 export const getHotelRooms = async (req: Request, res: Response) => {
@@ -236,47 +235,78 @@ export const deleteRoom = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Could not delete room." })
     }
 }
-//admin adds a picture to a room 
+// Admin uploads a room image
 export const addRoomImage = async (req: Request, res: Response) => {
     try {
-        const room_id = Number(req.params.id)
-        if (!Number.isInteger(room_id) || room_id <= 0) {
-            return res.status(400).json({ message: "Room id must be a positive number." })
+        const room_id = parseInt(req.params.id as string)
+        if (isNaN(room_id) || room_id <= 0) {
+            return res.status(400).json({ message: "Invalid room id." })
         }
-        const image_url = String(req.body.image_url || "").trim()
-        //link must start with http and have a maximum of 255 characters 
-        if (!image_url.startsWith("http") || image_url.length > 255) {
-            return res.status(400).json({ message: "Image link must start with http and be maximum of 255 characters." })
+        if (!req.file) {
+            return res.status(400).json({ message: "Please select an image." })
         }
-        const alt_text = req.body.alt_text ? String(req.body.alt_text).trim().slice(0, 100) : null
-        const room = await connectionPool.query("SELECT id FROM rooms WHERE id=$1", [room_id])
+        const room = await connectionPool.query("SELECT id FROM rooms WHERE id=$1 AND is_active=TRUE",
+            [room_id]
+        )
         if (room.rows.length === 0) {
             return res.status(404).json({ message: "Room not found." })
         }
-        const result = await connectionPool.query(
-            "INSERT INTO room_images (room_id,image_url,alt_text) VALUES ($1,$2,$3) RETURNING id,room_id,image_url,alt_text",
-            [room_id, image_url, alt_text]
+        const image = await new Promise<{ image_url: string, public_id: string }>((resolve, reject) => {
+            const upload = cloudinary.uploader.upload_stream(
+                { folder: "wander-inn/rooms" },
+                (error, result) => {
+                    if (error) {
+                        reject(error)
+                    }
+                    else if (result) {
+                        resolve({
+                            image_url: result.secure_url, public_id: result.public_id
+                        })
+                    }
+                    else {
+                        reject(new Error("Image upload failed."))
+                    }
+                }
+            )
+            upload.end(req.file!.buffer)
+        })
+        const result = await connectionPool.query(`INSERT INTO room_images (room_id, image_url, public_id) VALUES ($1, $2, $3) RETURNING *`,
+            [room_id, image.image_url, image.public_id]
         )
-        return res.status(201).json(result.rows[0])
+        return res.status(201).json({
+            message: "Room image uploaded successfully.", image: result.rows[0]
+        })
     }
     catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Could not add the room picture." })
+        return res.status(500).json({ message: "Could not upload room image." })
     }
 }
-//admin deletes a room picture 
+
+// Admin deletes a room picture
 export const deleteRoomImage = async (req: Request, res: Response) => {
     try {
-        const image_id = Number(req.params.imageId)
-
-        if (!Number.isInteger(image_id) || image_id <= 0) {
-            return res.status(400).json({ message: "Image id must be a positive number." })
+        const image_id = parseInt(req.params.imageId as string)
+        if (isNaN(image_id) || image_id <= 0) {
+            return res.status(400).json({ message: "Invalid image id." })
         }
-        const result = await connectionPool.query("DELETE FROM room_images WHERE id=$1 RETURNING id", [image_id])
+        const result = await connectionPool.query("SELECT * FROM room_images WHERE id=$1", [image_id]
+        )
+
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Picture not found." })
         }
-        return res.status(200).json({ message: "Picture deleted." })
+        const public_id = result.rows[0].public_id
+        if (!public_id) {
+            return res.status(400).json({ message: "This image has no Cloudinary public ID." })
+        }
+        const deleted = await cloudinary.uploader.destroy(public_id)
+        if (deleted.result !== "ok" && deleted.result !== "not found") {
+            return res.status(500).json({ message: "Could not delete image from Cloudinary." })
+        }
+        await connectionPool.query("DELETE FROM room_images WHERE id=$1", [image_id]
+        )
+        return res.status(200).json({ message: "Room picture deleted successfully." })
     }
     catch (error) {
         console.log(error)

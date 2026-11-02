@@ -1,23 +1,19 @@
 import { Request, Response } from "express";
 import connectionPool from "../config/database";
 import cloudinary from "../config/cloudinary"
-import { Readable } from "stream"
 
 //get full list of amenties 
 
 export const getAllAmenties = async (req: Request, res: Response) => {
     try {
-        const result = await connectionPool.query(
-            "SELECT id,name FROM amenities  ORDER BY name")
+        const result = await connectionPool.query("SELECT id,name FROM amenities  ORDER BY name")
         return res.status(200).json(result.rows)
-
     }
     catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Could  not get the amenities." })
     }
 }
-
 
 // Upload hotel image
 export const addHotelImage = async (req: Request, res: Response) => {
@@ -29,7 +25,6 @@ export const addHotelImage = async (req: Request, res: Response) => {
         if (!req.file) {
             return res.status(400).json({ message: "Please select an image." })
         }
-
         const hotel = await connectionPool.query(
             "SELECT id FROM hotels WHERE id=$1 AND is_active=TRUE",
             [hotel_id]
@@ -37,23 +32,23 @@ export const addHotelImage = async (req: Request, res: Response) => {
         if (hotel.rows.length === 0) {
             return res.status(404).json({ message: "Hotel not found." })
         }
-        const image_url = await new Promise<string>((resolve, reject) => {
+        const image = await new Promise<{ image_url: string, public_id: string }>((resolve, reject) => {
             const upload = cloudinary.uploader.upload_stream(
                 { folder: "wander-inn/hotels" },
                 (error, result) => {
                     if (error) {
                         reject(error)
                     } else if (result) {
-                        resolve(result.secure_url)
+                        resolve({image_url: result.secure_url,public_id: result.public_id })
                     } else {
                         reject(new Error("Image upload failed."))
                     }
                 }
             )
-            Readable.from(req.file!.buffer).pipe(upload)
+            upload.end(req.file!.buffer)
         })
-        const result = await connectionPool.query(`INSERT INTO hotel_images(hotel_id, image_url)  VALUES ($1, $2) RETURNING *`,
-            [hotel_id, image_url]
+        const result = await connectionPool.query(`INSERT INTO hotel_images(hotel_id, image_url,public_id)  VALUES ($1, $2,$3) RETURNING *`,
+            [hotel_id, image.image_url, image.public_id]
         )
         return res.status(201).json({ message: "Hotel image uploaded successfully.", image: result.rows[0] })
     } catch (error) {
@@ -62,31 +57,36 @@ export const addHotelImage = async (req: Request, res: Response) => {
     }
 }
 
-//delete a photo .
-
 export const deleteHotelImage = async (req: Request, res: Response) => {
     try {
-        const image_id = Number(req.params.imageId)
+        const image_id = parseInt(req.params.imageId as string)
 
-        if (isNaN(image_id)) {
-            return res.status(400).json({ message: "Image id must be a number." })
+        if (isNaN(image_id) || image_id <= 0) {
+            return res.status(400).json({ message: "Invalid image id." })
         }
-
-        const result = await connectionPool.query(
-            "DELETE FROM hotel_images WHERE id=$1 RETURNING id", [image_id]
+        const result = await connectionPool.query("SELECT * FROM hotel_images WHERE id=$1",
+            [image_id]
         )
-
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Photo not found." })
         }
-        return res.status(200).json({ message: "Photo deleted." })
+        const public_id = result.rows[0].public_id
+        if (!public_id) {
+            return res.status(400).json({message: "This image has no Cloudinary public ID." })
+        }
+        const deleted = await cloudinary.uploader.destroy(public_id)
+        if (deleted.result !== "ok" && deleted.result !== "not found") {
+            return res.status(500).json({ message: "Could not delete image from Cloudinary." })
+        }
+        await connectionPool.query("DELETE FROM hotel_images WHERE id=$1", [image_id]
+        )
+        return res.status(200).json({ message: "Photo deleted successfully." })
     }
     catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Could not delete the photo." })
     }
 }
-
 //sets  the amenties of a hotel 
 
 export const setHotelAmenities = async (req: Request, res: Response) => {
