@@ -1,13 +1,14 @@
 import React, { useState } from "react"
-import { useNavigate,useLocation } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import axios from "axios"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Login.css"
+import { GoogleLogin } from "@react-oauth/google"
 
 const Login = () => {
 
     const navigate = useNavigate()
-    const location=useLocation()
+    const location = useLocation()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
@@ -40,9 +41,9 @@ const Login = () => {
             localStorage.setItem("user", JSON.stringify(response.data.user))
 
             // Redirect the user to the page they wanted to visit 
-            const from=location.state?.from || "/"
+            const from = location.state?.from || "/"
 
-            navigate(from,{replace:true,state:{checkIn:location.state?.checkIn,checkOut:location.state?.checkOut,guests:location.state?.guests,numberOfRooms:location.state?.numberOfRooms}})
+            navigate(from, { replace: true, state: { checkIn: location.state?.checkIn, checkOut: location.state?.checkOut, guests: location.state?.guests, numberOfRooms: location.state?.numberOfRooms } })
 
         } catch (error) {
             console.log(error)
@@ -50,6 +51,34 @@ const Login = () => {
 
         } finally {
             // Stop loading whether login succeeds or fails
+            setLoading(false)
+        }
+    }
+
+    const handleGoogleLogin = async (credential: string) => {
+        try {
+            setLoading(true)
+            setErrors("")
+            const response = await axios.post("http://localhost:5000/api/auth/google", {
+                credential
+            })
+            localStorage.setItem("token", response.data.token)
+            localStorage.setItem("user", JSON.stringify(response.data.user))
+            const from = location.state?.from || "/"
+            navigate(from, {
+                replace: true, state: {
+                    checkIn: location.state?.checkIn,
+                    checkOut: location.state?.checkOut,
+                    guests: location.state?.guests,
+                    numberOfRooms: location.state?.numberOfRooms
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            setErrors("Google login failed. Please try again.")
+        }
+        finally {
             setLoading(false)
         }
     }
@@ -80,12 +109,12 @@ const Login = () => {
                 <Texts variant="p">OR</Texts>
             </div>
             <div className="login-google">
-                <button className="google-login-button" type="button">Continue with Google</button>
+                <GoogleLogin onSuccess={(response) => { if (response.credential) handleGoogleLogin(response.credential) }} onError={() => setErrors("Google login failed.")} />
             </div>
             {/* Navigate to registration if the user has no account */}
             <div className="login-register">
                 <Texts variant="p">Don't have an account?</Texts>
-                <button className="login-register-button" type="button" onClick={() => navigate("/register", {state:location.state})}>Register</button>
+                <button className="login-register-button" type="button" onClick={() => navigate("/register", { state: location.state })}>Register</button>
             </div>
         </div>
     )

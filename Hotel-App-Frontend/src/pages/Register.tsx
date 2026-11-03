@@ -3,6 +3,8 @@ import { Texts } from "../components/Texts/texts";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Register.css"
+import { GoogleLogin } from "@react-oauth/google";
+
 
 const Register = () => {
 
@@ -64,18 +66,55 @@ const Register = () => {
             // Redirect the user to the page they wanted to visit
             const from = location.state?.from || "/"
             navigate(from, {
-                replace: true, state: { checkIn: location.state?.checkIn, checkOut: location.state?.checkOut, guests: location.state?.guests }
+                replace: true, state: { checkIn: location.state?.checkIn, checkOut: location.state?.checkOut, guests: location.state?.guests, numberOfRooms: location.state?.numberOfRooms }
             })
         }
         catch (error) {
+            console.log(error)
             if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.message || "Registration failed.Please try again.")
+                setError(error.response?.data?.message || "Google registration failed. Please try again.")
+            }
+            else {
+                setError("Google registration failed. Please try again.")
             }
         }
         finally {
             setLoading(false)
         }
     }
+    const GoogleRegister = async (credential: string) => {
+        try {
+            setLoading(true)
+            setError("")
+            const response = await axios.post("http://localhost:5000/api/auth/google", {
+                credential
+            })
+            localStorage.setItem("token", response.data.token)
+            localStorage.setItem("user", JSON.stringify(response.data.user))
+            const from = location.state?.from || "/"
+            navigate(from, {
+                replace: true, state: {
+                    checkIn: location.state?.checkIn,
+                    checkOut: location.state?.checkOut,
+                    guests: location.state?.guests,
+                    numberOfRooms: location.state?.numberOfRooms
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            if (axios.isAxiosError(error)) {
+                setError(error.response?.data?.message || "Google registration failed. Please try again.")
+            }
+            else {
+                setError("Google registration failed. Please try again.")
+            }
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+    
     return (
         <div className="register-container">
             <div className="register-heading">
@@ -111,7 +150,7 @@ const Register = () => {
                 <Texts variant="p">OR</Texts>
             </div>
             <div className="register-google">
-                <button className="google-register-button" type="button">Continue with Google</button>
+                <GoogleLogin onSuccess={(response) => { if (response.credential) GoogleRegister(response.credential) }} onError={() => setError("Google registration failed.")} />
             </div>
             <div className="register-login">
                 <Texts variant="p">Already have an account?</Texts>

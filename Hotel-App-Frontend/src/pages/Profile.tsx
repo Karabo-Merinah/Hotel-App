@@ -59,7 +59,7 @@ const Profile = () => {
             <div className="profile-settings">
                 <Texts variant="h2">Account settings</Texts>
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/profile/edit")}>Personal information  <span>›</span></button>
-                <button className="profile-settings-item" type="button" onClick={() => navigate("/bookings")}>My booking <span>›</span></button>
+                <button className="profile-settings-item" type="button" onClick={() => navigate("/bookings")}>My bookings <span>›</span></button>
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/favourites")}> Favourites<span>›</span></button>
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/notifications")}>Notifications<span>›</span></button>
             </div>
