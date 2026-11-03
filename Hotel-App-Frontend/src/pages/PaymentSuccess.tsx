@@ -27,7 +27,7 @@ const PaymentSuccess = () => {
             }
             try {
                 const response = await axios.get(`http://localhost:5000/api/payments/verify/${encodeURIComponent(reference)}`,
-                    {headers: {Authorization: `Bearer ${token}`}})
+                    { headers: { Authorization: `Bearer ${token}` } })
 
                 if (response.data.status === "paid") {
                     setBookingId(response.data.booking_id)
@@ -38,7 +38,11 @@ const PaymentSuccess = () => {
             }
             catch (error) {
                 console.log(error)
-                setError("Could not verify payment. Please try again.")
+                if (axios.isAxiosError(error)) {
+                    setError(error.response?.data?.message || "Could not verify payment. Please try again.")
+                } else {
+                    setError("Could not verify payment. Please try again.")
+                }
             }
             finally {
                 setLoading(false)

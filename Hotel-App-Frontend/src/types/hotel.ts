@@ -10,6 +10,8 @@ export interface Hotel {
     address: string
     city: string
     star_rating: number
+    latitude: number | string | null
+    longitude: number | string | null
     images?: HotelImage[]
 }
 export interface Room {
@@ -72,4 +74,10 @@ export interface HotelReviews {
     average_rating: number
     reviews_count: number
     reviews: Review[]
+}
+export interface HotelMapProps {
+    name: string
+    address: string
+    latitude: number
+    longitude: number
 }

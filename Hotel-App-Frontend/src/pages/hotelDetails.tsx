@@ -6,6 +6,7 @@ import { Texts } from "../components/Texts/texts"
 import { Heart } from "lucide-react"
 import { Share2 } from "lucide-react"
 import "../styles/HotelDetails.css"
+import HotelMap from "../components/HotelMap"
 
 const HotelDetails = () => {
 
@@ -172,6 +173,14 @@ const HotelDetails = () => {
             <Texts variant="p">City: {hotel.city}</Texts>
             <Texts variant="p">Address: {hotel.address}</Texts>
             <Texts variant="p">Rating: {hotel.star_rating} Stars</Texts>
+            <div className="hotel-location">
+                <Texts variant="h2">Hotel Location</Texts>
+                {hotel.latitude != null && hotel.longitude != null ? (
+                    <HotelMap name={hotel.name} address={hotel.address} latitude={parseFloat(String(hotel.latitude))} longitude={parseFloat(String(hotel.longitude))} />
+                ) : (
+                    <Texts variant="p">Hotel location is not available.</Texts>
+                )}
+            </div>
             <div className="hotel-rooms">
                 <Texts variant="h2">Our Rooms</Texts>
                 {roomsError && <Texts variant="p">{roomsError}</Texts>}
