@@ -3,6 +3,8 @@ import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Profile.css"
+import { useDispatch } from "react-redux"
+import { logout } from "../features/authSlice"
 
 const Profile = () => {
     const navigate = useNavigate()
@@ -10,6 +12,8 @@ const Profile = () => {
     const [email, setEmail] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(true)
+    const dispatch = useDispatch()
+
     // Get the logged-in user's information
     const getProfile = async () => {
         const token = localStorage.getItem("token")
@@ -32,10 +36,15 @@ const Profile = () => {
     useEffect(() => {
         getProfile()
     }, [])
+
     // Log out the user
-    const logout = () => {
+    const UserLogout = () => {
+        // Remove saved authentication information
         localStorage.removeItem("token")
         localStorage.removeItem("user")
+        // Clear authentication state in Redux
+        dispatch(logout())
+        // Redirect to login
         navigate("/login")
     }
     if (loading) {
@@ -63,7 +72,7 @@ const Profile = () => {
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/favourites")}> Favourites<span>›</span></button>
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/notifications")}>Notifications<span>›</span></button>
             </div>
-            <button className="profile-logout-button" type="button" onClick={logout}>Logout</button>
+            <button className="profile-logout-button" type="button" onClick={UserLogout}>Logout</button>
         </div>
     )
 }

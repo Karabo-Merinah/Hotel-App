@@ -4,6 +4,9 @@ import axios from "axios"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Login.css"
 import { GoogleLogin } from "@react-oauth/google"
+import { useDispatch } from "react-redux"
+import { loginSuccess } from "../features/authSlice"
+
 
 const Login = () => {
 
@@ -13,12 +16,14 @@ const Login = () => {
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState("")
+    const dispatch = useDispatch()
 
-    // Log in the user
+    // Log in the user using email and password
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setErrors("")
 
+        //validates login inputs
         if (!email.trim()) {
             setErrors("Email is required.")
             return
@@ -40,9 +45,16 @@ const Login = () => {
             localStorage.setItem("token", response.data.token)
             localStorage.setItem("user", JSON.stringify(response.data.user))
 
+            // Update Redux with the logged in user's information
+            dispatch(loginSuccess({
+                user: response.data.user,
+                token: response.data.token
+            }))
+
             // Redirect the user to the page they wanted to visit 
             const from = location.state?.from || "/"
 
+            //stores booking details when redirecting
             navigate(from, { replace: true, state: { checkIn: location.state?.checkIn, checkOut: location.state?.checkOut, guests: location.state?.guests, numberOfRooms: location.state?.numberOfRooms } })
 
         } catch (error) {
@@ -55,15 +67,26 @@ const Login = () => {
         }
     }
 
-    const handleGoogleLogin = async (credential: string) => {
+    //log in user using their Google account
+    const GoogleLoginOAuth = async (credential: string) => {
         try {
             setLoading(true)
             setErrors("")
+
+              // Send the Google credential to the backend for verification
             const response = await axios.post("http://localhost:5000/api/auth/google", {
                 credential
             })
+             // Save the authenticated user and token
             localStorage.setItem("token", response.data.token)
             localStorage.setItem("user", JSON.stringify(response.data.user))
+
+            // Update Redux after successful Google login
+            dispatch(loginSuccess({
+                user: response.data.user,
+                token: response.data.token
+            }))
+            // Redirect the user while storing booking details
             const from = location.state?.from || "/"
             navigate(from, {
                 replace: true, state: {
@@ -109,7 +132,7 @@ const Login = () => {
                 <Texts variant="p">OR</Texts>
             </div>
             <div className="login-google">
-                <GoogleLogin onSuccess={(response) => { if (response.credential) handleGoogleLogin(response.credential) }} onError={() => setErrors("Google login failed.")} />
+                <GoogleLogin onSuccess={(response) => { if (response.credential) GoogleLoginOAuth(response.credential) }} onError={() => setErrors("Google login failed.")} />
             </div>
             {/* Navigate to registration if the user has no account */}
             <div className="login-register">

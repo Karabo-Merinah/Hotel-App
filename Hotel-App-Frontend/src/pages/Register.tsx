@@ -4,12 +4,15 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Register.css"
 import { GoogleLogin } from "@react-oauth/google";
+import { useDispatch } from "react-redux"
+import { loginSuccess } from "../features/authSlice"
 
 
 const Register = () => {
 
     const navigate = useNavigate()
     const location = useLocation()
+    const dispatch = useDispatch()
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -62,17 +65,26 @@ const Register = () => {
             localStorage.setItem("token", response.data.token)
             localStorage.setItem("user", JSON.stringify(response.data.user))
 
+            // update Redux after successful registration
+            dispatch(loginSuccess({
+                user: response.data.user,
+                token: response.data.token
+            }))
+
             setSuccess("Registration successful.")
-            // Redirect the user to the page they wanted to visit
+            // redirects the user to the page they wanted to visit
             const from = location.state?.from || "/"
+
+            // stores booking details during navigation
             navigate(from, {
                 replace: true, state: { checkIn: location.state?.checkIn, checkOut: location.state?.checkOut, guests: location.state?.guests, numberOfRooms: location.state?.numberOfRooms }
             })
         }
         catch (error) {
             console.log(error)
+            //displays backend error
             if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.message || "Google registration failed. Please try again.")
+                setError(error.response?.data?.message || "Registration failed. Please try again.")
             }
             else {
                 setError("Google registration failed. Please try again.")
@@ -82,16 +94,29 @@ const Register = () => {
             setLoading(false)
         }
     }
+
+    // Register or log in a user using their Google account
     const GoogleRegister = async (credential: string) => {
         try {
             setLoading(true)
             setError("")
+            // send the Google credential to the backend for verification
             const response = await axios.post("http://localhost:5000/api/auth/google", {
                 credential
             })
+
+            // save the authenticated user and token
             localStorage.setItem("token", response.data.token)
             localStorage.setItem("user", JSON.stringify(response.data.user))
+
+            // update Redux after successful Google registration
+            dispatch(loginSuccess({
+                user: response.data.user,
+                token: response.data.token
+            }))
+            // redirect to the previous page while storing booking details
             const from = location.state?.from || "/"
+
             navigate(from, {
                 replace: true, state: {
                     checkIn: location.state?.checkIn,
@@ -103,6 +128,7 @@ const Register = () => {
         }
         catch (error) {
             console.log(error)
+            // display an error if Google registration fails
             if (axios.isAxiosError(error)) {
                 setError(error.response?.data?.message || "Google registration failed. Please try again.")
             }
@@ -114,7 +140,7 @@ const Register = () => {
             setLoading(false)
         }
     }
-    
+
     return (
         <div className="register-container">
             <div className="register-heading">
@@ -149,12 +175,14 @@ const Register = () => {
             <div className="register-divider">
                 <Texts variant="p">OR</Texts>
             </div>
+            {/* Google OAuth registration */}
             <div className="register-google">
                 <GoogleLogin onSuccess={(response) => { if (response.credential) GoogleRegister(response.credential) }} onError={() => setError("Google registration failed.")} />
             </div>
+            {/* Navigate to login if the user already has an account */}
             <div className="register-login">
                 <Texts variant="p">Already have an account?</Texts>
-                <button className="register-login-button" onClick={() => navigate("/login", { state: location.state })}>Login</button>
+                <button className="register-login-button" type="button" onClick={() => navigate("/login", { state: location.state })}>Login</button>
             </div>
 
         </div>
