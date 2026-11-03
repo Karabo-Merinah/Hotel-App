@@ -5,6 +5,7 @@ import { Texts } from "../components/Texts/texts"
 import "../styles/Profile.css"
 import { useDispatch } from "react-redux"
 import { logout } from "../features/authSlice"
+import { clearFavourites } from "../features/favouriteSlice"
 
 const Profile = () => {
     const navigate = useNavigate()
@@ -44,6 +45,8 @@ const Profile = () => {
         localStorage.removeItem("user")
         // Clear authentication state in Redux
         dispatch(logout())
+        // Clear the previous user's favourite hotels
+        dispatch(clearFavourites())
         // Redirect to login
         navigate("/login")
     }

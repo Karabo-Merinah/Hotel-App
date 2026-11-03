@@ -5,6 +5,7 @@ import "../styles/Navbar.css"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "../app/store"
 import { logout } from "../features/authSlice"
+import { clearFavourites } from "../features/favouriteSlice"
 
 const Navbar = () => {
     const navigate = useNavigate()
@@ -21,12 +22,14 @@ const Navbar = () => {
 
     // Log out the user
     const userLogout = () => {
-        // Remove saved authentication information
 
+        // Remove saved authentication information
         localStorage.removeItem("token")
         localStorage.removeItem("user")
         // Clear the authentication state in Redux
         dispatch(logout())
+        // Clear the previous user's favourite hotels
+        dispatch(clearFavourites())
         // Close the menu and redirect to login
         closeMenu()
         navigate("/login")

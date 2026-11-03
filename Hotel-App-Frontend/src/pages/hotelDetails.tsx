@@ -7,6 +7,9 @@ import { Heart } from "lucide-react"
 import { Share2 } from "lucide-react"
 import "../styles/HotelDetails.css"
 import HotelMap from "../components/HotelMap"
+import { useDispatch, useSelector } from "react-redux"
+import type { RootState } from "../app/store"
+import { setFavourites, removeFavourite } from "../features/favouriteSlice"
 
 const HotelDetails = () => {
 
@@ -24,7 +27,13 @@ const HotelDetails = () => {
     const [reviewsError, setReviewsError] = useState("")
     const [roomsLoading, setRoomsLoading] = useState(false)
     const [roomsError, setRoomsError] = useState("")
-    const [isFavourite, setIsFavourite] = useState(false)
+
+    const dispatch = useDispatch()
+    // Get the user's favourite hotels from Redux
+    const favourites = useSelector((state: RootState) => state.favourites)
+    // Check if the current hotel is in favourites
+    const isFavourite = favourites.some(hotel => hotel.id === Number(id))
+
 
     const getHotel = async () => {
         try {
@@ -68,13 +77,16 @@ const HotelDetails = () => {
     const checkFavourite = async () => {
         const token = localStorage.getItem("token")
         if (!token || !id) {
-            setIsFavourite(false)
+            dispatch(setFavourites([]))
             return
         }
         try {
-            const response = await axios.get("http://localhost:5000/api/favourites", { headers: { Authorization: `Bearer ${token}` } })
-            const saved = response.data.some((hotel: { id: number }) => hotel.id === Number(id))
-            setIsFavourite(saved)
+            // Get the updated favourites from the backend
+            const response = await axios.get("http://localhost:5000/api/favourites", {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            // stores favourites in redux
+            dispatch(setFavourites(response.data))
         }
         catch (error) {
             console.log(error)
@@ -96,11 +108,15 @@ const HotelDetails = () => {
         try {
             if (isFavourite) {
                 await axios.delete(`http://localhost:5000/api/favourites/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-                setIsFavourite(false)
+                // Remove the hotel from redux
+                dispatch(removeFavourite(Number(id)))
             }
             else {
+                //ads the hotel to favourites
                 await axios.post("http://localhost:5000/api/favourites", { hotel_id: Number(id) }, { headers: { Authorization: `Bearer ${token}` } })
-                setIsFavourite(true)
+
+                //fetch updated favourites and store them 
+                await checkFavourite()
             }
         }
         catch (error) {

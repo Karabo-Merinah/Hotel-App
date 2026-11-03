@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit"
 import authReducer from "../features/authSlice"
+import favouritesReducer from "../features/favouriteSlice"
 
 // Create the Redux store and add the authentication reducer
 export const store = configureStore({
     reducer: {
-        auth: authReducer
+        auth: authReducer,
+        favourites:favouritesReducer
     }
 })
 

@@ -4,14 +4,20 @@ import axios from "axios"
 import { Heart } from "lucide-react"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Favourites.css"
-import type { FavouriteHotel } from "../types/hotel"
+import { useDispatch, useSelector } from "react-redux"
+import { setFavourites, removeFavourite } from "../features/favouriteSlice"
+import type { RootState } from "../app/store"
+
 
 const Favourites = () => {
     const navigate = useNavigate()
-    const [favourites, setFavourites] = useState<FavouriteHotel[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [removingId, setRemovingId] = useState<number | null>(null)
+    const dispatch = useDispatch()
+
+    // Get favourite hotels from Redux
+    const favourites = useSelector((state: RootState) => state.favourites)
 
     const getFavourites = async () => {
         const token = localStorage.getItem("token")
@@ -23,7 +29,8 @@ const Favourites = () => {
             setLoading(true)
             setError("")
             const response = await axios.get("http://localhost:5000/api/favourites", { headers: { Authorization: `Bearer ${token}` } })
-            setFavourites(response.data)
+            // Store the favourite hotels in Redux
+            dispatch(setFavourites(response.data))
         }
         catch (error) {
             console.log(error)
@@ -33,7 +40,9 @@ const Favourites = () => {
             setLoading(false)
         }
     }
-    const removeFavourite = async (hotelId: number) => {
+
+    //removes hotel from favourites 
+    const removingFavourite = async (hotelId: number) => {
         const token = localStorage.getItem("token")
         if (!token) {
             navigate("/login")
@@ -42,8 +51,10 @@ const Favourites = () => {
         try {
             setRemovingId(hotelId)
             setError("")
+            //removes the favourite from the backend
             await axios.delete(`http://localhost:5000/api/favourites/${hotelId}`, { headers: { Authorization: `Bearer ${token}` } })
-            setFavourites(favourites.filter((hotel) => hotel.id !== hotelId))
+            // Remove the hotel from state
+            dispatch(removeFavourite(hotelId))
         }
         catch (error) {
             console.log(error)
@@ -89,7 +100,7 @@ const Favourites = () => {
                             </div>
                             <div className="favourite-actions">
                                 <button type="button" onClick={() => navigate(`/hotels/${hotel.id}`)}>View Hotel </button>
-                                <button type="button" className="remove-favourite" onClick={() => removeFavourite(hotel.id)} disabled={removingId === hotel.id}><Heart size={18} fill="currentColor" />
+                                <button type="button" className="remove-favourite" onClick={() => removingFavourite(hotel.id)} disabled={removingId === hotel.id}><Heart size={18} fill="currentColor" />
                                     {removingId === hotel.id ? "Removing..." : "Remove"}
                                 </button>
                             </div>
