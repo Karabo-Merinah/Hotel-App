@@ -6,6 +6,7 @@ import "../styles/Profile.css"
 import { useDispatch } from "react-redux"
 import { logout } from "../features/authSlice"
 import { clearFavourites } from "../features/favouriteSlice"
+import { clearBookings } from "../features/bookingSlice"
 
 const Profile = () => {
     const navigate = useNavigate()
@@ -19,6 +20,7 @@ const Profile = () => {
     const getProfile = async () => {
         const token = localStorage.getItem("token")
         if (!token) {
+            setLoading(false)
             navigate("/login")
             return
         }
@@ -47,6 +49,8 @@ const Profile = () => {
         dispatch(logout())
         // Clear the previous user's favourite hotels
         dispatch(clearFavourites())
+        //clears the previous user bookings 
+        dispatch(clearBookings())
         // Redirect to login
         navigate("/login")
     }

@@ -56,6 +56,10 @@ const Register = () => {
             return
         }
 
+        if (!email.trim() || !email.includes("@") || !email.includes(".")) {
+            setError("Please enter a valid email address.")
+            return
+        }
         try {
             setLoading(true)
             //send the registration details to the backend 

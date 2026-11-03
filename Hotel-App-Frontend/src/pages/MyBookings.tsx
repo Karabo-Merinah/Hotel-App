@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
-import type { Booking } from "../types/hotel"
 import { Texts } from "../components/Texts/texts"
 import "../styles/MyBookings.css"
 import { CalendarX, Luggage } from "lucide-react"
+import { useDispatch, useSelector } from "react-redux"
+import { setBookings } from "../features/bookingSlice"
+import type { RootState } from "../app/store"
 
 const MyBookings = () => {
     const navigate = useNavigate()
-    const [bookings, setBookings] = useState<Booking[]>([])
+    const dispatch = useDispatch()
+    // Get bookings from Redux
+    const bookings = useSelector((state: RootState) => state.bookings)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
 
@@ -23,7 +27,8 @@ const MyBookings = () => {
             setLoading(true)
             setError("")
             const response = await axios.get("http://localhost:5000/api/bookings/myBookings", { headers: { Authorization: `Bearer ${token}` } })
-            setBookings(response.data)
+            // Store bookings in Redux
+            dispatch(setBookings(response.data))
         } catch (error) {
             console.log(error)
 

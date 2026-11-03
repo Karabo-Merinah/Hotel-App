@@ -2,11 +2,17 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import axios from "axios"
 import { Texts } from "../components/Texts/texts"
-import type { Booking as BookingType } from "../types/hotel"
+import { useDispatch, useSelector } from "react-redux"
+import { addBooking } from "../features/bookingSlice"
+import type { RootState } from "../app/store"
+
 
 const BookingPayment = () => {
     const { id } = useParams()
-    const [booking, setBooking] = useState<BookingType | null>(null)
+    const dispatch = useDispatch()
+    // Get booking from Redux
+    const bookings = useSelector((state: RootState) => state.bookings)
+    const booking = bookings.find(booking => booking.id === parseInt(id || "0"))
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(true)
     const [processing, setProcessing] = useState(false)
@@ -18,7 +24,8 @@ const BookingPayment = () => {
             const response = await axios.get(`http://localhost:5000/api/bookings/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             )
-            setBooking(response.data)
+            // Store the booking in Redux
+            dispatch(addBooking(response.data))
         }
         catch (error) {
             console.log(error)
@@ -31,6 +38,7 @@ const BookingPayment = () => {
     useEffect(() => {
         getBooking()
     }, [id])
+
 
     const handlePayment = async () => {
         if (!booking || booking.status !== "pending") return
@@ -58,7 +66,9 @@ const BookingPayment = () => {
     if (loading) {
         return <Texts variant="p">Loading booking details...</Texts>
     }
-
+    if (!booking) {
+        return <Texts variant="p">{error || "Booking not found."}</Texts>
+    }
     return (
         <div className="booking-confirmation">
             <Texts variant="h1">Confirm Your Booking</Texts>

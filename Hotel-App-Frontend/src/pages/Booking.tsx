@@ -3,13 +3,17 @@ import { useParams, useNavigate, useLocation } from "react-router-dom"
 import axios from "axios"
 import { Texts } from "../components/Texts/texts"
 import type { Room, Hotel } from "../types/hotel"
+import { useDispatch } from "react-redux"
+import { addBooking } from "../features/bookingSlice"
+
+
 
 
 const Booking = () => {
     const { roomId } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-
+    const dispatch = useDispatch()
     // Get selected dates and guests from the previous page
     const searchDetails = location.state || {}
     const [checkIn, setCheckIn] = useState(searchDetails.checkIn || "")
@@ -25,7 +29,7 @@ const Booking = () => {
 
     const handleBooking = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if(loading) return
+        if (loading) return
         setError("")
         // Validate booking dates
         if (!checkIn || !checkOut) {
@@ -75,8 +79,18 @@ const Booking = () => {
             const bookingResponse = await axios.post("http://localhost:5000/api/bookings", { room_id: parseInt(roomId), check_in: checkIn, check_out: checkOut, number_of_rooms: numberOfRooms, number_of_guests: guests },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
-            // Navigate to the booking confirmation page
-         navigate(`/bookings/${bookingResponse.data.id}`)
+            // Get the complete booking and store it in Redux
+            try {
+                const response = await axios.get(`http://localhost:5000/api/bookings/${bookingResponse.data.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                dispatch(addBooking(response.data))
+            }
+            catch (error) {
+                console.log("Could not update Redux bookings:", error)
+            }
+            // Navigate to booking details
+            navigate(`/bookings/${bookingResponse.data.id}`)
         }
         catch (error) {
             console.log(error)
@@ -143,7 +157,7 @@ const Booking = () => {
                     <label htmlFor="numberOfRooms">Number of Rooms</label>
                     <input type="number" id="numberOfRooms" min="1" value={numberOfRooms} onChange={(e) => setNumberOfRooms(parseInt(e.target.value) || 1)} required />
                 </div>
-                <button type="button" onClick={() => navigate(`/rooms/${roomId}`, { state: { checkIn, checkOut, guests,numberOfRooms } })}>Back to Room</button>
+                <button type="button" onClick={() => navigate(`/rooms/${roomId}`, { state: { checkIn, checkOut, guests, numberOfRooms } })}>Back to Room</button>
                 <button type="submit" disabled={loading}> {loading ? "Processing..." : "Review Booking"}</button>
             </form>
 
