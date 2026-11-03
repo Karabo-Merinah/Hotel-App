@@ -54,12 +54,13 @@ export const registerUser = async (req: Request, res: Response) => {
         }
 
         //check if the email format is correct.
-        const email_re1 = email.includes("@")
-        const email_re2 = email.includes(".")
-        const email_re3 = email.includes(" ")
+        const email_re1 = email.endsWith("@gmail.com")
+        const email_re2 = email.includes(" ")
 
-        if (!email_re1 || !email_re2 || email_re3) {
-            return res.status(400).json({ message: "Enter an email with  valid email format.example:example@gmail.com" })
+        if (!email_re1 || email_re2) {
+            return res.status(400).json({
+                message: "Please enter a valid Gmail address. Example: example@gmail.com"
+            })
         }
 
         //check  if the email is already used  
@@ -159,7 +160,8 @@ export const googleAuth = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Google credential is required." })
         }
         // Verify the Google token
-        const ticket = await googleClient.verifyIdToken({idToken: credential,audience: process.env.GOOGLE_CLIENT_ID
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential, audience: process.env.GOOGLE_CLIENT_ID
         })
         const googleUser = ticket.getPayload()
         if (!googleUser || !googleUser.email || !googleUser.email_verified) {
@@ -182,7 +184,7 @@ export const googleAuth = async (req: Request, res: Response) => {
                 [email]
             )
             if (email_result.rows.length > 0) {
-                return res.status(409).json({message: "An account with this email already exists. Please log in using your existing method."})
+                return res.status(409).json({ message: "An account with this email already exists. Please log in using your existing method." })
             }
             // Register the Google user
             const result = await connectionPool.query(`INSERT INTO users (name,email,provider,provider_id)
