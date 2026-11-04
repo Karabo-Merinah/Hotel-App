@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import connectionPool from "../config/database"
-import { PoolClient } from "pg"
+import { Pool, PoolClient } from "pg"
 
 const select_booking = `SELECT id,user_id,room_id,TO_CHAR(check_in,'YYYY-MM-DD') AS check_in,
               TO_CHAR(check_out,'YYYY-MM-DD') AS check_out,number_of_rooms,number_of_guests,total_price,status,created_at,
@@ -55,16 +55,75 @@ const getBookingsErrors = (bookingData: any) => {
 }
 
 //checks number of rooms already booked of certain type by ignoring the provided booking id 
-const getBookedRooms = async (room_id: number, check_in: string, check_out: string, excluded_id: number, client: PoolClient) => {
+const getBookedRooms = async (client: Pool | PoolClient, room_id: number, check_in: string, check_out: string, excluded_id: number) => {
 
-    const result = await client.query(`SELECT COALESCE(SUM(number_of_rooms), 0) AS booked
-         FROM bookings WHERE room_id = $1 AND status IN ('pending', 'confirmed')
-         AND check_in < $3 AND check_out > $2 AND id <> $4`,
+    const result = await client.query(`SELECT TO_CHAR(check_in, 'YYYY-MM-DD') AS check_in,
+                TO_CHAR(check_out, 'YYYY-MM-DD') AS check_out, number_of_rooms FROM bookings
+         WHERE room_id=$1 AND status IN ('pending', 'confirmed')
+         AND check_in<$3 AND check_out>$2 AND id<>$4`,
         [room_id, check_in, check_out, excluded_id]
     )
+    let max_booked = 0
+    const one_day = 1000 * 60 * 60 * 24
 
-    // converts it to the number format
-    return Number(result.rows[0].booked)
+    for (let date = Date.parse(check_in);
+        date < Date.parse(check_out);
+        date += one_day
+    ) {
+        let booked = 0
+        for (const booking of result.rows) {
+            if (date >= Date.parse(booking.check_in) && date < Date.parse(booking.check_out)) {
+                booked += booking.number_of_rooms
+            }
+        }
+        if (booked > max_booked) {
+            max_booked = booked
+        }
+    }
+    return max_booked
+}
+
+export const checkRoomAvailability = async (req: Request, res: Response) => {
+    const room_id = Number(req.params.id)
+    const check_in = String(req.query.check_in || "")
+    const check_out = String(req.query.check_out || "")
+
+    if (isNaN(room_id) || room_id < 1) {
+        return res.status(400).json({ message: "Invalid room ID." })
+    }
+
+    if (!check_in || !check_out) {
+        return res.status(400).json({ message: "Check-in and check-out dates are required." })
+    }
+
+    if (check_in.length !== 10 || check_out.length !== 10 || isNaN(Date.parse(check_in)) || isNaN(Date.parse(check_out))) {
+        return res.status(400).json({
+            message: "Invalid date format. Use YYYY-MM-DD."
+        })
+    }
+
+    if (check_out <= check_in) {
+        return res.status(400).json({ message: "Check-out must be after check-in." })
+    }
+
+    try {
+        const room_result = await connectionPool.query(
+            "SELECT total_rooms FROM rooms WHERE id=$1 AND is_active=TRUE",
+            [room_id]
+        )
+
+        if (room_result.rows.length === 0) {
+            return res.status(404).json({ message: "Room not found." })
+        }
+
+        const booked = await getBookedRooms(connectionPool, room_id, check_in, check_out, 0)
+        const available_rooms = room_result.rows[0].total_rooms - booked
+        return res.status(200).json({ room_id, check_in, check_out, available_rooms, available: available_rooms > 0 })
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not check room availability." })
+    }
 }
 
 //Saves a notification for a user 
@@ -94,10 +153,11 @@ const getHotelNameByRoom = async (room_id: number) => {
 
 //create a booking for the logged in user 
 export const createBooking = async (req: Request, res: Response) => {
-
-    const client = await connectionPool.connect()
+    let client: PoolClient | undefined
 
     try {
+        client = await connectionPool.connect()
+
         const booking_data = req.body
         const user_id = res.locals.userId
 
@@ -168,7 +228,7 @@ export const createBooking = async (req: Request, res: Response) => {
             return res.status(200).json(booking.rows[0])
         }
         // Check available rooms
-        const booked = await getBookedRooms(room_id, check_in, check_out, 0, client)
+        const booked = await getBookedRooms(client, room_id, check_in, check_out, 0)
 
         if (booked + rooms_wanted > room.total_rooms) {
             await client.query("ROLLBACK")
@@ -200,17 +260,19 @@ export const createBooking = async (req: Request, res: Response) => {
 
         // Return booking details
         const new_booking = await connectionPool.query(select_booking + "WHERE id = $1", [booking_id])
-
         return res.status(201).json(new_booking.rows[0])
-
     } catch (error) {
-        await client.query("ROLLBACK")
+        if (client) {
+            await client.query("ROLLBACK").catch(console.log)
+        }
         console.log(error)
         return res.status(500).json({ message: "Could not create the booking." })
-
     } finally {
-        client.release()
+        if (client) {
+            client.release()
+        }
     }
+
 }
 //gets the bookings of the logged in user  putting new bookings on top 
 
@@ -424,7 +486,7 @@ export const updateBooking = async (req: Request, res: Response) => {
         }
 
         // Check available rooms
-        const booked = await getBookedRooms(room_id, check_in, check_out, booking_id, client)
+        const booked = await getBookedRooms(client, room_id, check_in, check_out, booking_id)
 
         if (booked + rooms_wanted > room.total_rooms) {
             await client.query("ROLLBACK")

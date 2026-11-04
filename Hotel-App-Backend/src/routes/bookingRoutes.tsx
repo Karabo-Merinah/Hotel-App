@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { createBooking,getMyBookings,getBookingById,getAllBookings,updateBookingStatus,updateBooking, cancelMyBooking } from "../controllers/bookingController";
+import { createBooking,getMyBookings,getBookingById,getAllBookings,updateBookingStatus,updateBooking, cancelMyBooking ,checkRoomAvailability} from "../controllers/bookingController";
 import { requiresLogin,requiresAdmin } from "../middleware/authMiddleware";
 
 const booking_router=Router()
 
 //for logged in users
 booking_router.post("/",requiresLogin,createBooking)
+booking_router.get("/rooms/:id/availability", checkRoomAvailability)
+booking_router.get("/:id/availability", checkRoomAvailability)
 booking_router.get("/myBookings",requiresLogin,getMyBookings)
 booking_router.put("/:id/cancel",requiresLogin,cancelMyBooking)
 //admin routes 
