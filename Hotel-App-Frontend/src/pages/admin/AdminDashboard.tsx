@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import axios from "axios"
+import api from "../../api/axios"
 import { Texts } from "../../components/Texts/texts"
 import type { DashboardStats } from "../../types/admin"
 import "../../styles/AdminDashboard.css"
@@ -12,8 +12,11 @@ const AdminDashboard = () => {
     useEffect(() => {
         const getDashboardStats = async () => {
             try {
+                setLoading(true)
+                setError("")
+
                 const token = localStorage.getItem("token")
-                const response = await axios.get( "http://localhost:5000/api/admin/dashboard",
+                const response = await api.get("/api/admin/dashboard",
                     {headers: {Authorization: `Bearer ${token}`}}
                 )
                 setStats(response.data)
@@ -24,12 +27,11 @@ const AdminDashboard = () => {
                 setLoading(false)
             }
         }
-
         getDashboardStats()
     }, [])
 
     if (loading) {
-        return <p>Loading dashboard...</p>
+        return <Texts variant="p">Loading dashboard...</Texts>
     }
     if (error) {
         return <p>{error}</p>
@@ -38,46 +40,46 @@ const AdminDashboard = () => {
         return <p>No dashboard data found.</p>
     }
     return (
-        <main className="admin-dashboard">
+        <div className="admin-dashboard">
             <Texts variant="h1">Dashboard</Texts>
-            <p className="admin-dashboard-description">Overview of hotel performance and reservations</p>
+            <Texts variant="p" className="admin-dashboard-description">Overview of hotel performance and reservations</Texts>
             <div className="admin-stats">
                 <div className="admin-stat-card">
-                    <h3>Total hotels</h3>
+                    <Texts variant="h3">Total hotels</Texts>
                     <p>{stats.total_hotels}</p>
                 </div>
                 <div className="admin-stat-card">
-                    <h3>Active bookings</h3>
-                    <p>{stats.active_bookings}</p>
+                    <Texts variant="h3">Active bookings</Texts>
+                    <Texts variant="p">{stats.active_bookings}</Texts>
                 </div>
                 <div className="admin-stat-card">
-                    <h3>Available rooms</h3>
-                    <p>{stats.available_rooms}</p>
+                    <Texts variant="h3">Available rooms</Texts>
+                    <Texts variant="p">{stats.available_rooms}</Texts>
                 </div>
                 <div className="admin-stat-card">
-                    <h3>Monthly revenue</h3>
-                    <p>R{stats.monthly_revenue.toLocaleString("en-ZA")}</p>
+                    <Texts variant="h3">Monthly revenue</Texts>
+                    <Texts variant="p">R{stats.monthly_revenue.toLocaleString("en-ZA")}</Texts>
                 </div>
             </div>
-            <section className="admin-recent-reservations">
-                <h2>Recent reservations</h2>
+            <div className="admin-recent-reservations">
+                <Texts variant="h2">Recent reservations</Texts>
                 {stats.recent_bookings.length === 0 ? (
-                    <p>No recent reservations found.</p>
+                    <Texts variant="p">No recent reservations found.</Texts>
                 ) : (
                     <div className="admin-reservations-list">
                         {stats.recent_bookings.map((booking) => (
                             <div className="admin-reservation" key={booking.id}>
                                 <div>
                                     <strong>Reservation #{booking.id}</strong>
-                                    <p>Room #{booking.room_id}</p>
+                                    <Texts variant="p">Room #{booking.room_id}</Texts>
                                 </div>
                                 <span className="admin-reservation-status">{booking.status} </span>
                             </div>
                         ))}
                     </div>
                 )}
-            </section>
-        </main>
+            </div>
+        </div>
     )
 }
 

@@ -8,7 +8,7 @@ const HotelMap = ({ name, address, latitude, longitude }: HotelMapProps) => {
     return (
         <div className="hotel-map">
             <MapContainer center={[latitude, longitude]} zoom={15} scrollWheelZoom={false} style={{ height: "350px", width: "100%" }}>
-                <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <Marker position={[latitude, longitude]}>
                     <Popup>{name} - {address}</Popup>
                 </Marker>

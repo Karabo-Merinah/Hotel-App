@@ -1,7 +1,8 @@
-
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
+import api from "../../api/axios"
+import { Texts } from "../../components/Texts/texts"
 import type { AdminReservation } from "../../types/admin"
 import "../../styles/ManageBookings.css"
 
@@ -10,13 +11,14 @@ const ManageBookings = () => {
     const [bookings, setBookings] = useState<AdminReservation[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+    const [updatingId, setUpdatingId] = useState<number | null>(null)
 
     const getBookings = async () => {
         try {
             setLoading(true)
             setError("")
             const token = localStorage.getItem("token")
-            const response = await axios.get("http://localhost:5000/api/admin/bookings",
+            const response = await api.get("/api/admin/bookings",
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             setBookings(response.data)
@@ -33,12 +35,18 @@ const ManageBookings = () => {
             `Are you sure you want to ${status === "confirmed" ? "approve" : "cancel"} this reservation?`
         )
         if (!confirmed) return
-        try {
-            setError("")
-            const token = localStorage.getItem("token")
 
-            await axios.put(`http://localhost:5000/api/admin/bookings/${id}/status`, { status },
-                { headers: { Authorization: `Bearer ${token}` } }
+        try {
+            setUpdatingId(id)
+            setError("")
+
+            const token = localStorage.getItem("token")
+            await api.put(`/api/admin/bookings/${id}/status`, { status },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
             )
             await getBookings()
         } catch (error) {
@@ -49,6 +57,9 @@ const ManageBookings = () => {
                 setError("Could not update reservation.")
             }
         }
+        finally {
+            setUpdatingId(null)
+        }
     }
     useEffect(() => {
         getBookings()
@@ -58,31 +69,33 @@ const ManageBookings = () => {
     }
     return (
         <div className="manage-bookings">
-            <h1>Reservations</h1>
+            <Texts variant="h1">Reservations</Texts>
             {loading && <p>Loading reservations...</p>}
             {error && <p>{error}</p>}
             {!loading && !error && bookings.length === 0 && (
-                <p>No reservations found.</p>
+                <Texts variant="p">No reservations found.</Texts>
             )}
             {!loading && bookings.length > 0 && (
                 <div className="admin-bookings-list">
                     {bookings.map((booking) => (
                         <div className="admin-booking-card" key={booking.id}>
                             <div className="admin-booking-details">
-                                <h3>{booking.guest_name}</h3>
-                                <p>{booking.hotel_name} / {booking.room_type}</p>
-                                <p>Check-in: {formatDate(booking.check_in)}</p>
-                                <p>Check-out: {formatDate(booking.check_out)}</p>
-                                <p>{booking.number_of_guests} guests</p>
-                                <p>Status: <strong>{booking.status}</strong></p>
+                                <Texts variant="h3">{booking.guest_name}</Texts>
+                                <Texts variant="p">{booking.hotel_name} / {booking.room_type}</Texts>
+                                <Texts variant="p">Check-in: {formatDate(booking.check_in)}</Texts>
+                                <Texts variant="p">Check-out: {formatDate(booking.check_out)}</Texts>
+                                <Texts variant="p">{booking.number_of_guests} guests</Texts>
+                                <Texts variant="p">Status: <strong>{booking.status}</strong></Texts>
                             </div>
                             <div className="admin-booking-actions">
                                 {booking.status === "pending" && (
-                                    <button onClick={() => updateStatus(booking.id, "confirmed")}>Approve</button>
+                                    <button disabled={updatingId === booking.id} onClick={() => updateStatus(booking.id, "confirmed")}> {updatingId === booking.id ? "Updating..." : "Approve"}
+                                    </button>
                                 )}
                                 <button onClick={() => navigate(`/admin/bookings/${booking.id}`)}>View Details</button>
                                 {booking.status === "pending" && (
-                                    <button onClick={() => updateStatus(booking.id, "cancelled")}>Cancel</button>
+                                    <button disabled={updatingId === booking.id} onClick={() => updateStatus(booking.id, "cancelled")}> Cancel
+                                    </button>
                                 )}
                             </div>
                         </div>

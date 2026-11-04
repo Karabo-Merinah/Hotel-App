@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import { Menu, X } from "lucide-react"
@@ -29,7 +28,7 @@ const AdminNavbar = () => {
                 <nav className="admin-navbar-links">
                     <NavLink to="/admin" end>Dashboard</NavLink>
                     <NavLink to="/admin/hotels">Accommodations</NavLink>
-                    <NavLink to="/admin/hotels/new">Add / Edit Hotel</NavLink>
+                    <NavLink to="/admin/hotels/new">Add  Hotel</NavLink>
                     <NavLink to="/admin/bookings">Reservations</NavLink>
                     <NavLink to="/admin/rooms">Room & Pricing</NavLink>
                     <NavLink to="/admin/profile">Admin Profile</NavLink>

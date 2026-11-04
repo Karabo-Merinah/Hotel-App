@@ -1,19 +1,22 @@
-
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import type { AdminProfile } from "../../types/admin"
 import { Texts } from "../../components/Texts/texts"
 import "../../styles/AdminProfile.css"
+import { useDispatch } from "react-redux"
+import { logout as logoutAction } from "../../features/authSlice"
+
 
 const AdminProfilePage = () => {
     const navigate = useNavigate()
     const [activeSetting, setActiveSetting] = useState("")
-
     const user: AdminProfile | null = JSON.parse(localStorage.getItem("user") || "null")
+    const dispatch = useDispatch()
 
     const logout = () => {
         localStorage.removeItem("token")
         localStorage.removeItem("user")
+        dispatch(logoutAction())
         navigate("/login")
     }
 

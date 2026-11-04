@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import axios from "axios"
+import api from "../../api/axios"
 import type { Hotel } from "../../types/hotel"
 import type { AdminRoom } from "../../types/admin"
 import "../../styles/ManageRooms.css"
@@ -39,7 +39,7 @@ const ManageRooms = () => {
 
     const getHotels = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/hotels")
+            const response = await api.get("/api/hotels")
             setHotels(response.data)
         } catch (error) {
             console.log(error)
@@ -48,7 +48,7 @@ const ManageRooms = () => {
     }
     const getRooms = async (id: string) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`)
+            const response = await api.get(`/api/rooms/hotel/${id}`)
             setRooms(response.data)
         } catch (error) {
             console.log(error)
@@ -61,7 +61,7 @@ const ManageRooms = () => {
     }, [])
     const getRoomImages = async (id: string) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/rooms/${id}`)
+            const response = await api.get(`/api/rooms/${id}`)
             setExistingImages(response.data.images)
         } catch (error) {
             console.log(error)
@@ -109,7 +109,7 @@ const ManageRooms = () => {
             const formData = new FormData()
             formData.append("image", image)
 
-            await axios.post(`http://localhost:5000/api/rooms/${id}/images`, formData, {
+            await api.post(`/api/rooms/${id}/images`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             })
         }
@@ -123,7 +123,7 @@ const ManageRooms = () => {
         try {
             setError("")
 
-            await axios.delete(`http://localhost:5000/api/rooms/images/${imageId}`, {
+            await api.delete(`/api/rooms/images/${imageId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
 
@@ -157,9 +157,9 @@ const ManageRooms = () => {
 
             let savedRoomId = parseInt(roomId)
             if (roomId) {
-                await axios.put(`http://localhost:5000/api/rooms/${roomId}`, roomData, { headers: { Authorization: `Bearer ${token}` } })
+                await api.put(`/api/rooms/${roomId}`, roomData, { headers: { Authorization: `Bearer ${token}` } })
             } else {
-                const response = await axios.post("http://localhost:5000/api/rooms", roomData, {
+                const response = await api.post("/api/rooms", roomData, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 savedRoomId = response.data.id

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import axios from "axios"
+import api from "../../api/axios"
 import "../../styles/HotelForm.css"
 import { Texts } from "../../components/Texts/texts"
 import type { HotelImage } from "../../types/hotel"
@@ -29,7 +29,7 @@ const HotelForm = () => {
         if (!id) return
         const getHotel = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/hotels/${id}`
+                const response = await api.get(`/api/hotels/${id}`
                 )
                 const hotel = response.data
                 setName(hotel.name || "")
@@ -59,7 +59,7 @@ const HotelForm = () => {
             setDeletingImage(true)
             setImageError("")
             const token = localStorage.getItem("token")
-            await axios.delete(`http://localhost:5000/api/hotels/images/${imageId}`, {
+            await api.delete(`/api/hotels/images/${imageId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             setExistingImages(existingImages.filter((image) => image.id !== imageId))
@@ -88,12 +88,12 @@ const HotelForm = () => {
         }
         try {
             if (id) {
-                await axios.put(`http://localhost:5000/api/hotels/${id}`, hotelData, {
+                await api.put(`/api/hotels/${id}`, hotelData, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 await uploadHotelImages(parseInt(id))
             } else {
-                const response = await axios.post("http://localhost:5000/api/hotels", hotelData, { headers: { Authorization: `Bearer ${token}` } }
+                const response = await api.post("/api/hotels", hotelData, { headers: { Authorization: `Bearer ${token}` } }
                 )
                 await uploadHotelImages(response.data.id)
             }
@@ -118,7 +118,7 @@ const HotelForm = () => {
             for (const image of selectedImages) {
                 const formData = new FormData()
                 formData.append("image", image)
-                await axios.post(`http://localhost:5000/api/hotels/${hotelId}/images`, formData, {
+                await api.post(`/api/hotels/${hotelId}/images`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             }

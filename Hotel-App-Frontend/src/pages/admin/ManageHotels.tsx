@@ -1,7 +1,6 @@
-
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
+import api from "../../api/axios"
 import type { Hotel } from "../../types/hotel"
 import { Texts } from "../../components/Texts/texts"
 import "../../styles/ManageHotels.css"
@@ -16,7 +15,7 @@ const ManageHotels = () => {
         try {
             setLoading(true)
             setError("")
-            const response = await axios.get("http://localhost:5000/api/hotels")
+            const response = await api.get("/api/hotels")
             setHotels(response.data)
         } catch (error) {
             console.log(error)
@@ -31,7 +30,7 @@ const ManageHotels = () => {
     }, [])
 
     if (loading) {
-        return <p>Loading hotels...</p>
+        return <Texts variant="p">Loading hotels...</Texts>
     }
 
     return (
