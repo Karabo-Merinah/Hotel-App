@@ -21,6 +21,10 @@ const port = process.env.PORT || 5000
 app.use(cors())
 app.use(express.json())
 
+app.get("/", (req, res) => {
+    res.status(200).json({ message: "Wander Inn API is running" })
+})
+
 app.use("/api/auth", auth_router)
 app.use("/api/hotels", hotel_router)
 app.use("/api/rooms", room_router)
@@ -34,6 +38,6 @@ app.use("/api/admin",admin_router)
 
 
 app.listen(port, async () => {
-    console.log("Server running on http://localhost:" + port)
+    console.log("Server running on port " + port)
     await testConnection()
 })
