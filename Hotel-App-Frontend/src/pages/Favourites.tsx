@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
+import api from "../api/axios"
 import { Heart } from "lucide-react"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Favourites.css"
@@ -22,13 +22,16 @@ const Favourites = () => {
     const getFavourites = async () => {
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login")
+            setLoading(false)
+            navigate("/login", {
+                state: { from: "/favourites" }
+            })
             return
         }
         try {
             setLoading(true)
             setError("")
-            const response = await axios.get("http://localhost:5000/api/favourites", { headers: { Authorization: `Bearer ${token}` } })
+            const response = await api.get("/api/favourites", { headers: { Authorization: `Bearer ${token}` } })
             // Store the favourite hotels in Redux
             dispatch(setFavourites(response.data))
         }
@@ -45,14 +48,16 @@ const Favourites = () => {
     const removingFavourite = async (hotelId: number) => {
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login")
+            navigate("/login", {
+                state: { from: "/favourites" }
+            })
             return
         }
         try {
             setRemovingId(hotelId)
             setError("")
             //removes the favourite from the backend
-            await axios.delete(`http://localhost:5000/api/favourites/${hotelId}`, { headers: { Authorization: `Bearer ${token}` } })
+            await api.delete(`/api/favourites/${hotelId}`, { headers: { Authorization: `Bearer ${token}` } })
             // Remove the hotel from state
             dispatch(removeFavourite(hotelId))
         }

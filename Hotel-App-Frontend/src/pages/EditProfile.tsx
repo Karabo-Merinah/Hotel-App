@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import type { FormEvent } from "react"
 import axios from "axios"
+import api from "../api/axios"
 import { useNavigate } from "react-router-dom"
 import { Texts } from "../components/Texts/texts"
 import "../styles/EditProfile.css"
@@ -21,12 +22,17 @@ const EditProfile = () => {
     const getProfile = async () => {
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login")
+            setLoading(false)
+            navigate("/login", {
+                state: { from: "/profile/edit" }
+            })
             return
         }
         try {
             setLoading(true)
-            const response = await axios.get("http://localhost:5000/api/users/me", { headers: { Authorization: `Bearer ${token}` } })
+            setError("")
+            
+            const response = await api.get("/api/users/me", { headers: { Authorization: `Bearer ${token}` } })
             setName(response.data.name)
             setEmail(response.data.email)
             setPhone(response.data.phone || "")
@@ -58,7 +64,7 @@ const EditProfile = () => {
         }
         try {
             setSaving(true)
-            const response = await axios.put("http://localhost:5000/api/users/me", { name: name.trim(), phone }, { headers: { Authorization: `Bearer ${token}` } })
+            const response = await api.put("/api/users/me", { name: name.trim(), phone }, { headers: { Authorization: `Bearer ${token}` } })
             localStorage.setItem("user", JSON.stringify(response.data))
             // Return to the profile overview after saving
             navigate("/profile")

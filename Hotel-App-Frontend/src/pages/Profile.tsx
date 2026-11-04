@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import axios from "axios"
+import api from "../api/axios"
 import { useNavigate } from "react-router-dom"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Profile.css"
@@ -21,12 +21,16 @@ const Profile = () => {
         const token = localStorage.getItem("token")
         if (!token) {
             setLoading(false)
-            navigate("/login")
+            navigate("/login", {
+                state: { from: "/profile" }
+            })
             return
         }
         try {
             setLoading(true)
-            const response = await axios.get("http://localhost:5000/api/users/me", { headers: { Authorization: `Bearer ${token}` } })
+            setError("")
+            
+            const response = await api.get("/api/users/me", { headers: { Authorization: `Bearer ${token}` } })
             setName(response.data.name)
             setEmail(response.data.email)
         } catch (error) {

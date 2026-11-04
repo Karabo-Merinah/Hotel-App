@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
+import api from "../api/axios"
 import { useNavigate } from "react-router-dom"
 import { Texts } from "../components/Texts/texts"
 import "../styles/MyBookings.css"
@@ -20,13 +21,15 @@ const MyBookings = () => {
         const token = localStorage.getItem("token")
         if (!token) {
             setLoading(false)
-            navigate("/login")
+            navigate("/login", {
+                state: { from: "/bookings" }
+            })
             return
         }
         try {
             setLoading(true)
             setError("")
-            const response = await axios.get("http://localhost:5000/api/bookings/myBookings", { headers: { Authorization: `Bearer ${token}` } })
+            const response = await api.get("/api/bookings/myBookings", { headers: { Authorization: `Bearer ${token}` } })
             // Store bookings in Redux
             dispatch(setBookings(response.data))
         } catch (error) {
@@ -46,7 +49,7 @@ const MyBookings = () => {
         const token = localStorage.getItem("token")
         try {
             setError("")
-            await axios.put(`http://localhost:5000/api/bookings/${id}/cancel`, {}, {
+            await api.put(`/api/bookings/${id}/cancel`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             await getBookings()

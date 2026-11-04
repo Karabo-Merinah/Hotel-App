@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import axios from "axios"
+import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
 import { useDispatch, useSelector } from "react-redux"
 import { addBooking } from "../features/bookingSlice"
@@ -9,6 +10,7 @@ import type { RootState } from "../app/store"
 
 const BookingPayment = () => {
     const { id } = useParams()
+    const navigate = useNavigate()
     const dispatch = useDispatch()
     // Get booking from Redux
     const bookings = useSelector((state: RootState) => state.bookings)
@@ -20,10 +22,20 @@ const BookingPayment = () => {
 
     const getBooking = async () => {
         try {
+            setLoading(true)
+            setError("")
             const token = localStorage.getItem("token")
-            const response = await axios.get(`http://localhost:5000/api/bookings/${id}`,
+
+            if (!token) {
+                navigate("/login", {
+                    state: { from: `/bookings/${id}/payment` }
+                })
+                return
+            }
+            const response = await api.get(`/api/bookings/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             )
+
             // Store the booking in Redux
             dispatch(addBooking(response.data))
         }
@@ -46,7 +58,14 @@ const BookingPayment = () => {
             setProcessing(true)
             setError("")
             const token = localStorage.getItem("token")
-            const response = await axios.post("http://localhost:5000/api/payments", { booking_id: booking.id },
+
+            if (!token) {
+                navigate("/login", {
+                    state: { from: `/bookings/${id}/payment` }
+                })
+                return
+            }
+            const response = await api.post("/api/payments", { booking_id: booking.id },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             window.location.href = response.data.authorization_url

@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Texts } from "../components/Texts/texts";
-import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react"
+import { Texts } from "../components/Texts/texts"
+import api from "../api/axios"
+import axios from "axios"
+import { useNavigate, useLocation } from "react-router-dom"
 import "../styles/Register.css"
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google"
 import { useDispatch } from "react-redux"
 import { loginSuccess } from "../features/authSlice"
 
@@ -63,7 +64,7 @@ const Register = () => {
         try {
             setLoading(true)
             //send the registration details to the backend 
-            const response = await axios.post("http://localhost:5000/api/auth/register", { name, email, password, confirm_password: confirmPassword })
+            const response = await api.post("/api/auth/register", { name, email, password, confirm_password: confirmPassword })
 
             //saves the login details returned by backend 
             localStorage.setItem("token", response.data.token)
@@ -105,7 +106,7 @@ const Register = () => {
             setLoading(true)
             setError("")
             // send the Google credential to the backend for verification
-            const response = await axios.post("http://localhost:5000/api/auth/google", {
+            const response = await api.post("/api/auth/google", {
                 credential
             })
 

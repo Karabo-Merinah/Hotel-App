@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import api from "../api/axios"
 import axios from "axios"
 import { Texts } from "../components/Texts/texts"
 import "../styles/BookingDetails.css"
@@ -26,13 +27,15 @@ const BookingDetails = () => {
     const getBooking = async () => {
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login")
+            navigate("/login", {
+                state: { from: `/bookings/${id}` }
+            })
             return
         }
         try {
             setLoading(true)
             setError("")
-            const response = await axios.get(`http://localhost:5000/api/bookings/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+            const response = await api.get(`/api/bookings/${id}`, { headers: { Authorization: `Bearer ${token}` } })
             // Store the booking in Redux
             dispatch(addBooking(response.data))
         } catch (error) {
@@ -49,20 +52,20 @@ const BookingDetails = () => {
 
     const cancelBooking = async () => {
         if (!booking) return
-        const confirmed = window.confirm(
-            "Are you sure you want to cancel this booking?"
-        )
+        const confirmed = window.confirm( "Are you sure you want to cancel this booking?")
         if (!confirmed) return
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login")
+            navigate("/login", {
+                state: { from: `/bookings/${id}` }
+            })
             return
         }
         try {
             setCancelling(true)
             setError("")
             setMessage("")
-            const response = await axios.put(`http://localhost:5000/api/bookings/${booking.id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } }
+            const response = await api.put(`/api/bookings/${booking.id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } }
             )
             // Update the cancelled booking in Redux
             dispatch(updateBooking(response.data))
@@ -84,12 +87,15 @@ const BookingDetails = () => {
     if (loading) {
         return <Texts variant="p">Loading booking details...</Texts>
     }
+    if (error) {
+        return <Texts variant="p">{error}</Texts>
+    }
     // Display a message if the booking cannot be loaded
     if (!booking) {
         return <Texts variant="p">{error || "Booking not found."}</Texts>
     }
 
-    
+
     return (
         <div className="booking-details-container">
             <button type="button" onClick={() => navigate("/bookings")}>← Back to My Bookings </button>

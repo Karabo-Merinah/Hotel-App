@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
+import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
 import { Search } from "lucide-react"
 import "../styles/Home.css"
@@ -25,12 +25,12 @@ const Home = () => {
         try {
             setLoading(true)
             setError("")
-            let url = "http://localhost:5000/api/hotels"
+            let url = "/api/hotels"
             //if the user enter a city add it to the URL 
             if (searchCity !== "") {
                 url = `${url}?city=${encodeURIComponent(searchCity)}`
             }
-            const response = await axios.get(url)
+           const response = await api.get(url)
             //store the hotels that are returned 
             setHotels(response.data)
         }

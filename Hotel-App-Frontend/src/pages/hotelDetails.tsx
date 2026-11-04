@@ -1,7 +1,7 @@
 import type { Hotel, Room, HotelReviews } from "../types/hotel"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import axios from "axios"
+import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
 import { Heart } from "lucide-react"
 import { Share2 } from "lucide-react"
@@ -39,7 +39,7 @@ const HotelDetails = () => {
         try {
             setLoading(true)
             setError("")
-            const response = await axios.get(`http://localhost:5000/api/hotels/${id}`)
+            const response = await api.get(`/api/hotels/${id}`)
             setHotel(response.data)
         }
         catch (error) {
@@ -56,12 +56,12 @@ const HotelDetails = () => {
             setRoomsError("")
             let response
             if (checkIn && checkOut) {
-                response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`, {
+                response = await api.get(`/api/rooms/hotel/${id}`, {
                     params: { checkIn, checkOut, guests, numberOfRooms }
                 })
             }
             else {
-                response = await axios.get(`http://localhost:5000/api/rooms/hotel/${id}`)
+                response = await api.get(`/api/rooms/hotel/${id}`)
             }
             setRooms(response.data)
         }
@@ -82,7 +82,7 @@ const HotelDetails = () => {
         }
         try {
             // Get the updated favourites from the backend
-            const response = await axios.get("http://localhost:5000/api/favourites", {
+            const response = await api.get("/api/favourites", {
                 headers: { Authorization: `Bearer ${token}` }
             })
             // stores favourites in redux
@@ -107,13 +107,13 @@ const HotelDetails = () => {
         if (!id) return
         try {
             if (isFavourite) {
-                await axios.delete(`http://localhost:5000/api/favourites/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+                await api.delete(`/api/favourites/${id}`, { headers: { Authorization: `Bearer ${token}` } })
                 // Remove the hotel from redux
                 dispatch(removeFavourite(Number(id)))
             }
             else {
                 //ads the hotel to favourites
-                await axios.post("http://localhost:5000/api/favourites", { hotel_id: Number(id) }, { headers: { Authorization: `Bearer ${token}` } })
+                await api.post("/api/favourites", { hotel_id: Number(id) }, { headers: { Authorization: `Bearer ${token}` } })
 
                 //fetch updated favourites and store them 
                 await checkFavourite()
@@ -148,7 +148,7 @@ const HotelDetails = () => {
         try {
             setReviewsError("")
             setHotelReviews(null)
-            const response = await axios.get(`http://localhost:5000/api/reviews/hotel/${id}`)
+            const response = await api.get(`/api/reviews/hotel/${id}`)
             setHotelReviews(response.data)
         }
         catch (error) {

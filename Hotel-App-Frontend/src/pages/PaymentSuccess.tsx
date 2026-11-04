@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import axios from "axios"
+import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
 
 const PaymentSuccess = () => {
@@ -26,15 +27,15 @@ const PaymentSuccess = () => {
                 return
             }
             try {
-                const response = await axios.get(`http://localhost:5000/api/payments/verify/${encodeURIComponent(reference)}`,
+                const response = await api.get(`/api/payments/verify/${encodeURIComponent(reference)}`,
                     { headers: { Authorization: `Bearer ${token}` } })
 
-                if (response.data.status === "paid") {
+                if (response.data.status === "paid" && response.data.booking_id) {
                     setBookingId(response.data.booking_id)
-                }
-                else {
+                } else {
                     setError("Payment has not been confirmed.")
                 }
+
             }
             catch (error) {
                 console.log(error)
@@ -61,11 +62,10 @@ const PaymentSuccess = () => {
             <div className="payment-success-page">
                 <Texts variant="h1">Payment Not Confirmed</Texts>
                 <Texts variant="p">{error}</Texts>
-                <button onClick={() => navigate("/my-bookings")}> View My Bookings</button>
+                <button onClick={() => navigate("/bookings")}> View My Bookings</button>
             </div>
         )
     }
-
     return (
         <div className="payment-success-page">
             <Texts variant="h1">Payment Successful!</Texts>

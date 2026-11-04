@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import axios from "axios"
+import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
 import type { Room, Hotel } from "../types/hotel"
 import { useDispatch } from "react-redux"
 import { addBooking } from "../features/bookingSlice"
-
-
-
+import axios from "axios"
 
 const Booking = () => {
     const { roomId } = useParams()
@@ -70,18 +68,18 @@ const Booking = () => {
         // Get the logged-in user's token
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login", { state: { from: location.pathname, checkIn, checkOut, guests } })
+            navigate("/login", { state: { from: location.pathname, checkIn, checkOut, guests,numberOfRooms } })
             return
         }
         try {
             setLoading(true)
             // Save the booking in the database
-            const bookingResponse = await axios.post("http://localhost:5000/api/bookings", { room_id: parseInt(roomId), check_in: checkIn, check_out: checkOut, number_of_rooms: numberOfRooms, number_of_guests: guests },
+            const bookingResponse = await api.post("/api/bookings", { room_id: parseInt(roomId), check_in: checkIn, check_out: checkOut, number_of_rooms: numberOfRooms, number_of_guests: guests },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             // Get the complete booking and store it in Redux
             try {
-                const response = await axios.get(`http://localhost:5000/api/bookings/${bookingResponse.data.id}`, {
+                const response = await api.get(`/api/bookings/${bookingResponse.data.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 dispatch(addBooking(response.data))
@@ -108,9 +106,9 @@ const Booking = () => {
     const getBookingDetails = async () => {
         try {
             setError("")
-            const roomResponse = await axios.get(`http://localhost:5000/api/rooms/${roomId}`)
+            const roomResponse = await api.get(`/api/rooms/${roomId}`)
             setRoom(roomResponse.data)
-            const hotelResponse = await axios.get(`http://localhost:5000/api/hotels/${roomResponse.data.hotel_id}`)
+            const hotelResponse = await api.get(`/api/hotels/${roomResponse.data.hotel_id}`)
             setHotel(hotelResponse.data)
         }
         catch (error) {

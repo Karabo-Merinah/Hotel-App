@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import axios from "axios"
+import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Login.css"
 import { GoogleLogin } from "@react-oauth/google"
@@ -36,7 +36,7 @@ const Login = () => {
         try {
             setLoading(true)
             // Send login details to the backend
-            const response = await axios.post("http://localhost:5000/api/auth/login", {
+            const response = await api.post("/api/auth/login", {
                 email,
                 password
             })
@@ -74,7 +74,7 @@ const Login = () => {
             setErrors("")
 
               // Send the Google credential to the backend for verification
-            const response = await axios.post("http://localhost:5000/api/auth/google", {
+            const response = await api.post("/api/auth/google", {
                 credential
             })
              // Save the authenticated user and token

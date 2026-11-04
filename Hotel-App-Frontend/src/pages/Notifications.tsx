@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
+import api from "../api/axios"
 import { Bell, CheckCheck } from "lucide-react"
 import { Texts } from "../components/Texts/texts"
 import type { Notification } from "../types/hotel"
@@ -16,13 +16,16 @@ const Notifications = () => {
     const getNotifications = async () => {
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login")
+            setLoading(false)
+            navigate("/login", {
+                state: { from: "/notifications" }
+            })
             return
         }
         try {
             setLoading(true)
             setError("")
-            const response = await axios.get("http://localhost:5000/api/notifications", { headers: { Authorization: `Bearer ${token}` } })
+            const response = await api.get("/api/notifications", { headers: { Authorization: `Bearer ${token}` } })
             setNotifications(response.data)
         }
         catch (error) {
@@ -42,12 +45,15 @@ const Notifications = () => {
     const markAsRead = async (notificationId: number) => {
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login")
+            navigate("/login", {
+                //stores the destination even when user logins 
+                state: { from: "/notifications" }
+            })
             return
         }
         try {
             setError("")
-            await axios.put(`http://localhost:5000/api/notifications/${notificationId}/read`, {}, { headers: { Authorization: `Bearer ${token}` } })
+            await api.put(`/api/notifications/${notificationId}/read`, {}, { headers: { Authorization: `Bearer ${token}` } })
             setNotifications(notifications.map((notification) =>
                 notification.id === notificationId ? { ...notification, is_read: true } : notification
             ))
@@ -67,7 +73,7 @@ const Notifications = () => {
         }
         try {
             setError("")
-            await axios.put("http://localhost:5000/api/notifications/read-all", {}, { headers: { Authorization: `Bearer ${token}` } })
+            await api.put("/api/notifications/read-all", {}, { headers: { Authorization: `Bearer ${token}` } })
             setNotifications(notifications.map((notification) => ({ ...notification, is_read: true })))
         }
         catch (error) {
