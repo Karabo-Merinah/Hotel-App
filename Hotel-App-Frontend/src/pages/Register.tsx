@@ -7,7 +7,7 @@ import "../styles/Register.css"
 import { GoogleLogin } from "@react-oauth/google"
 import { useDispatch } from "react-redux"
 import { loginSuccess } from "../features/authSlice"
-
+import { Eye, EyeOff } from "lucide-react"
 
 const Register = () => {
 
@@ -21,7 +21,8 @@ const Register = () => {
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
     const [loading, setLoading] = useState(false)
-
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     //registers new user 
     const registering = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -163,11 +164,21 @@ const Register = () => {
                 </div>
                 <div className="register-password">
                     <label htmlFor="password">Password</label>
-                    <input id="password" className="register-password-input" type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+                    <div className="register-password-wrapper">
+                        <input id="password" className="register-password-input" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+                        <button type="button" className="register-password-toggle" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
                 </div>
                 <div className="register-confirm-password">
                     <label htmlFor="confirmPassword">Re-enter password</label>
-                    <input id="confirmPassword" className="register-confirm-input" type="password" placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                    <div className="register-password-wrapper">
+                        <input id="confirmPassword" className="register-confirm-input" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                        <button type="button" className="register-password-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label={showConfirmPassword ? "Hide password" : "Show password"}>
+                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
                 </div>
                 {error &&
                     <Texts variant="p" className="register-error">{error}</Texts>

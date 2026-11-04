@@ -6,7 +6,7 @@ import "../styles/Login.css"
 import { GoogleLogin } from "@react-oauth/google"
 import { useDispatch } from "react-redux"
 import { loginSuccess } from "../features/authSlice"
-
+import { Eye, EyeOff } from "lucide-react"
 
 const Login = () => {
 
@@ -17,6 +17,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState("")
     const dispatch = useDispatch()
+    const [showPassword, setShowPassword] = useState(false)
 
     // Log in the user using email and password
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -73,11 +74,11 @@ const Login = () => {
             setLoading(true)
             setErrors("")
 
-              // Send the Google credential to the backend for verification
+            // Send the Google credential to the backend for verification
             const response = await api.post("/api/auth/google", {
                 credential
             })
-             // Save the authenticated user and token
+            // Save the authenticated user and token
             localStorage.setItem("token", response.data.token)
             localStorage.setItem("user", JSON.stringify(response.data.user))
 
@@ -119,7 +120,12 @@ const Login = () => {
                 </div>
                 <div className="login-password">
                     <label htmlFor="login-password">Password</label>
-                    <input id="login-password" className="login-password-input" type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <div className="login-password-wrapper">
+                        <input id="login-password" className="login-password-input" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <button type="button" className="login-password-toggle" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
                 </div>
                 {/* Navigate to the Forgot Password page */}
                 <div className="login-forgot-password">

@@ -13,6 +13,9 @@ const RoomDetails = () => {
     const [room, setRoom] = useState<Room | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+    const [availableRooms, setAvailableRooms] = useState<number | null>(null)
+    const [checkingAvailability, setCheckingAvailability] = useState(false)
+    const [bookingError, setBookingError] = useState("")
 
     const getRoom = async () => {
         try {
@@ -29,9 +32,45 @@ const RoomDetails = () => {
             setLoading(false)
         }
     }
+
+
+    // Checks how many rooms are available for the selected dates
+    const checkAvailability = async () => {
+
+        // Stop if the user has not selected check-in and check-out dates
+        if (!checkIn || !checkOut) {
+            setAvailableRooms(null)
+            return
+        }
+        try {
+            // Show loading while checking availability
+            setCheckingAvailability(true)
+            // Send the room ID and selected dates to the backend
+            const response = await api.get(`/api/bookings/rooms/${id}/availability`, {
+                params: { check_in: checkIn, check_out: checkOut }
+            })
+            // Store the number of available rooms returned by the backend
+            setAvailableRooms(response.data.available_rooms)
+        }
+        catch (error) {
+            // Handle errors when availability cannot be checked
+            console.log(error)
+            setAvailableRooms(null)
+        }
+        finally {
+            // Stop loading after the request finishes
+            setCheckingAvailability(false)
+        }
+    }
+
     useEffect(() => {
         getRoom()
     }, [id])
+
+    useEffect(() => {
+        checkAvailability()
+    }, [id, checkIn, checkOut])
+
 
     if (loading) {
         return <Texts variant="p">Loading room details...</Texts>
@@ -46,8 +85,29 @@ const RoomDetails = () => {
     // Checks if the room can accommodate the selected guests
     const checkRoomCapacity = () => {
         if (!room) return
+
+        //clears previous booking errors 
+        setBookingError("")
+        //check if the dates are filled in 
+
+        if (!checkIn || !checkOut) {
+            setBookingError("Please select check-in and check-out dates first.")
+            return
+        }
+        // Check if the selected rooms can accommodate the guests
         if (guests > room.capacity * numberOfRooms) {
-            setError("The selected rooms cannot accommodate all guests.")
+            setBookingError("The selected rooms cannot accommodate all guests.")
+            return
+        }
+
+        if (availableRooms === null) {
+            setBookingError("Could not check room availability. Please try again.")
+            return
+        }
+
+        //check if enough rooms are available
+        if (numberOfRooms > availableRooms) {
+            setBookingError("Not enough rooms are available for the selected dates.")
             return
         }
         // Check if the user is logged in
@@ -62,6 +122,8 @@ const RoomDetails = () => {
         // User is logged in, continue to booking
         navigate(bookingPath, { state: { checkIn, checkOut, guests, numberOfRooms } })
     }
+
+
     return (
         <div className="room-details">
             <Texts variant="h1">{room.room_type}</Texts>
@@ -77,8 +139,20 @@ const RoomDetails = () => {
             <Texts variant="p"> Capacity: {room.capacity} guests</Texts>
             <Texts variant="p">Price: R{room.price_per_night} per night</Texts>
             <Texts variant="p">Total Rooms: {room.total_rooms} </Texts>
-            <button onClick={() => navigate(`/hotels/${room.hotel_id}`, { state: { checkIn, checkOut, guests,numberOfRooms } })}>Back to Hotel</button>
-            <button onClick={checkRoomCapacity}>Book Now</button>
+            {checkingAvailability ? (
+                <Texts variant="p">Checking availability...</Texts>
+            ) : availableRooms !== null ? (
+                <Texts variant="p">Available Rooms: {availableRooms}</Texts>
+            ) : (
+                <Texts variant="p">Select dates to check room availability.</Texts>
+            )}
+            <button onClick={() => navigate(`/hotels/${room.hotel_id}`, { state: { checkIn, checkOut, guests, numberOfRooms } })}>Back to Hotel</button>
+            {bookingError && (
+                <Texts variant="p">{bookingError}</Texts>
+            )}
+            <button onClick={checkRoomCapacity} disabled={checkingAvailability || (availableRooms !== null && availableRooms < numberOfRooms)}>
+                {availableRooms !== null && availableRooms < numberOfRooms
+                    ? "Not Available" : "Book Now"} </button>
         </div>
     )
 }

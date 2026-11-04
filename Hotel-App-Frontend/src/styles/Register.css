@@ -39,3 +39,36 @@
     height: 40px;
     border-radius: 5px;
 }
+
+.register-password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+
+.register-password-wrapper .register-password-input,
+.register-password-wrapper .register-confirm-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 45px;
+}
+
+.register-password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #555;
+}
+
+.register-password-toggle:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}

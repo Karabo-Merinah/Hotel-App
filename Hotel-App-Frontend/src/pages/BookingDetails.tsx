@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux"
 import { addBooking, updateBooking } from "../features/bookingSlice"
 import type { RootState } from "../app/store"
 
-
 const BookingDetails = () => {
     const { id } = useParams()
     const navigate = useNavigate()
