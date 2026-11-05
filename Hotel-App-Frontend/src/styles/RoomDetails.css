@@ -90,33 +90,6 @@
     background-color: #5C4033;
 }
 
-.room-image-dots {
-    position: absolute;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
-    padding: 9px 12px;
-    background-color: #333333;
-    border-radius: 20px;
-}
-
-.room-image-dots .room-image-dot {
-    width: 7px;
-    height: 7px;
-    padding: 0;
-    margin: 0;
-    border: none;
-    border-radius: 50%;
-    background-color: #999999;
-    cursor: pointer;
-}
-
-.room-image-dots .room-image-dot.active {
-    background-color: #FFFFFF;
-}
-
 .room-information {
     display: flex;
     flex-direction: column;

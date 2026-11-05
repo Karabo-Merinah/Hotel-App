@@ -153,11 +153,6 @@ const RoomDetails = () => {
                                 <>
                                     <button className="room-image-previous" onClick={previousImage} aria-label="Previous image"><ChevronLeft size={22} /> </button>
                                     <button className="room-image-next" onClick={nextImage} aria-label="Next image"><ChevronRight size={22} /></button>
-                                    <div className="room-image-dots">
-                                        {room.images.map((image, index) => (
-                                            <button key={image.id} className={currentImage === index ? "room-image-dot active" : "room-image-dot"} onClick={() => setCurrentImage(index)} aria-label={`View image ${index + 1}`} />
-                                        ))}
-                                    </div>
                                 </>
                             )}
                         </>
