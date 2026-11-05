@@ -35,9 +35,9 @@ const AdminNavbar = () => {
         <>
             <header className="admin-navbar">
                 <button className="admin-menu-button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Menu size={25} /></button>
-                <NavLink to="/admin" className="admin-logo">WANDER INN <span className="admin-panel-label">| ADMIN PANEL</span>
+                <span className="admin-logo">WANDER INN <span className="admin-panel-label">| ADMIN PANEL</span>
                     <span className="admin-mobile-label">| ADMIN</span>
-                </NavLink>
+                </span>
                 <nav className="admin-navbar-links">
                     <NavLink to="/admin" end>Dashboard</NavLink>
                     <NavLink to="/admin/hotels">Accommodations</NavLink>

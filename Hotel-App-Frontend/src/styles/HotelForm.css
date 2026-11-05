@@ -1,204 +1,231 @@
-﻿.hotel-form-container {
-    width: 90%;
-    max-width: 950px;
-    margin: 30px auto;
+﻿.admin-hotel-form-page {
+    max-width: 1180px;
+    width: calc(100% - 40px);
+    margin: 32px auto 64px;
+    color: #30251f;
+    box-sizing: border-box;
+}
+
+.admin-hotel-form-header {
+    margin-bottom: 24px;
+}
+
+.admin-hotel-form-header h1 {
+    color: #5c4033;
+    font-size: 32px;
+    margin: 0 0 12px;
+}
+
+.admin-hotel-form-header p {
+    color: #756c65;
+    margin: 8px 0;
+}
+
+.admin-hotel-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: white;
+    border: 1px solid #e9ded4;
+    border-radius: 12px;
     padding: 30px;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5E5;
+    box-sizing: border-box;
+}
+
+.admin-hotel-form > h2 {
+    color: #5c4033;
+    margin: 0 0 8px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #eee4dc;
+}
+
+.admin-hotel-form > label,
+.hotel-form-images > label,
+.admin-hotel-form-row label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #40342c;
+    margin-top: 8px;
+}
+
+.admin-hotel-form input:not([type="checkbox"]),
+.admin-hotel-form select,
+.admin-hotel-form textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #d9cec4;
+    border-radius: 7px;
+    background: white;
+    color: #30251f;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.admin-hotel-form textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+.admin-hotel-form input:focus,
+.admin-hotel-form select:focus,
+.admin-hotel-form textarea:focus {
+    outline: 2px solid #c5a98f;
+    outline-offset: 1px;
+}
+
+.hotel-form-images {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 20px;
+    background: #faf7f3;
+    border: 1px solid #eee4dc;
     border-radius: 10px;
 }
 
-.hotel-form-container h1 {
-    margin: 0 0 25px;
-    color: #5C4033;
-    font-size: 32px;
+.hotel-form-images h3 {
+    margin: 0;
+    color: #5c4033;
 }
 
-.hotel-form {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
-
-.hotel-form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.hotel-form-field label {
-    color: #292421;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.hotel-form-field input, .hotel-form-field select, .hotel-form-field textarea {
-    width: 100%;
-    padding: 11px 12px;
-    background-color: #FFFFFF;
-    color: #292421;
-    border: 1px solid #E5E5E5;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.hotel-form-field input, .hotel-form-field select {
-    min-height: 44px;
-}
-
-.hotel-form-field textarea {
-    resize: vertical;
-    line-height: 1.6;
-}
-
-.hotel-form-field input[type="file"] {
-    height: auto;
-}
-
-.hotel-form-description, .hotel-form-policies, .hotel-form-amenities, .hotel-form-images {
-    grid-column: 1 / -1;
-}
-
-.hotel-form-amenities h2, .hotel-form-images h2 {
-    margin: 15px 0;
-    color: #5C4033;
-    font-size: 23px;
-}
-
-.hotel-amenities-checkboxes {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 12px;
-}
-
-.hotel-amenities-checkboxes label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5E5;
-    border-radius: 6px;
+.hotel-form-images > p {
+    margin: 0;
+    color: #766b63;
     font-size: 13px;
 }
 
-.hotel-amenities-checkboxes input {
-    width: 17px;
-    height: 17px;
-    accent-color: #5C4033;
+.hotel-existing-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
 }
 
-.hotel-form-image-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.hotel-form-image {
-    width: 180px;
+.hotel-existing-image {
     padding: 10px;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5E5;
-    border-radius: 8px;
+    background: white;
+    border: 1px solid #e9ded4;
+    border-radius: 9px;
 }
 
-.hotel-form-image img {
+.hotel-existing-image img {
+    display: block;
     width: 100%;
     height: 120px;
     object-fit: cover;
     border-radius: 6px;
 }
 
-.hotel-form-image button {
+.hotel-existing-image button {
     width: 100%;
-    margin-top: 10px;
-    padding: 9px;
-    background-color: #FFFFFF;
-    color: #B42318;
-    border: 1px solid #B42318;
+    margin-top: 8px;
+    padding: 10px;
+    background: white;
+    color: #a12e2e;
+    border: 1px solid #e6c6c6;
+    border-radius: 7px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.hotel-existing-image button:hover {
+    background: #fff0ee;
+}
+
+.hotel-selected-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hotel-selected-images > div {
+    padding: 7px 12px;
+    background: white;
+    border: 1px solid #e9ded4;
     border-radius: 6px;
-    font-size: 13px;
+    overflow-wrap: anywhere;
 }
 
-.hotel-form-image button:hover {
-    background-color: #FFF0EE;
+.hotel-selected-images p {
+    margin: 0;
 }
 
-.hotel-form-actions {
+.admin-hotel-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.admin-hotel-form-row > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.admin-hotel-form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    grid-column: 1 / -1;
-    margin-top: 15px;
+    margin-top: 16px;
 }
 
-.hotel-form-actions button {
-    min-width: 130px;
-    height: 44px;
-    padding: 0 20px;
-    background-color: #5C4033;
-    color: #FFFFFF;
-    border: 1px solid #5C4033;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
+.admin-hotel-form-actions button {
+    background: #5c4033;
+    color: white;
+    border: 1px solid #5c4033;
+    border-radius: 7px;
+    padding: 12px 22px;
+    font: inherit;
+    cursor: pointer;
 }
 
-.hotel-form-actions button:hover {
-    background-color: #493226;
+.admin-hotel-form-actions button:hover {
+    background: #493126;
 }
 
-.hotel-form-actions button[type="button"] {
-    background-color: #FFFFFF;
-    color: #5C4033;
+.admin-hotel-form-actions .admin-hotel-cancel {
+    background: white;
+    color: #5c4033;
 }
 
-.hotel-form-actions button[type="button"]:hover {
-    background-color: #FFFFFF;
+.admin-hotel-form-actions .admin-hotel-cancel:hover {
+    background: #faf6f1;
 }
 
-.hotel-form-actions button:disabled {
+.admin-hotel-form-actions button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
-    .hotel-form-container {
-        width: 94%;
-        margin: 20px auto;
-        padding: 20px;
+.admin-hotel-error {
+    color: #a12e2e;
+}
+
+@media (max-width: 650px) {
+    .admin-hotel-form-page {
+        width: calc(100% - 28px);
+        margin: 22px auto 48px;
     }
 
-    .hotel-form-container h1 {
+    .admin-hotel-form-header h1 {
         font-size: 27px;
     }
 
-    .hotel-form {
+    .admin-hotel-form {
+        padding: 18px;
+    }
+
+    .admin-hotel-form-row {
         grid-template-columns: 1fr;
     }
 
-    .hotel-amenities-checkboxes {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .hotel-form-image {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .hotel-amenities-checkboxes {
-        grid-template-columns: 1fr;
-    }
-
-    .hotel-form-actions {
+    .admin-hotel-form-actions {
         flex-direction: column;
     }
 
-    .hotel-form-actions button {
+    .admin-hotel-form-actions button {
         width: 100%;
     }
 }
-

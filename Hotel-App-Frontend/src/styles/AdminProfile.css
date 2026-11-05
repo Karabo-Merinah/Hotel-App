@@ -1,123 +1,124 @@
-﻿.admin-profile {
-    width: 90%;
-    max-width: 850px;
-    margin: 35px auto;
-    padding: 20px;
+﻿.admin-profile-page {
+    max-width: 1180px;
+    width: calc(100% - 40px);
+    margin: 32px auto 64px;
+    color: #30251f;
+    box-sizing: border-box;
 }
 
-.admin-profile h1 {
-    margin: 0 0 25px;
-    color: #5C4033;
+.admin-profile-page h1,
+.admin-profile-page h2 {
+    color: #5c4033;
+}
+
+.admin-profile-page h1 {
     font-size: 32px;
+    margin: 0 0 12px;
+}
+
+.admin-profile-page > p {
+    color: #756c65;
+    margin-bottom: 25px;
+}
+
+.admin-profile-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 26px 0 32px;
 }
 
 .admin-profile-card {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    padding: 30px;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5E5;
-    border-radius: 10px;
+    background: white;
+    border: 1px solid #e9ded4;
+    border-radius: 12px;
+    padding: 24px;
+    min-width: 0;
 }
 
-.admin-profile-avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 90px;
-    height: 90px;
-    flex-shrink: 0;
-    background-color: #FFFFFF;
-    color: #5C4033;
-    border-radius: 50%;
-    font-size: 36px;
-    font-weight: 700;
-}
-
-.admin-profile-info {
-    flex: 1;
-}
-
-.admin-profile-info h2 {
+.admin-profile-card p {
     margin: 0 0 12px;
-    color: #5C4033;
-    font-size: 25px;
-}
-
-.admin-profile-info p {
-    margin: 10px 0;
-    color: #51483F;
+    color: #766b63;
     font-size: 14px;
 }
 
-.admin-profile-actions {
+.admin-profile-card h3 {
+    margin: 0;
+    font-size: 19px;
+    color: #5c4033;
+    overflow-wrap: anywhere;
+}
+
+.admin-profile-settings {
     display: flex;
-    gap: 12px;
-    margin-top: 25px;
+    flex-direction: column;
+    background: white;
+    border: 1px solid #e9ded4;
+    border-radius: 12px;
+    padding: 24px;
 }
 
-.admin-profile-actions button {
-    min-width: 140px;
-    height: 44px;
-    padding: 0 20px;
-    background-color: #5C4033;
-    color: #FFFFFF;
-    border: 1px solid #5C4033;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
+.admin-profile-settings h2 {
+    margin: 0 0 16px;
 }
 
-.admin-profile-actions button:hover {
-    background-color: #493226;
+.admin-profile-settings > button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 18px 10px;
+    background: white;
+    color: #30251f;
+    font: inherit;
+    text-align: left;
+    border: none;
+    border-bottom: 1px solid #eee4dc;
+    cursor: pointer;
 }
 
-.admin-profile-actions .admin-logout-button {
-    background-color: #FFFFFF;
-    color: #B42318;
-    border-color: #B42318;
+.admin-profile-settings > button:hover {
+    background: #faf6f1;
 }
 
-.admin-profile-actions .admin-logout-button:hover {
-    background-color: #FFF0EE;
+.admin-profile-settings > button span {
+    font-size: 23px;
+    color: #5c4033;
 }
 
-.admin-profile-error {
-    margin: 15px 0;
-    color: #B42318;
-    font-size: 14px;
+.admin-profile-settings > button.admin-profile-logout {
+    color: #a12e2e;
 }
 
-@media (max-width: 600px) {
-    .admin-profile {
-        width: 94%;
-        margin: 20px auto;
-        padding: 10px;
+.admin-profile-setting-content {
+    padding: 16px;
+    background: #faf6f1;
+    border-radius: 7px;
+}
+
+.admin-profile-setting-content p {
+    margin: 6px 0;
+}
+
+@media (max-width: 750px) {
+    .admin-profile-page {
+        width: calc(100% - 28px);
+        margin: 22px auto 48px;
     }
 
-    .admin-profile h1 {
+    .admin-profile-page h1 {
         font-size: 27px;
     }
 
+    .admin-profile-summary {
+        grid-template-columns: 1fr;
+    }
+
     .admin-profile-card {
-        flex-direction: column;
         padding: 20px;
-        text-align: center;
     }
 
-    .admin-profile-avatar {
-        width: 75px;
-        height: 75px;
-        font-size: 30px;
-    }
-
-    .admin-profile-actions {
-        flex-direction: column;
-    }
-
-    .admin-profile-actions button {
-        width: 100%;
+    .admin-profile-settings {
+        padding: 16px;
     }
 }
-

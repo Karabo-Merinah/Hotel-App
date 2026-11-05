@@ -1,85 +1,77 @@
 ﻿.manage-bookings {
-    width: 90%;
-    max-width: 1150px;
-    margin: 30px auto;
-    padding: 20px;
+    max-width: 1180px;
+    width: calc(100% - 40px);
+    margin: 32px auto 64px;
+    color: #30251f;
+    box-sizing: border-box;
 }
 
 .manage-bookings h1 {
-    margin: 0 0 30px;
-    color: #5C4033;
+    color: #5c4033;
     font-size: 32px;
 }
 
 .admin-bookings-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
+    margin-top: 24px;
 }
 
 .admin-booking-card {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 25px;
-    padding: 25px;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5E5;
-    border-radius: 10px;
+    align-items: center;
+    gap: 20px;
+    background: white;
+    border: 1px solid #e9ded4;
+    border-radius: 12px;
+    padding: 22px;
 }
 
 .admin-booking-details {
-    flex: 1;
+    min-width: 0;
 }
 
 .admin-booking-details h3 {
-    margin: 0 0 15px;
-    color: #5C4033;
-    font-size: 22px;
+    margin: 0 0 12px;
+    color: #5c4033;
 }
 
 .admin-booking-details p {
-    margin: 8px 0;
-    color: #51483F;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-.admin-booking-details strong {
-    color: #5C4033;
-    text-transform: capitalize;
+    margin: 7px 0;
+    color: #65594f;
 }
 
 .admin-booking-actions {
     display: flex;
-    flex-direction: column;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .admin-booking-actions button {
-    min-width: 135px;
-    height: 42px;
-    padding: 0 15px;
-    background-color: #5C4033;
-    color: #FFFFFF;
-    border: 1px solid #5C4033;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
+    padding: 11px 18px;
+    background: #5c4033;
+    color: white;
+    border: 1px solid #5c4033;
+    border-radius: 7px;
+    font: inherit;
+    cursor: pointer;
 }
 
 .admin-booking-actions button:hover {
-    background-color: #493226;
+    background: #493126;
+}
+
+.admin-booking-actions button:nth-child(2) {
+    background: white;
+    color: #5c4033;
 }
 
 .admin-booking-actions .cancel-booking-button {
-    background-color: #FFFFFF;
-    color: #B42318;
-    border: 1px solid #B42318;
-}
-
-.admin-booking-actions .cancel-booking-button:hover {
-    background-color: #FFF0EE;
+    background: white;
+    color: #a12e2e;
+    border-color: #a12e2e;
 }
 
 .admin-booking-actions button:disabled {
@@ -87,10 +79,10 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
     .manage-bookings {
-        width: 94%;
-        padding: 10px;
+        width: calc(100% - 28px);
+        margin: 22px auto 48px;
     }
 
     .manage-bookings h1 {
@@ -99,15 +91,10 @@
 
     .admin-booking-card {
         flex-direction: column;
-        align-items: flex-start;
-        padding: 18px;
-    }
-
-    .admin-booking-actions {
-        width: 100%;
+        align-items: stretch;
     }
 
     .admin-booking-actions button {
-        width: 100%;
+        flex: 1;
     }
 }

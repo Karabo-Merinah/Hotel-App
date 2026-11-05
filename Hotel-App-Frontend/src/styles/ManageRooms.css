@@ -1,59 +1,65 @@
 ﻿.admin-room-page {
-    width: 90%;
-    max-width: 1050px;
-    margin: 30px auto;
-    padding: 20px;
+    max-width: 1180px;
+    width: calc(100% - 40px);
+    margin: 32px auto 64px;
+    color: #30251f;
+    box-sizing: border-box;
 }
 
 .admin-room-page h1 {
-    margin: 0 0 30px;
-    color: #5C4033;
+    color: #5c4033;
     font-size: 32px;
+    margin-bottom: 16px;
 }
 
 .admin-room-form {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
-    padding: 30px;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5E5;
-    border-radius: 10px;
+    background: white;
+    border: 1px solid #e9ded4;
+    border-radius: 12px;
+    padding: 28px;
+    margin-top: 24px;
+    box-sizing: border-box;
 }
 
 .admin-room-field {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0;
 }
 
 .admin-room-field label {
-    color: #292421;
     font-size: 14px;
     font-weight: 600;
+    color: #40342c;
 }
 
-.admin-room-field input, .admin-room-field select, .admin-room-field textarea {
+.admin-room-field input,
+.admin-room-field select,
+.admin-room-field textarea {
+    box-sizing: border-box;
     width: 100%;
-    padding: 11px 12px;
-    background-color: #FFFFFF;
-    color: #292421;
-    border: 1px solid #E5E5E5;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.admin-room-field input, .admin-room-field select {
-    min-height: 44px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #d9cec4;
+    border-radius: 7px;
+    background: white;
+    color: #30251f;
+    font: inherit;
 }
 
 .admin-room-field textarea {
     resize: vertical;
-    line-height: 1.6;
 }
 
-.admin-room-field input[type="file"] {
-    height: auto;
+.admin-room-field input:focus,
+.admin-room-field select:focus,
+.admin-room-field textarea:focus {
+    outline: 2px solid #c5a98f;
+    outline-offset: 1px;
 }
 
 .admin-room-description {
@@ -61,21 +67,21 @@
 }
 
 .admin-room-images {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
 }
 
 .admin-room-image {
-    width: 180px;
     padding: 10px;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5E5;
-    border-radius: 8px;
+    border: 1px solid #e9ded4;
+    border-radius: 9px;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .admin-room-image img {
+    display: block;
     width: 100%;
     height: 120px;
     object-fit: cover;
@@ -84,57 +90,51 @@
 
 .admin-room-image button {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 8px;
     padding: 10px;
-    background-color: #FFFFFF;
-    color: #B42318;
-    border: 1px solid #B42318;
-    border-radius: 6px;
-    font-size: 12px;
+    background: white;
+    color: #a12e2e;
+    border: 1px solid #e6c6c6;
+    border-radius: 7px;
+    font: inherit;
+    cursor: pointer;
 }
 
 .admin-room-image button:hover {
-    background-color: #FFF0EE;
+    background: #fff0ee;
 }
 
 .admin-room-active {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     gap: 10px;
-    grid-column: 1 / -1;
 }
 
 .admin-room-active input {
     width: 18px;
     height: 18px;
-    accent-color: #5C4033;
-}
-
-.admin-room-active label {
-    color: #292421;
-    font-size: 14px;
+    accent-color: #5c4033;
 }
 
 .admin-room-actions {
+    grid-column: 1 / -1;
     display: flex;
     justify-content: flex-end;
-    grid-column: 1 / -1;
 }
 
 .admin-room-actions button {
-    min-width: 160px;
-    height: 44px;
-    padding: 0 20px;
-    background-color: #5C4033;
-    color: #FFFFFF;
+    padding: 12px 22px;
+    background: #5c4033;
+    color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
+    border-radius: 7px;
+    font: inherit;
+    cursor: pointer;
 }
 
 .admin-room-actions button:hover {
-    background-color: #493226;
+    background: #493126;
 }
 
 .admin-room-actions button:disabled {
@@ -142,10 +142,10 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
     .admin-room-page {
-        width: 94%;
-        padding: 10px;
+        width: calc(100% - 28px);
+        margin: 22px auto 48px;
     }
 
     .admin-room-page h1 {
@@ -157,12 +157,7 @@
         padding: 18px;
     }
 
-    .admin-room-image {
-        width: 100%;
-    }
-
     .admin-room-actions button {
         width: 100%;
     }
 }
-
