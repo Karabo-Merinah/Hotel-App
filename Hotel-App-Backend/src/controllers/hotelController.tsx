@@ -6,7 +6,7 @@ export const getAllHotels = async (req: Request, res: Response) => {
 
     try {
 
-        let query_text = `SELECT id,name,city,address,star_rating,latitude,longitude,
+        let query_text = `SELECT id,name,description,city,address,star_rating,latitude,longitude,
         (SELECT MIN(price_per_night) FROM rooms 
         WHERE rooms.hotel_id=hotels.id AND is_active=TRUE) AS price_from ,
         (SELECT image_url FROM hotel_images WHERE hotel_images.hotel_id=hotels.id ORDER BY id LIMIT 1) AS main_image 
