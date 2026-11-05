@@ -1,56 +1,59 @@
-
-.navbar {
+﻿.navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 15px 30px;
-    background-color: white;
-    border-bottom: 1px solid #e5e5e5;
     gap: 24px;
+    padding: 16px 30px;
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #E5E5E5;
+    position:sticky; 
+    top:0; 
+    z-index:1000;
 }
 
 .navbar-logo {
+    color: #5C4033;
+    font-family: 'Playfair Display', serif;
     font-size: 24px;
-    font-weight: bold;
+    font-weight: 700;
     text-decoration: none;
-    color: #222;
     white-space: nowrap;
 }
 
 .navbar-links {
     display: flex;
     align-items: center;
-    gap: 35px;
+    gap: 30px;
     margin-left: auto;
 }
 
 .navbar-links a {
-    color: #333;
+    color: #51483F;
+    font-size: 14px;
+    font-weight: 500;
     text-decoration: none;
-    font-size: 15px;
 }
 
 .navbar-links a:hover,
 .navbar-links a.active {
-    font-weight: 600;
-    color: #111;
+    color: #5C4033;
+    font-weight: 700;
 }
 
 .navbar-auth button {
-    padding: 10px 24px;
+    padding: 11px 24px;
+    background-color: #5C4033;
+    color: white;
     border: none;
     border-radius: 6px;
-    background-color: #333;
-    color: white;
-    cursor: pointer;
-    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .navbar-auth button:hover {
-    background-color: #555;
+    background-color: #493226;
 }
 
-/* Hide mobile controls on desktop */
 .navbar-menu-button,
 .navbar-mobile-menu,
 .navbar-overlay {
@@ -66,7 +69,7 @@
     }
 
     .navbar-logo {
-        font-size: 22px;
+        font-size: 20px;
         text-align: center;
     }
 
@@ -81,18 +84,20 @@
         justify-content: center;
         position: absolute;
         left: 16px;
+        padding: 5px;
         background: none;
         border: none;
-        color: #222;
-        cursor: pointer;
-        padding: 5px;
+        color: #5C4033;
     }
 
     .navbar-overlay {
         display: block;
         position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #00000066;
         z-index: 999;
     }
 
@@ -104,32 +109,31 @@
         left: 0;
         width: 280px;
         max-width: 85%;
-        height: 100dvh;
-        background: white;
+        height: 100%;
         padding: 70px 20px 25px;
         gap: 10px;
+        background-color: #FFFFFF;
         z-index: 1000;
-        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
         overflow-y: auto;
     }
 
     .navbar-mobile-menu a,
-    .navbar-mobile-menu > button:not(.navbar-close-button) {
+    .navbar-mobile-menu>button:not(.navbar-close-button) {
         display: block;
         padding: 14px 12px;
-        color: #333;
-        text-decoration: none;
-        font-size: 16px;
+        color: #292421;
         background: none;
         border: none;
-        text-align: left;
-        cursor: pointer;
         border-radius: 6px;
+        text-align: left;
+        text-decoration: none;
+        font-size: 15px;
     }
 
     .navbar-mobile-menu a:hover,
     .navbar-mobile-menu a.active {
-        background: #f2f2f2;
+        background-color: #FFFFFF;
+        color: #5C4033;
         font-weight: 600;
     }
 
@@ -137,9 +141,9 @@
         position: absolute;
         top: 18px;
         right: 18px;
+        padding: 5px;
         background: none;
         border: none;
-        color: #222;
-        cursor: pointer;
+        color: #5C4033;
     }
 }

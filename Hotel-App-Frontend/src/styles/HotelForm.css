@@ -1,149 +1,204 @@
-
-.admin-hotel-form-page {
-    min-height: calc(100vh - 67px);
-    padding: 32px 28px;
-    background: #faf7f2;
-    color: #383029;
-}
-
-.admin-hotel-form-header {
-    max-width: 900px;
-    margin: 0 auto 24px;
-}
-
-.admin-hotel-form-header h1 {
-    margin: 0 0 8px;
-}
-
-.admin-hotel-form-header p {
-    color: #70665d;
-}
-
-.admin-hotel-form {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 28px;
-    background: white;
-    border: 1px solid #e5ded4;
+﻿.hotel-form-container {
+    width: 90%;
+    max-width: 950px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
     border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
 }
 
-.admin-hotel-form h2 {
-    margin: 0 0 12px;
-    font-size: 20px;
+.hotel-form-container h1 {
+    margin: 0 0 25px;
+    color: #5C4033;
+    font-size: 32px;
 }
 
-.admin-hotel-form label {
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.admin-hotel-form input,
-.admin-hotel-form textarea,
-.admin-hotel-form select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px;
-    border: 1px solid #c9bdb0;
-    border-radius: 6px;
-    background: white;
-    color: #383029;
-    font: inherit;
-}
-
-.admin-hotel-form-row {
+.hotel-form {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 }
 
-.admin-hotel-form-row > div {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.admin-hotel-form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-.admin-hotel-form-actions button {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    background: #2e2924;
-    color: white;
-    cursor: pointer;
-}
-
-.admin-hotel-form-actions .admin-hotel-cancel {
-    background: #f2ebe0;
-    color: #383029;
-}
-
-.admin-hotel-form-actions button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.admin-hotel-error {
-    color: #b42318;
-}
-
-.hotel-existing-images {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-.hotel-existing-image {
+.hotel-form-field {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.hotel-existing-image img {
+.hotel-form-field label {
+    color: #292421;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hotel-form-field input, .hotel-form-field select, .hotel-form-field textarea {
     width: 100%;
-    height: 140px;
-    object-fit: cover;
+    padding: 11px 12px;
+    background-color: #FFFFFF;
+    color: #292421;
+    border: 1px solid #E5E5E5;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.hotel-form-field input, .hotel-form-field select {
+    min-height: 44px;
+}
+
+.hotel-form-field textarea {
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.hotel-form-field input[type="file"] {
+    height: auto;
+}
+
+.hotel-form-description, .hotel-form-policies, .hotel-form-amenities, .hotel-form-images {
+    grid-column: 1 / -1;
+}
+
+.hotel-form-amenities h2, .hotel-form-images h2 {
+    margin: 15px 0;
+    color: #5C4033;
+    font-size: 23px;
+}
+
+.hotel-amenities-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.hotel-amenities-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.hotel-amenities-checkboxes input {
+    width: 17px;
+    height: 17px;
+    accent-color: #5C4033;
+}
+
+.hotel-form-image-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.hotel-form-image {
+    width: 180px;
+    padding: 10px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
     border-radius: 8px;
 }
 
-.hotel-existing-image button {
-    padding: 10px;
-    border: none;
+.hotel-form-image img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
     border-radius: 6px;
-    background-color: #2e2924;
-    color: white;
-    cursor: pointer;
 }
 
-.hotel-existing-image button:disabled {
-    opacity: 0.5;
+.hotel-form-image button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px;
+    background-color: #FFFFFF;
+    color: #B42318;
+    border: 1px solid #B42318;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.hotel-form-image button:hover {
+    background-color: #FFF0EE;
+}
+
+.hotel-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    grid-column: 1 / -1;
+    margin-top: 15px;
+}
+
+.hotel-form-actions button {
+    min-width: 130px;
+    height: 44px;
+    padding: 0 20px;
+    background-color: #5C4033;
+    color: #FFFFFF;
+    border: 1px solid #5C4033;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hotel-form-actions button:hover {
+    background-color: #493226;
+}
+
+.hotel-form-actions button[type="button"] {
+    background-color: #FFFFFF;
+    color: #5C4033;
+}
+
+.hotel-form-actions button[type="button"]:hover {
+    background-color: #FFFFFF;
+}
+
+.hotel-form-actions button:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
-    .admin-hotel-form-page {
-        padding: 24px 16px;
+@media (max-width: 768px) {
+    .hotel-form-container {
+        width: 94%;
+        margin: 20px auto;
+        padding: 20px;
     }
 
-    .admin-hotel-form {
-        padding: 18px;
+    .hotel-form-container h1 {
+        font-size: 27px;
     }
 
-    .admin-hotel-form-row {
+    .hotel-form {
         grid-template-columns: 1fr;
     }
 
-    .admin-hotel-form-actions {
-        flex-direction: column;
+    .hotel-amenities-checkboxes {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hotel-form-image {
+        width: 100%;
     }
 }
+
+@media (max-width: 480px) {
+    .hotel-amenities-checkboxes {
+        grid-template-columns: 1fr;
+    }
+
+    .hotel-form-actions {
+        flex-direction: column;
+    }
+
+    .hotel-form-actions button {
+        width: 100%;
+    }
+}
+

@@ -115,7 +115,7 @@ const ManageBookings = () => {
                                 )}
                                 <button onClick={() => navigate(`/admin/bookings/${booking.id}`)}>View Details</button>
                                 {booking.status === "pending" && (
-                                    <button disabled={updatingId !== null} onClick={() => setConfirmBooking({ id: booking.id, status: "cancelled" })}>Cancel</button>
+                                    <button className="cancel-booking-button" disabled={updatingId !== null} onClick={() => setConfirmBooking({ id: booking.id, status: "cancelled" })}>Cancel</button>
                                 )}
                             </div>
                         </div>

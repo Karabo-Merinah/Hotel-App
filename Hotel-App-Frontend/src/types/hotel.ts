@@ -18,6 +18,8 @@ export interface Hotel {
     latitude: number | string | null
     longitude: number | string | null
     images?: HotelImage[]
+    main_image?: string | null
+    price_from?: number | string | null
     amenities?: Amenity[]
 }
 

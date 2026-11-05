@@ -1,42 +1,49 @@
-.profile-container {
-    width: 100%;
+﻿.profile-container {
+    width: 90%;
     max-width: 1100px;
-    margin: 40px auto;
+    margin: 35px auto;
     padding: 20px;
-    box-sizing: border-box;
+}
+
+.profile-container h1 {
+    margin: 10px 0 25px;
+    color: #5C4033;
+    font-size: 32px;
 }
 
 .profile-back-button {
+    padding: 0;
+    margin-bottom: 15px;
     background: none;
     border: none;
-    padding: 0;
-    margin-bottom: 20px;
-    cursor: pointer;
+    color: #5C4033;
+    font-size: 14px;
+    font-weight: 600;
 }
 
-/* User information card */
 .profile-card {
     display: flex;
     align-items: center;
     gap: 25px;
-    padding: 30px;
     margin-top: 20px;
-    background-color: white;
-    border: 1px solid #c9bdb0;
-    border-radius: 9px;
+    padding: 30px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 10px;
 }
 
 .profile-avatar {
-    width: 90px;
-    height: 90px;
-    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+    background-color: #FFFFFF;
+    color: #5C4033;
     border-radius: 50%;
-    background-color: #f7dec2;
     font-size: 36px;
-    font-weight: bold;
+    font-weight: 700;
 }
 
 .profile-user-info {
@@ -44,25 +51,41 @@
 }
 
 .profile-user-info h2 {
-    margin-bottom: 8px;
+    margin: 0 0 10px;
+    color: #5C4033;
+    font-size: 25px;
+}
+
+.profile-user-info p {
+    margin: 8px 0;
+    color: #71685F;
+    font-size: 14px;
 }
 
 .profile-edit-button {
-    width: 170px;
-    height: 40px;
-    border: 1px solid #c9bdb0;
-    border-radius: 9px;
-    background-color: #f7dec2;
-    cursor: pointer;
+    min-width: 150px;
+    height: 42px;
+    padding: 0 18px;
+    background-color: #5C4033;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
-/* Account settings */
+.profile-edit-button:hover {
+    background-color: #493226;
+}
+
 .profile-settings {
     margin-top: 40px;
 }
 
 .profile-settings h2 {
     margin-bottom: 20px;
+    color: #5C4033;
+    font-size: 26px;
 }
 
 .profile-settings-item {
@@ -70,44 +93,78 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    min-height: 54px;
-    margin-bottom: 10px;
-    padding: 12px 20px;
-    background-color: white;
-    border: 1px solid #c9bdb0;
-    border-radius: 9px;
+    min-height: 55px;
+    margin-bottom: 12px;
+    padding: 14px 20px;
+    background-color: #FFFFFF;
+    color: #292421;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
     text-align: left;
-    cursor: pointer;
-}
-
-.profile-settings-item span {
-    font-size: 24px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .profile-settings-item:hover {
-    background-color: #faf7f2;
+    background-color: #FFFFFF;
+}
+
+.profile-settings-item span {
+    color: #5C4033;
+    font-size: 24px;
 }
 
 .profile-logout-button {
     width: 100%;
-    height: 40px;
+    height: 44px;
     margin-top: 20px;
-    border-radius: 5px;
-    cursor: pointer;
+    background-color: #FFFFFF;
+    color: #B42318;
+    border: 1px solid #B42318;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
-/* Mobile */
+.profile-logout-button:hover {
+    background-color: #FFF0EE;
+}
+
+.profile-error {
+    margin: 15px 0;
+    color: #B42318;
+    font-size: 14px;
+}
+
 @media (max-width: 600px) {
     .profile-container {
+        width: 94%;
         margin: 20px auto;
+        padding: 10px;
+    }
+
+    .profile-container h1 {
+        font-size: 27px;
     }
 
     .profile-card {
         flex-direction: column;
+        align-items: center;
+        padding: 22px;
         text-align: center;
+    }
+
+    .profile-avatar {
+        width: 75px;
+        height: 75px;
+        font-size: 30px;
     }
 
     .profile-edit-button {
         width: 100%;
+    }
+
+    .profile-settings h2 {
+        font-size: 23px;
     }
 }

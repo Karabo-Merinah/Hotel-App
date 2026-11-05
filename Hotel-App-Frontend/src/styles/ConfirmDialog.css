@@ -1,54 +1,69 @@
-.confirm-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+﻿.confirm-overlay {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     padding: 20px;
+    background-color: #00000080;
     z-index: 9998;
 }
 
 .confirm-dialog {
-    background-color: white;
-    padding: 25px;
-    border-radius: 10px;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    max-width: 420px;
+    padding: 30px;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px #00000020;
 }
 
 .confirm-dialog h2 {
-    margin-bottom: 12px;
-    font-size: 20px;
-    color: #222;
+    margin: 0 0 15px;
+    color: #5C4033;
+    font-size: 24px;
 }
 
 .confirm-dialog p {
-    margin-bottom: 20px;
-    color: #555;
+    margin: 0 0 25px;
+    color: #51483F;
     font-size: 14px;
+    line-height: 1.7;
 }
 
 .confirm-buttons {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 12px;
 }
 
 .confirm-buttons button {
-    padding: 10px 15px;
+    min-width: 110px;
+    height: 42px;
+    padding: 0 18px;
+    background-color: #FFFFFF;
+    color: #5C4033;
+    border: 1px solid #5C4033;
     border-radius: 6px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    background-color: white;
-    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.confirm-buttons button:hover {
+    background-color: #FFFFFF;
 }
 
 .confirm-buttons button:last-child {
-    background-color: #a12c2c;
-    color: white;
-    border: none;
+    background-color: #5C4033;
+    color: #FFFFFF;
+    border: 1px solid #5C4033;
+}
+
+.confirm-buttons button:last-child:hover {
+    background-color: #493226;
 }
 
 .confirm-buttons button:disabled {
@@ -57,11 +72,17 @@
 }
 
 @media (max-width: 480px) {
+    .confirm-dialog {
+        padding: 22px;
+    }
+    .confirm-dialog h2 {
+        font-size: 22px;
+    }
     .confirm-buttons {
         flex-direction: column;
     }
-
     .confirm-buttons button {
         width: 100%;
     }
 }
+

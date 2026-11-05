@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux"
 import { addBooking } from "../features/bookingSlice"
 import axios from "axios"
 import Popup from "../components/Popup"
+import  "../styles/Bookings.css"
 
 
 const Booking = () => {

@@ -30,7 +30,7 @@ const Home = () => {
             if (searchCity !== "") {
                 url = `${url}?city=${encodeURIComponent(searchCity)}`
             }
-           const response = await api.get(url)
+            const response = await api.get(url)
             //store the hotels that are returned 
             setHotels(response.data)
         }
@@ -137,15 +137,29 @@ const Home = () => {
                 }
                 {!loading && hotels.map((hotel) => (
                     <div className="hotel-card" key={hotel.id}>
-                        <Texts variant="h3">{hotel.name}</Texts>
-                        <Texts variant="p">City: {hotel.city}</Texts>
-                        <Texts variant="p">Address:{hotel.address}</Texts>
-                        <Texts variant="p">{hotel.description}</Texts>
-                        <Texts variant="span">Rating: {hotel.star_rating} Stars</Texts>
-                        <div className="hotel-card-actions">
-                            <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests,numberOfRooms } })}>View Hotel</button>
+                        {hotel.main_image ? (
+                            <img className="hotel-card-image" src={hotel.main_image} alt={hotel.name} />
+                        ) : (
+                            <div className="hotel-card-no-image">No image available</div>
+                        )}
+
+                        <div className="hotel-card-content">
+                            <Texts variant="h3">{hotel.name}</Texts>
+                            <Texts variant="p">{hotel.city}, {hotel.address}</Texts>
+                            <Texts variant="p">{hotel.description}</Texts>
+                            <Texts variant="p">Rating: {hotel.star_rating} Stars</Texts>
+                            <div className="hotel-card-bottom">
+                                <div className="hotel-card-price">
+                                    {hotel.price_from !== null && hotel.price_from !== undefined ? (
+                                        <Texts variant="p">From R{hotel.price_from} / night</Texts>
+                                    ) : (
+                                        <Texts variant="p">Price unavailable</Texts>
+                                    )}
+                                </div>
+
+                                <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests, numberOfRooms } })}>View Hotel</button>
+                            </div>
                         </div>
-                        <hr />
                     </div>
                 ))}
             </div>

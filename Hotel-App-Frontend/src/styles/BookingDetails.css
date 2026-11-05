@@ -1,52 +1,106 @@
+﻿
 .booking-details-container {
+    width: 90%;
     max-width: 900px;
-    margin: 40px auto;
+    margin: 35px auto;
     padding: 20px;
 }
+
+.booking-details-container h1 {
+    margin: 15px 0 25px;
+    color: #5C4033;
+    font-size: 32px;
+}
+
 .booking-details-container > button {
+    padding: 0;
+    margin-bottom: 15px;
     background: none;
     border: none;
-    cursor: pointer;
-    margin-bottom: 20px;
+    color: #5C4033;
+    font-size: 14px;
+    font-weight: 600;
 }
+
 .booking-details-card {
-    background: white;
-    border: 1px solid #c9bdb0;
-    border-radius: 10px;
-    padding: 30px;
-    margin-top: 25px;
-}
-.booking-details-card p {
-    margin: 15px 0;
-}
-@media (max-width: 600px) {
-    .booking-details-container {
-        margin: 20px auto;
-    }
-    .booking-details-card {
-        padding: 20px;
-    }
-}
-
-.cancel-booking-button {
-    background-color: #fff;
-    color: #c0392b;
-    border: 1px solid #c0392b;
-    border-radius: 5px;
-    padding: 12px 20px;
     margin-top: 20px;
-    cursor: pointer;
-}
-.cancel-booking-button:hover {
-    background-color: #fff0ee;
+    padding: 30px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 10px;
 }
 
-.cancel-booking-button:disabled {
+.booking-details-card h2 {
+    margin: 0 0 20px;
+    color: #5C4033;
+    font-size: 25px;
+}
+
+.booking-details-card p {
+    margin: 13px 0;
+    color: #51483F;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.booking-details-card button {
+    margin: 15px 12px 0 0;
+    padding: 12px 20px;
+    background-color: #5C4033;
+    color: #FFFFFF;
+    border: 1px solid #5C4033;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.booking-details-card button:hover {
+    background-color: #493226;
+}
+
+.booking-details-card .cancel-booking-button {
+    background-color: #FFFFFF;
+    color: #B42318;
+    border: 1px solid #B42318;
+}
+
+.booking-details-card .cancel-booking-button:hover {
+    background-color: #FFF0EE;
+}
+
+.booking-details-card button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
 .booking-success {
-    color: green;
     margin-top: 15px;
+    color: #287A45;
+    font-size: 14px;
 }
+
+@media (max-width: 600px) {
+    .booking-details-container {
+        width: 94%;
+        margin: 20px auto;
+        padding: 10px;
+    }
+
+    .booking-details-container h1 {
+        font-size: 27px;
+    }
+
+    .booking-details-card {
+        padding: 18px;
+    }
+
+    .booking-details-card h2 {
+        font-size: 22px;
+    }
+
+    .booking-details-card button {
+        width: 100%;
+        margin: 10px 0 0;
+    }
+}
+

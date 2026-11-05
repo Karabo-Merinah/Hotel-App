@@ -1,3 +1,4 @@
+
 import type { Hotel, Room, HotelReviews } from "../types/hotel"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
@@ -20,9 +21,7 @@ const HotelDetails = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-    //getting search details from home page 
     const { checkIn = "", checkOut = "", guests = 1, numberOfRooms = 1 } = location.state || {}
-
     const [hotel, setHotel] = useState<Hotel | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
@@ -43,7 +42,7 @@ const HotelDetails = () => {
     // Check if the current hotel is in favourites
     const isFavourite = favourites.some(hotel => hotel.id === Number(id))
 
-
+    // Get the selected hotel details from the backend
     const getHotel = async () => {
         try {
             setLoading(true)
@@ -59,6 +58,8 @@ const HotelDetails = () => {
             setLoading(false)
         }
     }
+
+    // Get rooms belonging to the selected hotel
     const getRooms = async () => {
         try {
             setRoomsLoading(true)
@@ -82,7 +83,8 @@ const HotelDetails = () => {
             setRoomsLoading(false)
         }
     }
-    //checks if the hotel is already saved 
+
+    // Check if the hotel is already saved in the user's favourites
     const checkFavourite = async () => {
         const token = localStorage.getItem("token")
         if (!token || !id) {
@@ -101,17 +103,19 @@ const HotelDetails = () => {
             return false
         }
     }
+
+    // Check favourites when the hotel ID changes
     useEffect(() => {
         checkFavourite()
     }, [id])
 
-
-    //remove the hotel from favourites 
+    // Add or remove the selected hotel from favourites
     const toggleFavourite = async () => {
         if (updatingFavourite || !id) return
 
         const token = localStorage.getItem("token")
 
+        // Redirect users to login if they are not authenticated
         if (!token) {
             navigate("/login", { state: { from: location.pathname } })
             return
@@ -126,9 +130,7 @@ const HotelDetails = () => {
                 await api.delete(`/api/favourites/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
-
                 dispatch(removeFavourite(parseInt(id)))
-
                 setPopupType("success")
                 setPopup("Hotel removed from favourites successfully.")
 
@@ -162,8 +164,7 @@ const HotelDetails = () => {
             setConfirmRemove(false)
         }
     }
-
-    // share button of the accomodation sharing 
+    // Share the hotel link or copy it to the clipboard
     const shareHotel = async () => {
         if (!hotel) return
 
@@ -184,7 +185,7 @@ const HotelDetails = () => {
             setPopup("Could not share hotel.")
         }
     }
-
+    // Get guest reviews for the selected hotel
     const getHotelReviews = async () => {
         try {
             setReviewsError("")
@@ -197,12 +198,14 @@ const HotelDetails = () => {
             setReviewsError("Could not load hotel reviews.")
         }
     }
+    // Load hotel details, rooms and reviews
     useEffect(() => {
         getHotel()
         getRooms()
         getHotelReviews()
     }, [id])
 
+    // Automatically close popup messages after 3 seconds
     useEffect(() => {
         if (!popup) return
 
@@ -214,6 +217,7 @@ const HotelDetails = () => {
     }, [popup])
 
 
+    // Clear the popup message from navigation state
     useEffect(() => {
         if (location.state?.popup) {
             navigate(location.pathname, {
@@ -232,22 +236,28 @@ const HotelDetails = () => {
     if (!hotel) {
         return <Texts variant="p">Hotel not found.</Texts>
     }
+
     return (
         <div className="hotel-details">
+            {/* Display popup messages and confirmation dialog */}
             {popup && <Popup message={popup} type={popupType} onClose={() => setPopup("")} />}
             {confirmRemove && (
                 <ConfirmDialog title="Remove Favourite" message="Are you sure you want to remove this hotel from your favourites?" onConfirm={toggleFavourite} onClose={() => setConfirmRemove(false)} loading={updatingFavourite} />
             )}
+
             <Texts variant="h1">{hotel.name}</Texts>
             <div className="hotel-images">
                 {hotel.images && hotel.images.map((image) => (
                     <img key={image.id} src={image.image_url} alt={hotel.name} />
                 ))}
             </div>
+
+            {/* Favourite and share buttons */}
             <div className="hotel-actions">
                 <button type="button" className="hotel-favourite-button" onClick={() => isFavourite ? setConfirmRemove(true) : toggleFavourite()} disabled={updatingFavourite} title={isFavourite ? "Remove from Favourites" : "Add to Favourites"} aria-label={isFavourite ? "Remove from Favourites" : "Add to Favourites"}><Heart size={22} fill={isFavourite ? "#c0392b" : "none"} color={isFavourite ? "#c0392b" : "#333"} /></button>
                 <button type="button" className="hotel-share-button" onClick={shareHotel} title="Share Accommodation" aria-label="Share Accommodation"><Share2 size={22} /></button>
             </div>
+            {/* Hotel description and general information */}
             <Texts variant="p">{hotel.description}</Texts>
             <Texts variant="p">City: {hotel.city}</Texts>
             <Texts variant="p">Address: {hotel.address}</Texts>
@@ -267,14 +277,8 @@ const HotelDetails = () => {
                     <Texts variant="p">No amenities listed.</Texts>
                 )}
             </div>
-            <div className="hotel-location">
-                <Texts variant="h2">Hotel Location</Texts>
-                {hotel.latitude != null && hotel.longitude != null ? (
-                    <HotelMap name={hotel.name} address={hotel.address} latitude={parseFloat(String(hotel.latitude))} longitude={parseFloat(String(hotel.longitude))} />
-                ) : (
-                    <Texts variant="p">Hotel location is not available.</Texts>
-                )}
-            </div>
+
+            {/* Display available rooms for the selected hotel */}
             <div className="hotel-rooms">
                 <Texts variant="h2">Our Rooms</Texts>
                 {roomsError && <Texts variant="p">{roomsError}</Texts>}
@@ -294,6 +298,8 @@ const HotelDetails = () => {
                     ))
                 )}
             </div>
+
+            {/* Display guest reviews and average hotel rating */}
             <div className="hotel-reviews">
                 <Texts variant="h2">Guest Reviews</Texts>
                 {reviewsError && (
@@ -322,9 +328,18 @@ const HotelDetails = () => {
                     </>
                 )}
             </div>
+
+            {/* Display the hotel's location on the map */}
+            <div className="hotel-location">
+                <Texts variant="h2">Hotel Location</Texts>
+                {hotel.latitude != null && hotel.longitude != null ? (
+                    <HotelMap name={hotel.name} address={hotel.address} latitude={parseFloat(String(hotel.latitude))} longitude={parseFloat(String(hotel.longitude))} />
+                ) : (
+                    <Texts variant="p">Hotel location is not available.</Texts>
+                )}
+            </div>
         </div>
     )
 }
 
 export default HotelDetails
-

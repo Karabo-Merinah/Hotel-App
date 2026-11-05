@@ -1,0 +1,45 @@
+﻿
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+:root {
+    font-family: 'Montserrat', sans-serif;
+    color: #292421;
+    background-color: #FFFFFF;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+}
+
+button, input, select, textarea {
+    font-family: 'Montserrat', sans-serif;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+}
+
+a {
+    color: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid #5C4033;
+    outline-offset: 1px;
+}
+

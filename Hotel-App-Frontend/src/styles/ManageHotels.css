@@ -1,77 +1,129 @@
-
-.manage-hotels {
-    min-height: calc(100vh - 67px);
-    background: #faf7f2;
-    padding: 32px 28px;
-    color: #383029;
+﻿.manage-hotels {
+    width: 90%;
+    max-width: 1150px;
+    margin: 30px auto;
+    padding: 20px;
 }
 
 .manage-hotels-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     gap: 20px;
-    margin-bottom: 28px;
+    margin-bottom: 30px;
+}
+
+.manage-hotels-header h1 {
+    margin: 0 0 10px;
+    color: #5C4033;
+    font-size: 32px;
 }
 
 .manage-hotels-header p {
-    margin-top: 8px;
-    color: #70665d;
+    margin: 0;
+    color: #71685F;
+    font-size: 14px;
 }
 
-.manage-hotels-header button,
-.manage-hotel-actions button {
-    padding: 12px 18px;
+.manage-hotels-header button {
+    padding: 12px 22px;
+    background-color: #5C4033;
+    color: #FFFFFF;
     border: none;
     border-radius: 6px;
-    background: #2e2924;
-    color: white;
-    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.manage-hotels-header button:hover {
+    background-color: #493226;
 }
 
 .manage-hotels-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 18px;
 }
 
 .manage-hotel-card {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     gap: 20px;
-    padding: 22px;
-    background: white;
-    border: 1px solid #e5ded4;
+    padding: 25px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
     border-radius: 10px;
 }
 
+.manage-hotel-info {
+    flex: 1;
+}
+
 .manage-hotel-info h3 {
-    margin: 0 0 8px;
+    margin: 0 0 10px;
+    color: #5C4033;
+    font-size: 22px;
 }
 
 .manage-hotel-info p {
     margin: 0;
-    color: #70665d;
+    color: #71685F;
+    font-size: 14px;
 }
 
 .manage-hotel-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+}
+.manage-hotel-actions button {
+    min-width: 115px;
+    height: 42px;
+    padding: 0 15px;
+    background-color: #5C4033;
+    color: #FFFFFF;
+    border: 1px solid #5C4033;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.manage-hotel-actions button:hover {
+    background-color: #493226;
+}
+.manage-hotel-actions button:last-child {
+    background-color: #FFFFFF;
+    color: #5C4033;
+}
+.manage-hotel-actions button:last-child:hover {
+    background-color: #FFFFFF;
 }
 
 @media (max-width: 600px) {
     .manage-hotels {
-        padding: 24px 16px;
+        width: 94%;
+        padding: 10px;
     }
-
-    .manage-hotels-header,
+    .manage-hotels-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .manage-hotels-header h1 {
+        font-size: 27px;
+    }
+    .manage-hotels-header button {
+        width: 100%;
+    }
     .manage-hotel-card {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
+        padding: 18px;
     }
-
     .manage-hotel-actions {
-        flex-wrap: wrap;
+        width: 100%;
+        flex-direction: column;
+    }
+    .manage-hotel-actions button {
+        width: 100%;
     }
 }
+
