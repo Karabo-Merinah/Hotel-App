@@ -1,22 +1,21 @@
 import { Pool } from "pg"
 import dotenv from "dotenv"
 
+
 dotenv.config()
 
 //creating connection
 const connectionPool = new Pool({ connectionString: process.env.DATABASE_URL })
-
-//testing connection 
-
+// Testing connection
 export const testConnection = async () => {
     try {
         const client = await connectionPool.connect()
-        console.log("Connected successfully")
+        console.log("Database connected successfully")
         client.release()
     }
     catch (error) {
-        console.log(error)
+        console.log("Database connection failed:", error)
     }
 }
 
-export default connectionPool;
+export default connectionPool
