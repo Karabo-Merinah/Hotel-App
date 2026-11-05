@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Texts } from "../components/Texts/texts"
 import api from "../api/axios"
@@ -23,7 +22,7 @@ const Register = () => {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
+    const [passwordFocused, setPasswordFocused] = useState(false)
     // Register a new user
     const registering = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -51,8 +50,8 @@ const Register = () => {
             newErrors.password = "Password is required."
         }
         // Check if the password has at least 8 characters
-        else if (password.length < 8) {
-            newErrors.password = "Password must be at least 8 characters."
+        else if (password.length < 8 || password.length > 10) {
+            newErrors.password = "Password must contain 8 to 10 characters."
         }
 
         // Check if the confirm password is provided
@@ -184,9 +183,21 @@ const Register = () => {
                 <div className="register-password">
                     <label htmlFor="password">Password</label>
                     <div className="register-password-wrapper">
-                        <input id="password" className="register-password-input" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+                        <input id="password" className="register-password-input" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)} minLength={8} maxLength={10} required />
                         <button type="button" className="register-password-toggle" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                     </div>
+                    {passwordFocused && (
+                        <div className="register-password-requirements">
+                            <p>Password must contain:</p>
+                            <ul>
+                                <li>8 to 10 characters</li>
+                                <li>At least one lowercase letter</li>
+                                <li>At least one uppercase letter</li>
+                                <li>At least one number</li>
+                                <li>At least one special character (@#$%&*!?)</li>
+                            </ul>
+                        </div>
+                    )}
                     {errors.password && <Texts variant="p" className="register-error">{errors.password}</Texts>}
                 </div>
                 <div className="register-confirm-password">
