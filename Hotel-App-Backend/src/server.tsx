@@ -20,7 +20,7 @@ const port = process.env.PORT || 5000
 
 app.use(cors({
     origin: ["http://localhost:5173",
-        "https://wander-hotel-app.netlify.app/"
+        "https://wander-hotel-app.netlify.app"
     ]
 }))
 
