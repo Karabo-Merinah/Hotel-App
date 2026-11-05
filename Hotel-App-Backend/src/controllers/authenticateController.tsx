@@ -15,13 +15,12 @@ const create_token = (userId: number, role: string) => {
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-
 export const registerUser = async (req: Request, res: Response) => {
     try {
         const full_name = req.body.name
         const email = req.body.email
-        const password = req.body.password
-        const confirm_password = req.body.confirm_password
+        const password: string = req.body.password
+        const confirm_password: string = req.body.confirm_password
 
         //check if all fields are filled in 
 
@@ -38,17 +37,41 @@ export const registerUser = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Confirm password is required ." })
         }
 
-        //checks if passwords minimum length is met 
-
-        if (password.length < 8) {
-            return res.status(400).json({ message: "Password  must be at least 8 characters ." })
+        // Check password length
+        if (password.length < 8 || password.length > 10) {
+            return res.status(400).json({ message: "Password must contain 8 to 10 characters." })
         }
-        if (confirm_password.length < 8) {
-            return res.status(400).json({ message: "Password  must be at least 8 characters ." })
+        // Check lowercase letter
+        const hasLowercase = password.split("").some((letter: string) => letter >= "a" && letter <= "z")
+
+        if (!hasLowercase) {
+            return res.status(400).json({ message: "Password must contain a lowercase letter." })
         }
 
-        //checks if password and confirm password are the same 
+        // Check uppercase letter
+        const hasUppercase = password.split("").some((letter: string) => letter >= "A" && letter <= "Z")
 
+        if (!hasUppercase) {
+            return res.status(400).json({ message: "Password must contain an uppercase letter." })
+        }
+
+        // Check number
+        const hasNumber = password.split("").some((letter: string) => letter >= "0" && letter <= "9")
+
+        if (!hasNumber) {
+            return res.status(400).json({ message: "Password must contain a number." })
+        }
+        // Check special character
+        const specialCharacters = "@#$%&*!?"
+        const hasSpecialCharacter = password.split("").some((letter: string) =>
+            specialCharacters.includes(letter)
+        )
+        if (!hasSpecialCharacter) {
+            return res.status(400).json({
+                message: "Password must contain a special character (@, #, $, %, &, *, !, ?)."
+            })
+        }
+        // Check if passwords match
         if (password !== confirm_password) {
             return res.status(400).json({ message: "Passwords do not match." })
         }
@@ -58,9 +81,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const email_re2 = email.includes(" ")
 
         if (!email_re1 || email_re2) {
-            return res.status(400).json({
-                message: "Please enter a valid Gmail address. Example: example@gmail.com"
-            })
+            return res.status(400).json({ message: "Please enter a valid Gmail address. Example: example@gmail.com" })
         }
 
         //check  if the email is already used  
