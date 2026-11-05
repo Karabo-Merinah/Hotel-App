@@ -7,6 +7,8 @@ import "../styles/Favourites.css"
 import { useDispatch, useSelector } from "react-redux"
 import { setFavourites, removeFavourite } from "../features/favouriteSlice"
 import type { RootState } from "../app/store"
+import Popup from "../components/Popup"
+import ConfirmDialog from "../components/ConfirmDialog"
 
 
 const Favourites = () => {
@@ -15,6 +17,10 @@ const Favourites = () => {
     const [error, setError] = useState("")
     const [removingId, setRemovingId] = useState<number | null>(null)
     const dispatch = useDispatch()
+    const [popup, setPopup] = useState("")
+    const [popupType, setPopupType] = useState<"success" | "error">("success")
+    const [confirmId, setConfirmId] = useState<number | null>(null)
+
 
     // Get favourite hotels from Redux
     const favourites = useSelector((state: RootState) => state.favourites)
@@ -44,39 +50,61 @@ const Favourites = () => {
         }
     }
 
-    //removes hotel from favourites 
+    // Remove hotel from favourites
     const removingFavourite = async (hotelId: number) => {
+        if (removingId !== null) return
+
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login", {
-                state: { from: "/favourites" }
-            })
+            navigate("/login", { state: { from: "/favourites" } })
             return
         }
+
         try {
             setRemovingId(hotelId)
             setError("")
-            //removes the favourite from the backend
+            setPopup("")
+
+            // Remove the favourite from the backend
             await api.delete(`/api/favourites/${hotelId}`, { headers: { Authorization: `Bearer ${token}` } })
-            // Remove the hotel from state
+            // Update Redux
             dispatch(removeFavourite(hotelId))
-        }
-        catch (error) {
+            // Close confirmation dialog
+            setConfirmId(null)
+            // Display success popup
+            setPopupType("success")
+            setPopup("Hotel removed from favourites successfully.")
+
+        } catch (error) {
             console.log(error)
-            setError("Could not remove hotel from favourites.")
-        }
-        finally {
+            setPopupType("error")
+            setPopup("Could not remove hotel from favourites.")
+            setConfirmId(null)
+        } finally {
             setRemovingId(null)
         }
     }
+
     useEffect(() => {
         getFavourites()
     }, [])
+
+    // Automatically close popup after 3 seconds
+    useEffect(() => {
+        if (!popup) return
+        const timer = setTimeout(() => { setPopup("") }, 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
     if (loading) {
         return <Texts variant="p">Loading favourites...</Texts>
     }
     return (
         <div className="favourites-container">
+            {popup && <Popup message={popup} type={popupType} onClose={() => setPopup("")} />}
+            {confirmId !== null && (
+                <ConfirmDialog title="Remove Favourite" message="Are you sure you want to remove this hotel from your favourites?" onConfirm={() => removingFavourite(confirmId)} onClose={() => setConfirmId(null)} loading={removingId !== null} />
+            )}
             <button className="favourites-back" type="button" onClick={() => navigate("/profile")}>← Back</button>
             <Texts variant="h1">My Favourites</Texts>
             <Texts variant="p">Hotels you've saved for later.</Texts>
@@ -105,9 +133,7 @@ const Favourites = () => {
                             </div>
                             <div className="favourite-actions">
                                 <button type="button" onClick={() => navigate(`/hotels/${hotel.id}`)}>View Hotel </button>
-                                <button type="button" className="remove-favourite" onClick={() => removingFavourite(hotel.id)} disabled={removingId === hotel.id}><Heart size={18} fill="currentColor" />
-                                    {removingId === hotel.id ? "Removing..." : "Remove"}
-                                </button>
+                                <button type="button" className="remove-favourite" onClick={() => setConfirmId(hotel.id)} disabled={removingId === hotel.id}><Heart size={18} fill="currentColor" />{removingId === hotel.id ? "Removing..." : "Remove"}</button>
                             </div>
                         </div>
                     ))}

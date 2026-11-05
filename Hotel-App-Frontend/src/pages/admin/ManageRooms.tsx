@@ -4,6 +4,9 @@ import type { Hotel } from "../../types/hotel"
 import type { AdminRoom } from "../../types/admin"
 import "../../styles/ManageRooms.css"
 import { Texts } from "../../components/Texts/texts"
+import Popup from "../../components/Popup"
+import ConfirmDialog from "../../components/ConfirmDialog"
+
 
 
 const ManageRooms = () => {
@@ -19,9 +22,11 @@ const ManageRooms = () => {
     const [isActive, setIsActive] = useState(true)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
-    const [message, setMessage] = useState("")
     const [selectedImages, setSelectedImages] = useState<File[]>([])
     const [existingImages, setExistingImages] = useState<{ id: number, image_url: string }[]>([])
+    const [popup, setPopup] = useState("")
+    const [confirmImageId, setConfirmImageId] = useState<number | null>(null)
+    const [deletingImage, setDeletingImage] = useState(false)
 
     const token = localStorage.getItem("token")
 
@@ -74,7 +79,7 @@ const ManageRooms = () => {
         setRooms([])
         clearForm()
         setError("")
-        setMessage("")
+        setPopup("")
 
         if (id) {
             getRooms(id)
@@ -84,7 +89,7 @@ const ManageRooms = () => {
     const selectRoom = (id: string) => {
         setRoomId(id)
         setError("")
-        setMessage("")
+        setPopup("")
 
         if (!id) {
             clearForm()
@@ -115,23 +120,26 @@ const ManageRooms = () => {
         }
     }
 
+    // Delete a room image after confirmation
     const deleteRoomImage = async (imageId: number) => {
-        if (!window.confirm("Are you sure you want to delete this image?")) {
-            return
-        }
-
         try {
+            setDeletingImage(true)
             setError("")
 
             await api.delete(`/api/rooms/images/${imageId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
-
-            setExistingImages(existingImages.filter(image => image.id !== imageId))
-            setMessage("Room image deleted successfully.")
-        } catch (error) {
+            // Remove the deleted image from the page
+            setExistingImages(existingImages.filter((image) => image.id !== imageId))
+            setPopup("Room image deleted successfully.")
+        }
+        catch (error) {
             console.log(error)
             setError("Could not delete room image.")
+        }
+        finally {
+            setDeletingImage(false)
+            setConfirmImageId(null)
         }
     }
 
@@ -143,7 +151,7 @@ const ManageRooms = () => {
         }
         setLoading(true)
         setError("")
-        setMessage("")
+        setPopup("")
 
         try {
             const roomData = {
@@ -167,7 +175,7 @@ const ManageRooms = () => {
             if (selectedImages.length > 0) {
                 await uploadRoomImages(savedRoomId)
             }
-            setMessage(roomId ? "Room updated successfully." : "Room added successfully.")
+            setPopup(roomId ? "Room updated successfully." : "Room added successfully.")
             clearForm()
             getRooms(hotelId)
         }
@@ -179,8 +187,21 @@ const ManageRooms = () => {
             setLoading(false)
         }
     }
+
+    useEffect(() => {
+        if (!popup) return
+
+        const timer = setTimeout(() => setPopup(""), 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
+
     return (
         <div className="admin-room-page">
+            {popup && <Popup message={popup} type="success" onClose={() => setPopup("")} />}
+            {confirmImageId !== null && (
+                <ConfirmDialog title="Delete Room Image" message="Are you sure you want to delete this room image?" onConfirm={() => deleteRoomImage(confirmImageId)} onClose={() => setConfirmImageId(null)} loading={deletingImage} />
+            )}
             <Texts variant="h1">Room & Pricing</Texts>
             <form className="admin-room-form" onSubmit={saveRoom}>
                 <div className="admin-room-field">
@@ -234,7 +255,7 @@ const ManageRooms = () => {
                             {existingImages.map((image) => (
                                 <div className="admin-room-image" key={image.id}>
                                     <img src={image.image_url} alt="Room" />
-                                    <button type="button" onClick={() => deleteRoomImage(image.id)}>Delete image</button>
+                                    <button type="button" onClick={() => setConfirmImageId(image.id)} disabled={deletingImage}>Delete image</button>
                                 </div>
                             ))}
                         </div>
@@ -249,7 +270,6 @@ const ManageRooms = () => {
                 </div>
             </form>
             {error && <Texts variant="p">{error}</Texts>}
-            {message && <Texts variant="p">{message}</Texts>}
         </div>
     )
 }

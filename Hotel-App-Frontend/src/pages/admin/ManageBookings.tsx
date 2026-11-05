@@ -5,6 +5,9 @@ import api from "../../api/axios"
 import { Texts } from "../../components/Texts/texts"
 import type { AdminReservation } from "../../types/admin"
 import "../../styles/ManageBookings.css"
+import Popup from "../../components/Popup"
+import ConfirmDialog from "../../components/ConfirmDialog"
+
 
 const ManageBookings = () => {
     const navigate = useNavigate()
@@ -12,6 +15,9 @@ const ManageBookings = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [updatingId, setUpdatingId] = useState<number | null>(null)
+    const [popup, setPopup] = useState("")
+    const [confirmBooking, setConfirmBooking] = useState<{ id: number, status: string } | null>(null)
+
 
     const getBookings = async () => {
         try {
@@ -30,27 +36,30 @@ const ManageBookings = () => {
         }
     }
 
+    // Update a reservation after confirmation
     const updateStatus = async (id: number, status: string) => {
-        const confirmed = window.confirm(
-            `Are you sure you want to ${status === "confirmed" ? "approve" : "cancel"} this reservation?`
-        )
-        if (!confirmed) return
-
         try {
             setUpdatingId(id)
             setError("")
+            setPopup("")
 
             const token = localStorage.getItem("token")
-            await api.put(`/api/admin/bookings/${id}/status`, { status },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            )
-            await getBookings()
-        } catch (error) {
+            await api.put(`/api/admin/bookings/${id}/status`, { status }, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            // Update the reservation status on the page
+            setBookings(bookings.map((booking) =>
+                booking.id === id ? { ...booking, status } : booking
+            ))
+
+            // Display a success notification
+            setPopup(status === "confirmed" ? "Reservation approved successfully." : "Reservation cancelled successfully.")
+        }
+        catch (error) {
             console.log(error)
+
+            // Display an inline error if updating fails
             if (axios.isAxiosError(error)) {
                 setError(error.response?.data?.message || "Could not update reservation.")
             } else {
@@ -59,16 +68,29 @@ const ManageBookings = () => {
         }
         finally {
             setUpdatingId(null)
+            setConfirmBooking(null)
         }
     }
     useEffect(() => {
         getBookings()
     }, [])
+
+
+    useEffect(() => {
+        if (!popup) return
+        const timer = setTimeout(() => setPopup(""), 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
     const formatDate = (date: string) => {
         return date.split("T")[0]
     }
     return (
         <div className="manage-bookings">
+            {popup && <Popup message={popup} type="success" onClose={() => setPopup("")} />}
+
+            {confirmBooking && (
+                <ConfirmDialog title={confirmBooking.status === "confirmed" ? "Approve Reservation" : "Cancel Reservation"} message={confirmBooking.status === "confirmed" ? "Are you sure you want to approve this reservation?" : "Are you sure you want to cancel this reservation?"} onConfirm={() => updateStatus(confirmBooking.id, confirmBooking.status)} onClose={() => setConfirmBooking(null)} loading={updatingId !== null} />)}
             <Texts variant="h1">Reservations</Texts>
             {loading && <p>Loading reservations...</p>}
             {error && <p>{error}</p>}
@@ -89,13 +111,11 @@ const ManageBookings = () => {
                             </div>
                             <div className="admin-booking-actions">
                                 {booking.status === "pending" && (
-                                    <button disabled={updatingId === booking.id} onClick={() => updateStatus(booking.id, "confirmed")}> {updatingId === booking.id ? "Updating..." : "Approve"}
-                                    </button>
+                                    <button disabled={updatingId !== null} onClick={() => setConfirmBooking({ id: booking.id, status: "confirmed" })}>Approve</button>
                                 )}
                                 <button onClick={() => navigate(`/admin/bookings/${booking.id}`)}>View Details</button>
                                 {booking.status === "pending" && (
-                                    <button disabled={updatingId === booking.id} onClick={() => updateStatus(booking.id, "cancelled")}> Cancel
-                                    </button>
+                                    <button disabled={updatingId !== null} onClick={() => setConfirmBooking({ id: booking.id, status: "cancelled" })}>Cancel</button>
                                 )}
                             </div>
                         </div>

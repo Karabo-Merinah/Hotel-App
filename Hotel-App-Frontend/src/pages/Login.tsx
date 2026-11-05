@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
@@ -7,6 +7,7 @@ import { GoogleLogin } from "@react-oauth/google"
 import { useDispatch } from "react-redux"
 import { loginSuccess } from "../features/authSlice"
 import { Eye, EyeOff } from "lucide-react"
+import Popup from "../components/Popup"
 
 const Login = () => {
 
@@ -15,22 +16,22 @@ const Login = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
-    const [errors, setErrors] = useState("")
     const dispatch = useDispatch()
     const [showPassword, setShowPassword] = useState(false)
+    const [popup, setPopup] = useState("")
 
     // Log in the user using email and password
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setErrors("")
+        setPopup("")
 
         //validates login inputs
         if (!email.trim()) {
-            setErrors("Email is required.")
+            setPopup("Email is required.")
             return
         }
         if (!password) {
-            setErrors("Password is required.")
+            setPopup("Password is required.")
             return
         }
 
@@ -52,15 +53,16 @@ const Login = () => {
                 token: response.data.token
             }))
 
-            // Redirect the user to the page they wanted to visit 
-            const from = location.state?.from || "/"
+            // Redirect admins to the admin dashboard and regular users to their previous page
+            const role = response.data.user.role
+            const from = role === "admin" ? "/admin" : location.state?.from || "/"
 
             //stores booking details when redirecting
             navigate(from, { replace: true, state: { checkIn: location.state?.checkIn, checkOut: location.state?.checkOut, guests: location.state?.guests, numberOfRooms: location.state?.numberOfRooms } })
 
         } catch (error) {
             console.log(error)
-            setErrors("Invalid email or password.")
+            setPopup("Invalid email or password.")
 
         } finally {
             // Stop loading whether login succeeds or fails
@@ -72,7 +74,7 @@ const Login = () => {
     const GoogleLoginOAuth = async (credential: string) => {
         try {
             setLoading(true)
-            setErrors("")
+            setPopup("")
 
             // Send the Google credential to the backend for verification
             const response = await api.post("/api/auth/google", {
@@ -87,8 +89,10 @@ const Login = () => {
                 user: response.data.user,
                 token: response.data.token
             }))
-            // Redirect the user while storing booking details
-            const from = location.state?.from || "/"
+            // Redirect Google users based on their role
+            const role = response.data.user.role
+            const from = role === "admin" ? "/admin" : location.state?.from || "/"
+
             navigate(from, {
                 replace: true, state: {
                     checkIn: location.state?.checkIn,
@@ -100,15 +104,22 @@ const Login = () => {
         }
         catch (error) {
             console.log(error)
-            setErrors("Google login failed. Please try again.")
+            setPopup("Google login failed. Please try again.")
         }
         finally {
             setLoading(false)
         }
     }
 
+    useEffect(() => {
+        if (!popup) return
+        const timer = setTimeout(() => setPopup(""), 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
     return (
         <div className="login-container">
+              {popup && <Popup message={popup} type="error" onClose={() => setPopup("")} />}
             <div className="login-heading">
                 <Texts variant="h1">Welcome Back</Texts>
                 <Texts variant="p">Login to your Wander Inn account.</Texts>
@@ -131,14 +142,13 @@ const Login = () => {
                 <div className="login-forgot-password">
                     <button className="login-forgot-password-button" type="button" onClick={() => navigate("/forgot-password")}>Forgot Password?</button>
                 </div>
-                {errors && <Texts variant="p" className="login-error">{errors}</Texts>}
                 <button className="login-button" type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
             </form>
             <div className="login-divider">
                 <Texts variant="p">OR</Texts>
             </div>
             <div className="login-google">
-                <GoogleLogin onSuccess={(response) => { if (response.credential) GoogleLoginOAuth(response.credential) }} onError={() => setErrors("Google login failed.")} />
+                <GoogleLogin onSuccess={(response) => { if (response.credential) GoogleLoginOAuth(response.credential); else setPopup("Google login failed.") }} onError={() => setPopup("Google login failed.")} />
             </div>
             {/* Navigate to registration if the user has no account */}
             <div className="login-register">

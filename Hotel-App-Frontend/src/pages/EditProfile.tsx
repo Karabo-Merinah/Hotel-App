@@ -5,6 +5,8 @@ import api from "../api/axios"
 import { useNavigate } from "react-router-dom"
 import { Texts } from "../components/Texts/texts"
 import "../styles/EditProfile.css"
+import Popup from "../components/Popup"
+
 
 const EditProfile = () => {
     const navigate = useNavigate()
@@ -17,6 +19,8 @@ const EditProfile = () => {
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
+    const [popup, setPopup] = useState("")
+
 
     // Load the user's current information
     const getProfile = async () => {
@@ -31,7 +35,7 @@ const EditProfile = () => {
         try {
             setLoading(true)
             setError("")
-            
+
             const response = await api.get("/api/users/me", { headers: { Authorization: `Bearer ${token}` } })
             setName(response.data.name)
             setEmail(response.data.email)
@@ -53,32 +57,39 @@ const EditProfile = () => {
     const updateProfile = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setError("")
+
         if (!name.trim()) {
             setError("Name is required.")
             return
         }
+
         const token = localStorage.getItem("token")
         if (!token) {
             navigate("/login")
             return
         }
+
         try {
             setSaving(true)
             const response = await api.put("/api/users/me", { name: name.trim(), phone }, { headers: { Authorization: `Bearer ${token}` } })
             localStorage.setItem("user", JSON.stringify(response.data))
-            // Return to the profile overview after saving
-            navigate("/profile")
+            // Navigate to Profile and pass the success message
+            navigate("/profile", { state: { popup: "Profile updated successfully!" } })
+
         } catch (error) {
             console.log(error)
             if (axios.isAxiosError(error)) {
                 setError(error.response?.data?.message || "Could not update your profile.")
+                setPopup(error.response?.data?.message || "Could not update your profile.")
             } else {
                 setError("Could not update your profile.")
+                setPopup("Could not update your profile.")
             }
         } finally {
             setSaving(false)
         }
     }
+
     // Discard unsaved changes
     const cancelEdit = () => {
         setName(originalName)
@@ -90,6 +101,7 @@ const EditProfile = () => {
     }
     return (
         <div className="edit-profile-container">
+            {popup && <Popup message={popup} type="error" onClose={() => setPopup("")} />}
             <button className="edit-profile-back-button" type="button" onClick={() => navigate("/profile")}>← Back</button>
             <div className="edit-profile-heading">
                 <Texts variant="h1">Edit Profile</Texts>

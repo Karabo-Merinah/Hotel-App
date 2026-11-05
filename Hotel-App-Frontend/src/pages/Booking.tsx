@@ -6,6 +6,8 @@ import type { Room, Hotel } from "../types/hotel"
 import { useDispatch } from "react-redux"
 import { addBooking } from "../features/bookingSlice"
 import axios from "axios"
+import Popup from "../components/Popup"
+
 
 const Booking = () => {
     const { roomId } = useParams()
@@ -25,6 +27,8 @@ const Booking = () => {
     const [availableRooms, setAvailableRooms] = useState<number | null>(null)
     const [checkingAvailability, setCheckingAvailability] = useState(false)
     const today = new Date().toLocaleDateString("en-CA")
+    const [popup, setPopup] = useState("")
+
 
     const handleBooking = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -82,9 +86,11 @@ const Booking = () => {
             const currentAvailableRooms = availabilityResponse.data.available_rooms
             // Update the displayed availability
             setAvailableRooms(currentAvailableRooms)
+
             // Stop if there are not enough rooms
             if (numberOfRooms > currentAvailableRooms) {
                 setError("Not enough rooms are available for the selected dates.")
+                setPopup("Not enough rooms are available for the selected dates.")
                 return
             }
             // Save the booking in the database
@@ -101,16 +107,21 @@ const Booking = () => {
             catch (error) {
                 console.log("Could not update Redux bookings:", error)
             }
-            // Navigate to booking details
-            navigate(`/bookings/${bookingResponse.data.id}`)
+            // Navigate to booking details and display success notification
+            navigate(`/bookings/${bookingResponse.data.id}`, {
+                state: { popup: "Your booking has been created successfully!" }
+            })
         }
         catch (error) {
             console.log(error)
+
             if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.message || "Could not complete booking.")
-            }
-            else {
+                const message = error.response?.data?.message || "Could not complete booking."
+                setError(message)
+                setPopup(message)
+            } else {
                 setError("Something went wrong. Please try again.")
+                setPopup("Something went wrong. Please try again.")
             }
         }
         finally {
@@ -185,8 +196,17 @@ const Booking = () => {
         }
     }, [roomId, checkIn, checkOut])
 
+    // Automatically close the popup after 3 seconds
+    useEffect(() => {
+        if (!popup) return
+
+        const timer = setTimeout(() => { setPopup("") }, 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
     return (
         <div className="booking-page">
+            {popup && <Popup message={popup} type="error" onClose={() => setPopup("")} />}
             {hotel && room && (
                 <div className="booking-details">
                     <Texts variant="h2">Booking Details</Texts>
@@ -231,5 +251,4 @@ const Booking = () => {
         </div>
     )
 }
-
 export default Booking

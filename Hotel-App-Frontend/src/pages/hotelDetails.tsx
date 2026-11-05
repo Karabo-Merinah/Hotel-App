@@ -9,7 +9,10 @@ import "../styles/HotelDetails.css"
 import HotelMap from "../components/HotelMap"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "../app/store"
-import { setFavourites, removeFavourite } from "../features/favouriteSlice"
+import { setFavourites, addFavourite, removeFavourite } from "../features/favouriteSlice"
+import Popup from "../components/Popup"
+import ConfirmDialog from "../components/ConfirmDialog"
+
 
 const HotelDetails = () => {
 
@@ -27,6 +30,11 @@ const HotelDetails = () => {
     const [reviewsError, setReviewsError] = useState("")
     const [roomsLoading, setRoomsLoading] = useState(false)
     const [roomsError, setRoomsError] = useState("")
+    const [popup, setPopup] = useState(location.state?.popup || "")
+    const [popupType, setPopupType] = useState<"success" | "error">("success")
+    const [confirmRemove, setConfirmRemove] = useState(false)
+    const [updatingFavourite, setUpdatingFavourite] = useState(false)
+
 
     const dispatch = useDispatch()
     // Get the user's favourite hotels from Redux
@@ -78,18 +86,18 @@ const HotelDetails = () => {
         const token = localStorage.getItem("token")
         if (!token || !id) {
             dispatch(setFavourites([]))
-            return
+            return false
         }
         try {
-            // Get the updated favourites from the backend
             const response = await api.get("/api/favourites", {
                 headers: { Authorization: `Bearer ${token}` }
             })
-            // stores favourites in redux
             dispatch(setFavourites(response.data))
-        }
-        catch (error) {
+            return true
+
+        } catch (error) {
             console.log(error)
+            return false
         }
     }
     useEffect(() => {
@@ -99,29 +107,58 @@ const HotelDetails = () => {
 
     //remove the hotel from favourites 
     const toggleFavourite = async () => {
+        if (updatingFavourite || !id) return
+
         const token = localStorage.getItem("token")
+
         if (!token) {
-            navigate("/login")
+            navigate("/login", { state: { from: location.pathname } })
             return
         }
-        if (!id) return
-        try {
-            if (isFavourite) {
-                await api.delete(`/api/favourites/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-                // Remove the hotel from redux
-                dispatch(removeFavourite(Number(id)))
-            }
-            else {
-                //ads the hotel to favourites
-                await api.post("/api/favourites", { hotel_id: Number(id) }, { headers: { Authorization: `Bearer ${token}` } })
 
-                //fetch updated favourites and store them 
-                await checkFavourite()
+        try {
+            setUpdatingFavourite(true)
+            setPopup("")
+
+            if (isFavourite) {
+                // Remove hotel from favourites
+                await api.delete(`/api/favourites/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+
+                dispatch(removeFavourite(parseInt(id)))
+
+                setPopupType("success")
+                setPopup("Hotel removed from favourites successfully.")
+
+            } else {
+                // Add hotel to favourites
+                await api.post("/api/favourites", { hotel_id: parseInt(id) }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+
+                // Update Redux immediately
+                if (hotel) {
+                    dispatch(addFavourite({
+                        id: hotel.id, name: hotel.name, city: hotel.city,
+                        address: hotel.address, star_rating: hotel.star_rating,
+                        latitude: hotel.latitude === null ? null : parseFloat(String(hotel.latitude)), longitude: hotel.longitude === null ? null : parseFloat(String(hotel.longitude)),
+                        price_from: null, main_image: hotel.images?.[0]?.image_url || null
+                    }))
+                }
+
+                setPopupType("success")
+                setPopup("Hotel added to favourites successfully.")
             }
-        }
-        catch (error) {
+
+        } catch (error) {
             console.log(error)
-            alert("Could not update favourites.")
+            setPopupType("error")
+            setPopup("Could not update favourites.")
+
+        } finally {
+            setUpdatingFavourite(false)
+            setConfirmRemove(false)
         }
     }
 
@@ -136,11 +173,14 @@ const HotelDetails = () => {
             }
             else {
                 await navigator.clipboard.writeText(hotel_url)
-                alert("Hotel link copied.")
+                setPopupType("success")
+                setPopup("Hotel link copied successfully.")
             }
         }
         catch (error) {
             console.log(error)
+            setPopupType("error")
+            setPopup("Could not share hotel.")
         }
     }
 
@@ -161,6 +201,27 @@ const HotelDetails = () => {
         getRooms()
         getHotelReviews()
     }, [id])
+
+    useEffect(() => {
+        if (!popup) return
+
+        const timer = setTimeout(() => {
+            setPopup("")
+        }, 3000)
+
+        return () => clearTimeout(timer)
+    }, [popup])
+
+
+    useEffect(() => {
+        if (location.state?.popup) {
+            navigate(location.pathname, {
+                replace: true,
+                state: {checkIn,checkOut,guests,numberOfRooms}
+            })
+        }
+    }, [location.state, location.pathname, navigate])
+
     if (loading) {
         return <Texts variant="p">Loading hotel details...</Texts>
     }
@@ -172,6 +233,10 @@ const HotelDetails = () => {
     }
     return (
         <div className="hotel-details">
+            {popup && <Popup message={popup} type={popupType} onClose={() => setPopup("")} />}
+            {confirmRemove && (
+                <ConfirmDialog title="Remove Favourite" message="Are you sure you want to remove this hotel from your favourites?" onConfirm={toggleFavourite} onClose={() => setConfirmRemove(false)} loading={updatingFavourite} />
+            )}
             <Texts variant="h1">{hotel.name}</Texts>
             <div className="hotel-images">
                 {hotel.images && hotel.images.map((image) => (
@@ -179,10 +244,7 @@ const HotelDetails = () => {
                 ))}
             </div>
             <div className="hotel-actions">
-                <button type="button" className="hotel-favourite-button" onClick={toggleFavourite}
-                    title={isFavourite ? "Remove from Favourites" : "Add to Favourites"} aria-label={isFavourite ? "Remove from Favourites" : "Add to Favourites"}>
-                    <Heart size={22} fill={isFavourite ? "#c0392b" : "none"} color={isFavourite ? "#c0392b" : "#333"} />
-                </button>
+                <button type="button" className="hotel-favourite-button" onClick={() => isFavourite ? setConfirmRemove(true) : toggleFavourite()} disabled={updatingFavourite} title={isFavourite ? "Remove from Favourites" : "Add to Favourites"} aria-label={isFavourite ? "Remove from Favourites" : "Add to Favourites"}><Heart size={22} fill={isFavourite ? "#c0392b" : "none"} color={isFavourite ? "#c0392b" : "#333"} /></button>
                 <button type="button" className="hotel-share-button" onClick={shareHotel} title="Share Accommodation" aria-label="Share Accommodation"><Share2 size={22} /></button>
             </div>
             <Texts variant="p">{hotel.description}</Texts>

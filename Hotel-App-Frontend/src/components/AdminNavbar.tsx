@@ -2,10 +2,19 @@ import { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import { Menu, X } from "lucide-react"
 import "../styles/AdminNavbar.css"
+import { useDispatch } from "react-redux"
+import { logout as logoutUser } from "../features/authSlice"
+import { clearFavourites } from "../features/favouriteSlice"
+import { clearBookings } from "../features/bookingSlice"
+import ConfirmDialog from "../components/ConfirmDialog"
+
 
 const AdminNavbar = () => {
     const navigate = useNavigate()
     const [menuOpen, setMenuOpen] = useState(false)
+    const [confirmLogout, setConfirmLogout] = useState(false)
+    const dispatch = useDispatch()
+
 
     const closeMenu = () => {
         setMenuOpen(false)
@@ -14,10 +23,14 @@ const AdminNavbar = () => {
     const logout = () => {
         localStorage.removeItem("token")
         localStorage.removeItem("user")
+
+        dispatch(logoutUser())
+        dispatch(clearFavourites())
+        dispatch(clearBookings())
+
         closeMenu()
         navigate("/login")
     }
-
     return (
         <>
             <header className="admin-navbar">
@@ -32,6 +45,7 @@ const AdminNavbar = () => {
                     <NavLink to="/admin/bookings">Reservations</NavLink>
                     <NavLink to="/admin/rooms">Room & Pricing</NavLink>
                     <NavLink to="/admin/profile">Admin Profile</NavLink>
+                    <button type="button" className="admin-desktop-logout" onClick={() => setConfirmLogout(true)}>Logout</button>
                 </nav>
             </header>
 
@@ -48,9 +62,15 @@ const AdminNavbar = () => {
                         <NavLink to="/admin/bookings" onClick={closeMenu}>Reservations <span>›</span></NavLink>
                         <NavLink to="/admin/rooms" onClick={closeMenu}>Room & Pricing <span>›</span></NavLink>
                         <NavLink to="/admin/profile" onClick={closeMenu}>Admin Profile <span>›</span></NavLink>
-                        <button className="admin-mobile-logout" onClick={logout}>Logout</button>
+                        <button className="admin-mobile-logout" type="button" onClick={() => setConfirmLogout(true)}>Logout</button>
                     </nav>
                 </>
+            )}
+            {confirmLogout && (
+                <ConfirmDialog title="Confirm Logout" message="Are you sure you want to log out of your Wander Inn admin account?" onConfirm={() => {
+                    logout()
+                    setConfirmLogout(false)
+                }} onClose={() => setConfirmLogout(false)} loading={false} />
             )}
         </>
     )

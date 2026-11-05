@@ -7,11 +7,14 @@ import type { RootState } from "../app/store"
 import { logout } from "../features/authSlice"
 import { clearFavourites } from "../features/favouriteSlice"
 import { clearBookings } from "../features/bookingSlice"
+import ConfirmDialog from "../components/ConfirmDialog"
+
 
 const Navbar = () => {
     const navigate = useNavigate()
     const [menuOpen, setMenuOpen] = useState(false)
     const dispatch = useDispatch()
+    const [confirmLogout, setConfirmLogout] = useState(false)
 
     // Get authentication status from Redux
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
@@ -53,7 +56,7 @@ const Navbar = () => {
                 {/* Display Login or Logout based on Redux authentication */}
                 <div className="navbar-auth">
                     {isAuthenticated ? (
-                        <button type="button" onClick={userLogout}>Logout</button>
+                        <button type="button" onClick={() => setConfirmLogout(true)}>Logout</button>
                     ) : (
                         <button type="button" onClick={() => navigate("/login")}>Login</button>
                     )}
@@ -72,12 +75,18 @@ const Navbar = () => {
                         <NavLink to="/notifications" onClick={closeMenu}>Notifications</NavLink>
                         {/* Display Login or Logout on mobile */}
                         {isAuthenticated ? (
-                            <button type="button" onClick={userLogout}>Logout</button>
+                            <button type="button" onClick={() => setConfirmLogout(true)}>Logout</button>
                         ) : (
                             <NavLink to="/login" onClick={closeMenu}>Login</NavLink>
                         )}
                     </nav>
                 </>
+            )}
+            {confirmLogout && (
+                <ConfirmDialog title="Confirm Logout" message="Are you sure you want to log out of your Wander Inn account?" onConfirm={() => {
+                    userLogout()
+                    setConfirmLogout(false)
+                }} onClose={() => setConfirmLogout(false)} loading={false} />
             )}
         </>
     )

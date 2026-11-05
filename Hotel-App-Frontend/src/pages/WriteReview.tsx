@@ -1,21 +1,23 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import api from "../api/axios"
 import { Star } from "lucide-react"
 import { Texts } from "../components/Texts/texts"
 import "../styles/WriteReview.css"
+import Popup from "../components/Popup"
 
 const WriteReview = () => {
     const { hotelId } = useParams()
     const navigate = useNavigate()
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState("")
-    const [error, setError] = useState("")
     const [submitting, setSubmitting] = useState(false)
+    const [popup, setPopup] = useState("")
 
     const submitReview = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+        if(submitting) return 
         const token = localStorage.getItem("token")
         if (!token) {
             navigate("/login", {
@@ -27,30 +29,39 @@ const WriteReview = () => {
         }
         if (!hotelId) return
         if (rating === 0) {
-            setError("Please select a rating.")
+            setPopup("Please select a rating ")
             return
         }
         try {
             setSubmitting(true)
-            setError("")
             await api.post("/api/reviews", { hotel_id: Number(hotelId), rating, comment }, { headers: { Authorization: `Bearer ${token}` } })
-            navigate(`/hotels/${hotelId}`)
+            navigate(`/hotels/${hotelId}`, {
+                state: { popup: "Your review has been submitted successfully!" }
+            })
         }
         catch (error) {
             console.log(error)
             if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.message || "Could not submit review.")
-            }
-            else {
-                setError("Could not submit review.")
+                const message = error.response?.data?.message || "Could not submit review."
+                setPopup(message)
+            } else {
+                setPopup("Could not submit review.")
             }
         }
         finally {
             setSubmitting(false)
         }
     }
+
+    useEffect(() => {
+        if (!popup) return
+        const timer = setTimeout(() => setPopup(""), 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
     return (
         <div className="write-review-container">
+             {popup && <Popup message={popup} type="error" onClose={() => setPopup("")} />}
             <button type="button" onClick={() => navigate(`/hotels/${hotelId}`)}> ← Back to Hotel</button>
             <Texts variant="h1">Write a Review</Texts>
             <form onSubmit={submitReview}>
@@ -62,7 +73,6 @@ const WriteReview = () => {
                 <label htmlFor="review-comment">Your review</label>
                 <textarea id="review-comment" value={comment} onChange={(event) => setComment(event.target.value)} maxLength={400} rows={5} placeholder="Tell us about your experience..." />
                 <Texts variant="p">{comment.length}/400 characters</Texts>
-                {error && <Texts variant="p">{error}</Texts>}
                 <button type="submit" disabled={submitting}>{submitting ? "Submitting..." : "Submit Review"}</button>
             </form>
         </div>

@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react"
 import api from "../api/axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { Texts } from "../components/Texts/texts"
 import "../styles/Profile.css"
 import { useDispatch } from "react-redux"
 import { logout } from "../features/authSlice"
 import { clearFavourites } from "../features/favouriteSlice"
 import { clearBookings } from "../features/bookingSlice"
+import Popup from "../components/Popup"
+import ConfirmDialog from "../components/ConfirmDialog"
+
 
 const Profile = () => {
     const navigate = useNavigate()
@@ -15,6 +18,9 @@ const Profile = () => {
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(true)
     const dispatch = useDispatch()
+    const location = useLocation()
+    const [popup, setPopup] = useState(location.state?.popup || "")
+    const [confirmLogout, setConfirmLogout] = useState(false)
 
     // Get the logged-in user's information
     const getProfile = async () => {
@@ -29,7 +35,7 @@ const Profile = () => {
         try {
             setLoading(true)
             setError("")
-            
+
             const response = await api.get("/api/users/me", { headers: { Authorization: `Bearer ${token}` } })
             setName(response.data.name)
             setEmail(response.data.email)
@@ -43,6 +49,18 @@ const Profile = () => {
     useEffect(() => {
         getProfile()
     }, [])
+
+    // Close the popup after 3 seconds
+    useEffect(() => {
+        if (!popup) return
+
+        // Clear the popup message from navigation state
+        navigate("/profile", { replace: true, state: null })
+
+        const timer = setTimeout(() => { setPopup("") }, 3000)
+
+        return () => clearTimeout(timer)
+    }, [popup, navigate])
 
     // Log out the user
     const UserLogout = () => {
@@ -63,6 +81,13 @@ const Profile = () => {
     }
     return (
         <div className="profile-container">
+            {popup && <Popup message={popup} type="success" onClose={() => setPopup("")} />}
+            {confirmLogout && (
+                <ConfirmDialog title="Confirm Logout" message="Are you sure you want to log out of your Wander Inn account?" onConfirm={() => {
+                    UserLogout()
+                    setConfirmLogout(false)
+                }} onClose={() => setConfirmLogout(false)} loading={false} />
+            )}
             <button className="profile-back-button" type="button" onClick={() => navigate(-1)}>← Back</button>
             <Texts variant="h1">My Profile</Texts>
             {error && <Texts variant="p" className="profile-error">{error}</Texts>}
@@ -83,7 +108,7 @@ const Profile = () => {
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/favourites")}> Favourites<span>›</span></button>
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/notifications")}>Notifications<span>›</span></button>
             </div>
-            <button className="profile-logout-button" type="button" onClick={UserLogout}>Logout</button>
+            <button className="profile-logout-button" type="button" onClick={() => setConfirmLogout(true)}>Logout</button>
         </div>
     )
 }

@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import api from "../../api/axios"
 import type { Hotel } from "../../types/hotel"
 import { Texts } from "../../components/Texts/texts"
 import "../../styles/ManageHotels.css"
+import Popup from "../../components/Popup"
+
 
 const ManageHotels = () => {
     const navigate = useNavigate()
+    const location = useLocation()
+    const [popup, setPopup] = useState(location.state?.popup || "")
     const [hotels, setHotels] = useState<Hotel[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
@@ -29,12 +33,27 @@ const ManageHotels = () => {
         getHotels()
     }, [])
 
+
+    useEffect(() => {
+        if (!popup) return
+
+        const timer = setTimeout(() => setPopup(""), 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
+    useEffect(() => {
+        if (location.state?.popup) {
+            navigate(location.pathname, { replace: true, state: null })
+        }
+    }, [location.state, location.pathname, navigate])
+
     if (loading) {
         return <Texts variant="p">Loading hotels...</Texts>
     }
 
     return (
         <div className="manage-hotels">
+            {popup && <Popup message={popup} type="success" onClose={() => setPopup("")} />}
             <div className="manage-hotels-header">
                 <div>
                     <Texts variant="h1">Accommodations</Texts>

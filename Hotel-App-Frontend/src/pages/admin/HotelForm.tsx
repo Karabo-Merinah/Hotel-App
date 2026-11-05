@@ -4,6 +4,9 @@ import api from "../../api/axios"
 import "../../styles/HotelForm.css"
 import { Texts } from "../../components/Texts/texts"
 import type { HotelImage } from "../../types/hotel"
+import Popup from "../../components/Popup"
+import ConfirmDialog from "../../components/ConfirmDialog"
+
 
 const HotelForm = () => {
     const { id } = useParams()
@@ -24,6 +27,9 @@ const HotelForm = () => {
     const [imageError, setImageError] = useState("")
     const [existingImages, setExistingImages] = useState<HotelImage[]>([])
     const [deletingImage, setDeletingImage] = useState(false)
+    const [popup, setPopup] = useState("")
+    const [confirmImageId, setConfirmImageId] = useState<number | null>(null)
+
 
     useEffect(() => {
         if (!id) return
@@ -51,18 +57,17 @@ const HotelForm = () => {
     }, [id])
 
     const deleteHotelImage = async (imageId: number) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this image?")
-        if (!confirmDelete) {
-            return
-        }
         try {
             setDeletingImage(true)
             setImageError("")
+
             const token = localStorage.getItem("token")
             await api.delete(`/api/hotels/images/${imageId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
+
             setExistingImages(existingImages.filter((image) => image.id !== imageId))
+            setPopup("Hotel image deleted successfully.")
         }
         catch (error) {
             console.log(error)
@@ -70,6 +75,7 @@ const HotelForm = () => {
         }
         finally {
             setDeletingImage(false)
+            setConfirmImageId(null)
         }
     }
     const saveHotel = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -97,7 +103,9 @@ const HotelForm = () => {
                 )
                 await uploadHotelImages(response.data.id)
             }
-            navigate("/admin/hotels")
+            navigate("/admin/hotels", {
+                state: {popup: id ? "Hotel updated successfully!" : "Hotel added successfully!" }
+            })
         } catch (error) {
             console.log(error)
             setError("Could not complete saving the hotel. Check whether the hotel was already saved before retrying.")
@@ -132,8 +140,18 @@ const HotelForm = () => {
         }
     }
 
+    useEffect(() => {
+        if (!popup) return
+        const timer = setTimeout(() => setPopup(""), 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
     return (
         <div className="admin-hotel-form-page">
+            {popup && <Popup message={popup} type="success" onClose={() => setPopup("")} />}
+            {confirmImageId !== null && (
+                <ConfirmDialog title="Delete Hotel Image" message="Are you sure you want to delete this hotel image?" onConfirm={() => deleteHotelImage(confirmImageId)} onClose={() => setConfirmImageId(null)} loading={deletingImage} />
+            )}
             <div className="admin-hotel-form-header">
                 <Texts variant="h1">{id ? "Edit Hotel" : "Add Hotel"}</Texts>
                 <Texts variant="p">Manage accommodation details and information.</Texts>
@@ -155,7 +173,7 @@ const HotelForm = () => {
                             {existingImages.map((image) => (
                                 <div className="hotel-existing-image" key={image.id}>
                                     <img src={image.image_url} alt="Hotel" />
-                                    <button type="button" onClick={() => deleteHotelImage(image.id)} disabled={deletingImage}>Delete Image</button>
+                                    <button type="button" onClick={() => setConfirmImageId(image.id)} disabled={deletingImage}>Delete Image</button>
                                 </div>
                             ))}
                         </div>

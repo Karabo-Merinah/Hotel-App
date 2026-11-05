@@ -7,6 +7,9 @@ import "../styles/BookingDetails.css"
 import { useDispatch, useSelector } from "react-redux"
 import { addBooking, updateBooking } from "../features/bookingSlice"
 import type { RootState } from "../app/store"
+import Popup from "../components/Popup"
+import ConfirmDialog from "../components/ConfirmDialog"
+
 
 const BookingDetails = () => {
     const { id } = useParams()
@@ -16,7 +19,9 @@ const BookingDetails = () => {
     const bookings = useSelector((state: RootState) => state.bookings)
     const booking = bookings.find(booking => booking.id === parseInt(id || "0"))
     const [cancelling, setCancelling] = useState(false)
-    const [message, setMessage] = useState("")
+    const [popup, setPopup] = useState("")
+    const [popupType, setPopupType] = useState<"success" | "error">("success")
+    const [showConfirm, setShowConfirm] = useState(false)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
 
@@ -49,36 +54,47 @@ const BookingDetails = () => {
     }, [id])
 
 
+    // Automatically close popup 
+    useEffect(() => {
+        if (!popup) return
+
+        const timer = setTimeout(() => {
+            setPopup("")
+        }, 3000)
+        return () => clearTimeout(timer)
+    }, [popup])
+
+
     const cancelBooking = async () => {
-        if (!booking) return
-        const confirmed = window.confirm( "Are you sure you want to cancel this booking?")
-        if (!confirmed) return
+        if (!booking || cancelling) return
         const token = localStorage.getItem("token")
         if (!token) {
-            navigate("/login", {
-                state: { from: `/bookings/${id}` }
-            })
+            navigate("/login", { state: { from: `/bookings/${id}` } })
             return
         }
+
         try {
             setCancelling(true)
-            setError("")
-            setMessage("")
-            const response = await api.put(`/api/bookings/${booking.id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } }
-            )
+            setPopup("")
+            const response = await api.put(`/api/bookings/${booking.id}/cancel`, {}, { headers: { Authorization: `Bearer ${token}` } })
             // Update the cancelled booking in Redux
             dispatch(updateBooking(response.data))
-            setMessage("Your booking has been cancelled successfully.")
-        }
-        catch (error) {
+            // Close the confirmation window
+            setShowConfirm(false)
+            // Display success popup
+            setPopupType("success")
+            setPopup("Your booking has been cancelled successfully.")
+        } catch (error) {
             console.log(error)
+
             if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.message || "Could not cancel booking.")
+                setPopup(error.response?.data?.message || "Could not cancel booking.")
             } else {
-                setError("Could not cancel booking.")
+                setPopup("Could not cancel booking.")
             }
-        }
-        finally {
+            setPopupType("error")
+            setShowConfirm(false)
+        } finally {
             setCancelling(false)
         }
     }
@@ -97,10 +113,12 @@ const BookingDetails = () => {
 
     return (
         <div className="booking-details-container">
+            {popup && <Popup message={popup} type={popupType} onClose={() => setPopup("")} />}
+            {showConfirm && (
+                <ConfirmDialog message="Are you sure you want to cancel this booking?" onConfirm={cancelBooking} onClose={() => setShowConfirm(false)} loading={cancelling} />
+            )}
             <button type="button" onClick={() => navigate("/bookings")}>← Back to My Bookings </button>
             <Texts variant="h1">Booking Details</Texts>
-            {error && <Texts variant="p">{error}</Texts>}
-            {message && <Texts variant="p" className="booking-success">{message}</Texts>}
             {booking && (
                 <div className="booking-details-card">
                     <Texts variant="h2">{booking.hotel_name}</Texts>
@@ -115,8 +133,8 @@ const BookingDetails = () => {
                     {booking.status === "pending" && (
                         <button type="button" onClick={() => navigate(`/bookings/${booking.id}/payment`)}>Pay Now</button>
                     )}
-                    {(booking.status === "pending" || booking.status === "confirmed") && booking.check_in > new Date().toLocaleDateString("en-CA") && (
-                        <button type="button" className="cancel-booking-button" onClick={cancelBooking} disabled={cancelling}>{cancelling ? "Cancelling..." : "Cancel Booking"}</button>
+                    {(booking.status === "pending" || booking.status === "confirmed") && booking.check_in > today && (
+                        <button type="button" className="cancel-booking-button" onClick={() => setShowConfirm(true)} disabled={cancelling}>Cancel Booking</button>
                     )}
                     {canReview && (
                         <button type="button" onClick={() => navigate(`/hotels/${booking.hotel_id}/review`)}>Write a Review</button>

@@ -46,6 +46,27 @@
     display: none;
 }
 
+.admin-desktop-logout {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    background-color: #8b4513;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.admin-desktop-logout:hover {
+    background-color: #6f370f;
+}
+
+@media (max-width: 768px) {
+    .admin-desktop-logout {
+        display: none;
+    }
+}
+
 @media (max-width: 1000px) {
     .admin-navbar {
         height: 64px;
