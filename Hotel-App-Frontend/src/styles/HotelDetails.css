@@ -50,3 +50,28 @@
     object-fit: cover;
     border-radius: 8px;
 }
+.hotel-amenities {
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.hotel-amenities-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.hotel-amenity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.amenity-icon {
+    flex-shrink: 0;
+    color: inherit;
+}

@@ -3,6 +3,11 @@ export interface HotelImage {
     image_url: string
 }
 
+export interface Amenity {
+    id: number
+    name: string
+}
+
 export interface Hotel {
     id: number
     name: string
@@ -13,7 +18,9 @@ export interface Hotel {
     latitude: number | string | null
     longitude: number | string | null
     images?: HotelImage[]
+    amenities?: Amenity[]
 }
+
 export interface Room {
     id: number
     hotel_id: number

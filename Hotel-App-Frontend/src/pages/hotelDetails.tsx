@@ -12,6 +12,7 @@ import type { RootState } from "../app/store"
 import { setFavourites, addFavourite, removeFavourite } from "../features/favouriteSlice"
 import Popup from "../components/Popup"
 import ConfirmDialog from "../components/ConfirmDialog"
+import AmenityIcon from "../components/AmenityIcon"
 
 
 const HotelDetails = () => {
@@ -217,7 +218,7 @@ const HotelDetails = () => {
         if (location.state?.popup) {
             navigate(location.pathname, {
                 replace: true,
-                state: {checkIn,checkOut,guests,numberOfRooms}
+                state: { checkIn, checkOut, guests, numberOfRooms }
             })
         }
     }, [location.state, location.pathname, navigate])
@@ -251,6 +252,21 @@ const HotelDetails = () => {
             <Texts variant="p">City: {hotel.city}</Texts>
             <Texts variant="p">Address: {hotel.address}</Texts>
             <Texts variant="p">Rating: {hotel.star_rating} Stars</Texts>
+            <div className="hotel-amenities">
+                <Texts variant="h2">Hotel Amenities</Texts>
+                {hotel.amenities && hotel.amenities.length > 0 ? (
+                    <div className="hotel-amenities-list">
+                        {hotel.amenities.map((amenity) => (
+                            <div className="hotel-amenity" key={amenity.id}>
+                                <AmenityIcon name={amenity.name} />
+                                <span>{amenity.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <Texts variant="p">No amenities listed.</Texts>
+                )}
+            </div>
             <div className="hotel-location">
                 <Texts variant="h2">Hotel Location</Texts>
                 {hotel.latitude != null && hotel.longitude != null ? (
