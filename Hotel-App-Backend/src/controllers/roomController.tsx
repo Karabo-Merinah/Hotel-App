@@ -41,17 +41,15 @@ export const getHotelRooms = async (req: Request, res: Response) => {
             checkIn < new Date().toISOString().slice(0, 10)) {
             return res.status(400).json({ message: "Enter valid booking dates." })
         }
-
         const result = await connectionPool.query(`SELECT rooms.* FROM rooms, hotels WHERE rooms.hotel_id = hotels.id
-            AND rooms.hotel_id = $1 AND rooms.is_active = TRUE AND hotels.is_active = TRUE
-            AND rooms.capacity * $2 >= $3 AND rooms.total_rooms - (
-                SELECT COALESCE(SUM(number_of_rooms), 0) FROM bookings
-                WHERE bookings.room_id = rooms.id AND bookings.status IN ('pending', 'confirmed')
-                AND bookings.check_in < $5 AND bookings.check_out > $4
-            ) >= $2 ORDER BY rooms.price_per_night`,
+    AND rooms.hotel_id = $1 AND rooms.is_active = TRUE AND hotels.is_active = TRUE
+    AND rooms.capacity * $2 >= $3 AND rooms.capacity <= $3
+    AND rooms.total_rooms - (SELECT COALESCE(SUM(number_of_rooms), 0) FROM bookings
+        WHERE bookings.room_id = rooms.idnAND bookings.status IN ('pending', 'confirmed')
+        AND bookings.check_in < $5 AND bookings.check_out > $4
+    ) >= $2 ORDER BY rooms.price_per_night`,
             [hotel_id, numberOfRooms, guests, checkIn, checkOut]
         )
-
         return res.status(200).json(result.rows)
     }
     catch (error) {
