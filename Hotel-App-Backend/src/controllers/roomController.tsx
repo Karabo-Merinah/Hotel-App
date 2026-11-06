@@ -3,6 +3,7 @@ import connectionPool from "../config/database"
 import cloudinary from "../config/cloudinary"
 
 // Get rooms belonging to a hotel
+
 export const getHotelRooms = async (req: Request, res: Response) => {
     try {
         const hotel_id = parseInt(req.params.hotelId as string)
@@ -13,22 +14,15 @@ export const getHotelRooms = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Invalid hotel id." })
         }
 
-        // When users are just browsing hotel branches
+        // When users are browsing hotels without selecting dates
         if (!checkIn && !checkOut) {
-            const result = await connectionPool.query(
-                `SELECT rooms.* FROM rooms, hotels
-                WHERE rooms.hotel_id = hotels.id
-                AND rooms.hotel_id = $1
-                AND rooms.is_active = TRUE
-                AND hotels.is_active = TRUE
-                ORDER BY rooms.price_per_night`,
-                [hotel_id]
-            )
-
+            const result = await connectionPool.query(`SELECT rooms.* FROM rooms, hotels WHERE rooms.hotel_id = hotels.id
+                AND rooms.hotel_id = $1 AND rooms.is_active = TRUE
+                AND hotels.is_active = TRUE ORDER BY rooms.price_per_night`,
+                [hotel_id])
             return res.status(200).json(result.rows)
         }
-
-        // When users are searching for available rooms
+        // When users search for available rooms
         const guests = parseInt(String(req.query.guests))
         const numberOfRooms = parseInt(String(req.query.numberOfRooms))
 
@@ -41,15 +35,16 @@ export const getHotelRooms = async (req: Request, res: Response) => {
             checkIn < new Date().toISOString().slice(0, 10)) {
             return res.status(400).json({ message: "Enter valid booking dates." })
         }
+
         const result = await connectionPool.query(`SELECT rooms.* FROM rooms, hotels WHERE rooms.hotel_id = hotels.id
-    AND rooms.hotel_id = $1 AND rooms.is_active = TRUE AND hotels.is_active = TRUE
-    AND rooms.capacity * $2 >= $3 AND rooms.capacity <= $3
-    AND rooms.total_rooms - (SELECT COALESCE(SUM(number_of_rooms), 0) FROM bookings
-        WHERE bookings.room_id = rooms.idnAND bookings.status IN ('pending', 'confirmed')
-        AND bookings.check_in < $5 AND bookings.check_out > $4
-    ) >= $2 ORDER BY rooms.price_per_night`,
+            AND rooms.hotel_id = $1 AND rooms.is_active = TRUE AND hotels.is_active = TRUE
+            AND rooms.capacity * $2 >= $3 AND rooms.capacity <= $3
+            AND rooms.total_rooms - ( SELECT COALESCE(SUM(number_of_rooms), 0)  FROM bookings
+                WHERE bookings.room_id = rooms.id AND bookings.status IN ('pending', 'confirmed')
+                AND bookings.check_in < $5  AND bookings.check_out > $4) >= $2  ORDER BY rooms.price_per_night`,
             [hotel_id, numberOfRooms, guests, checkIn, checkOut]
         )
+
         return res.status(200).json(result.rows)
     }
     catch (error) {
@@ -57,6 +52,7 @@ export const getHotelRooms = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Could not get hotel rooms." })
     }
 }
+
 //get a room by its id with the pictures
 export const getRoomById = async (req: Request, res: Response) => {
 
