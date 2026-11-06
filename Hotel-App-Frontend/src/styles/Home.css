@@ -261,7 +261,10 @@
     gap: 10px;
     flex: 1;
 }
-
+.home-hotels .empty-hotels {
+    width: 100%;
+    grid-column: 1 / -1;
+}
 .hotel-card-content h3 {
     margin: 0;
     color: #5C4033;
