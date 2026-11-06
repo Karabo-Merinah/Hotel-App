@@ -222,33 +222,35 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
 
 The project includes `public/_redirects` to support React Router pages when refreshing or opening a direct URL on Netlify. The backend must allow the deployed Netlify origin in its CORS configuration.
 
+
 ## App Preview
 
 ### Home Page
 
-Add a screenshot showing hotel listings and the search form.
+Preview showing hotel listings and the search form.
 
-![Home page](../Hotel-App//Hotel-App-Frontend/hotel_homepage.png)
+![Home page](./Hotel-App-Frontend/hotel_homepage.png)
 
 ### Hotel Details
 
-Add a screenshot showing hotel information and images.
+Preview showing hotel information and images.
 
-![Hotel details](../Hotel-App//Hotel-App-Frontend//hotel_details.png)
+![Hotel details](./Hotel-App-Frontend/hotel_details.png)
 
-![Hotel details](../Hotel-App//Hotel-App-Frontend//hotel_details_2.png)
-
+![Hotel details](./Hotel-App-Frontend/hotel_details_2.png)
 
 ### Room Details
 
-Add a screenshot showing room details and the images
-![Room details](../Hotel-App//Hotel-App-Frontend//room_details.png) 
+Preview showing room details and images.
+
+![Room details](./Hotel-App-Frontend/room_details.png)
 
 ### Admin Dashboard
 
-Add a screenshot showing the admin dashboard.
+Preview showing the admin dashboard.
 
-![Admin dashboard](../Hotel-App//Hotel-App-Frontend//admin_dashboard.png)
+![Admin dashboard](./Hotel-App-Frontend/admin_dashboard.png)
+
 
 ## What I Have Learnt
 
