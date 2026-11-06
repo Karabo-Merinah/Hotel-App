@@ -29,7 +29,7 @@ CREATE TABLE hotels (
 CREATE TABLE hotel_images (
     id SERIAL PRIMARY KEY,
     hotel_id INTEGER NOT NULL REFERENCES hotels (id) ON DELETE CASCADE,
-    image_url VARCHAR(255) NOT NULL
+    image_url VARCHAR(255) NOT NULL,
      public_id TEXT;
 
 );
@@ -61,7 +61,7 @@ CREATE TABLE room_images (
     room_id INTEGER NOT NULL REFERENCES rooms (id) ON DELETE CASCADE,
     image_url TEXT NOT NULL,
     alt_text TEXT,
-    sort_order INTEGER DEFAULT 0
+    sort_order INTEGER DEFAULT 0,
     public_id TEXT;
 );
 
