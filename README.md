@@ -228,25 +228,27 @@ The project includes `public/_redirects` to support React Router pages when refr
 
 Add a screenshot showing hotel listings and the search form.
 
-<!-- ![Home page](./home-page-preview.png) -->
+![Home page](../Hotel-App//Hotel-App-Frontend/hotel_homepage.png)
 
 ### Hotel Details
 
 Add a screenshot showing hotel information and images.
 
-<!-- ![Hotel details](./hotel-details-preview.png) -->
+![Hotel details](../Hotel-App//Hotel-App-Frontend//hotel_details.png)
+
+![Hotel details](../Hotel-App//Hotel-App-Frontend//hotel_details_2.png)
+
 
 ### Room Details
 
-Add a screenshot showing room details and the image carousel.
-
-<!-- ![Room details](./room-details-preview.png) -->
+Add a screenshot showing room details and the images
+![Room details](../Hotel-App//Hotel-App-Frontend//room_details.png) 
 
 ### Admin Dashboard
 
 Add a screenshot showing the admin dashboard.
 
-<!-- ![Admin dashboard](./admin-dashboard-preview.png) -->
+![Admin dashboard](../Hotel-App//Hotel-App-Frontend//admin_dashboard.png)
 
 ## What I Have Learnt
 
@@ -254,13 +256,12 @@ Add a screenshot showing the admin dashboard.
 - Using React Router to manage public, protected and admin routes.
 - Managing authentication, bookings and favourites with Redux Toolkit.
 - Sending API requests with Axios and handling loading and error states.
-- Implementing email/password login and Google authentication in a frontend.
+- Implementing email/password login and Google authentication in a frontend
+-Using OAuth 
 - Working with hotel and room image galleries.
 - Displaying maps using React Leaflet.
 - Building booking and payment-related user interfaces.
 - Creating responsive layouts for desktop and mobile devices.
-- Using environment variables to connect a frontend to different backend environments.
-- Deploying a Vite application on Netlify and connecting it to a backend on Render.
 - Understanding CORS configuration when frontend and backend are hosted on different domains.
 
 ## Future Improvements
