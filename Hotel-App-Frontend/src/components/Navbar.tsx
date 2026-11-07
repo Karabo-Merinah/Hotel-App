@@ -8,7 +8,7 @@ import { logout } from "../features/authSlice"
 import { clearFavourites } from "../features/favouriteSlice"
 import { clearBookings } from "../features/bookingSlice"
 import ConfirmDialog from "../components/ConfirmDialog"
-
+import logo from "../assets/wander_inn_logo.png"
 
 const Navbar = () => {
     const navigate = useNavigate()
@@ -45,7 +45,9 @@ const Navbar = () => {
         <>
             <header className="navbar">
                 <button type="button" className="navbar-menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">{menuOpen ? <X size={25} /> : <Menu size={25} />}</button>
-                <NavLink to="/" className="navbar-logo" onClick={closeMenu}> WANDER INN STAYS</NavLink>
+                <NavLink to="/" className="navbar-logo" onClick={closeMenu}>
+                    <img src={logo} alt="Wander Inn Logo" className="navbar-logo-image" />
+                </NavLink>
                 {/* Desktop navigation links */}
                 <nav className="navbar-links">
                     <NavLink to="/" end>Home</NavLink>

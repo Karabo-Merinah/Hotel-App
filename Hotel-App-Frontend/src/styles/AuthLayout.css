@@ -1,0 +1,74 @@
+
+.auth-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #FAF7F3;
+}
+
+.auth-form-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.auth-logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 16px;
+    text-decoration: none;
+}
+
+.auth-logo {
+    display: block;
+    width: 150px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.auth-image {
+    background-image: url("../assets/hotel_auth_picture.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100%;
+}
+
+@media (max-width: 900px) {
+    .auth-layout {
+        grid-template-columns: 1fr;
+        min-height: 100vh;
+    }
+
+    .auth-image {
+        display: none;
+    }
+
+    .auth-form-section {
+        padding: 24px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-form-section {
+        padding: 16px 12px;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .auth-logo {
+        width: 120px;
+        height: 80px;
+    }
+
+    .auth-logo-link {
+        margin-bottom: 12px;
+    }
+}

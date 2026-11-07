@@ -8,6 +8,8 @@ import { GoogleLogin } from "@react-oauth/google"
 import { useDispatch } from "react-redux"
 import { loginSuccess } from "../features/authSlice"
 import { Eye, EyeOff } from "lucide-react"
+import AuthLayout from "../components/AuthLayout"
+import AuthTabs from "../components/AuthTabs"
 
 const Register = () => {
 
@@ -164,66 +166,69 @@ const Register = () => {
     }
 
     return (
-        <div className="register-container">
-            <div className="register-heading">
-                <Texts variant="h1">Create An Account</Texts>
-                <Texts variant="p">Join Wander Inn and start booking your perfect stay.</Texts>
-            </div>
-            <form className="register-form" onSubmit={registering} noValidate>
-                <div className="register-name">
-                    <label htmlFor="name">Name</label>
-                    <input id="name" className="register-name-input" type="text" placeholder="Enter your full name" value={name} onChange={(e) => setName(e.target.value)} required />
-                    {errors.name && <Texts variant="p" className="register-error">{errors.name}</Texts>}
+        <AuthLayout>
+            <div className="register-container">
+                <div className="register-heading">
+                    <Texts variant="h1">Create An Account</Texts>
+                    <Texts variant="p">Join Wander Inn and start booking your perfect stay.</Texts>
                 </div>
-                <div className="register-email">
-                    <label htmlFor="email">Email</label>
-                    <input id="email" className="register-email-input" type="email" placeholder="e.g example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    {errors.email && <Texts variant="p" className="register-error">{errors.email}</Texts>}
-                </div>
-                <div className="register-password">
-                    <label htmlFor="password">Password</label>
-                    <div className="register-password-wrapper">
-                        <input id="password" className="register-password-input" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)} minLength={8} maxLength={10} required />
-                        <button type="button" className="register-password-toggle" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
+                <AuthTabs activeTab="register" />
+                <form className="register-form" onSubmit={registering} noValidate>
+                    <div className="register-name">
+                        <label htmlFor="name">Name</label>
+                        <input id="name" className="register-name-input" type="text" placeholder="Enter your full name" value={name} onChange={(e) => setName(e.target.value)} required />
+                        {errors.name && <Texts variant="p" className="register-error">{errors.name}</Texts>}
                     </div>
-                    {passwordFocused && (
-                        <div className="register-password-requirements">
-                            <p>Password must contain:</p>
-                            <ul>
-                                <li>8 to 10 characters</li>
-                                <li>At least one lowercase letter</li>
-                                <li>At least one uppercase letter</li>
-                                <li>At least one number</li>
-                                <li>At least one special character (@#$%&*!?)</li>
-                            </ul>
+                    <div className="register-email">
+                        <label htmlFor="email">Email</label>
+                        <input id="email" className="register-email-input" type="email" placeholder="e.g example@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        {errors.email && <Texts variant="p" className="register-error">{errors.email}</Texts>}
+                    </div>
+                    <div className="register-password">
+                        <label htmlFor="password">Password</label>
+                        <div className="register-password-wrapper">
+                            <input id="password" className="register-password-input" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)} minLength={8} maxLength={10} required />
+                            <button type="button" className="register-password-toggle" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                         </div>
-                    )}
-                    {errors.password && <Texts variant="p" className="register-error">{errors.password}</Texts>}
-                </div>
-                <div className="register-confirm-password">
-                    <label htmlFor="confirmPassword">Re-enter password</label>
-                    <div className="register-password-wrapper">
-                        <input id="confirmPassword" className="register-confirm-input" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-                        <button type="button" className="register-password-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label={showConfirmPassword ? "Hide password" : "Show password"}>{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
+                        {passwordFocused && (
+                            <div className="register-password-requirements">
+                                <p>Password must contain:</p>
+                                <ul>
+                                    <li>8 to 10 characters</li>
+                                    <li>At least one lowercase letter</li>
+                                    <li>At least one uppercase letter</li>
+                                    <li>At least one number</li>
+                                    <li>At least one special character (@#$%&*!?)</li>
+                                </ul>
+                            </div>
+                        )}
+                        {errors.password && <Texts variant="p" className="register-error">{errors.password}</Texts>}
                     </div>
-                    {errors.confirmPassword && <Texts variant="p" className="register-error">{errors.confirmPassword}</Texts>}
+                    <div className="register-confirm-password">
+                        <label htmlFor="confirmPassword">Re-enter password</label>
+                        <div className="register-password-wrapper">
+                            <input id="confirmPassword" className="register-confirm-input" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                            <button type="button" className="register-password-toggle" onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label={showConfirmPassword ? "Hide password" : "Show password"}>{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
+                        </div>
+                        {errors.confirmPassword && <Texts variant="p" className="register-error">{errors.confirmPassword}</Texts>}
+                    </div>
+                    {errors.general && <Texts variant="p" className="register-error">{errors.general}</Texts>}
+                    <button className="register-button" type="submit" disabled={loading}>{loading ? "Registering..." : "Register"}</button>
+                </form>
+                <div className="register-divider">
+                    <Texts variant="p">OR</Texts>
                 </div>
-                {errors.general && <Texts variant="p" className="register-error">{errors.general}</Texts>}
-                <button className="register-button" type="submit" disabled={loading}>{loading ? "Registering..." : "Register"}</button>
-            </form>
-            <div className="register-divider">
-                <Texts variant="p">OR</Texts>
+                {/* Google OAuth registration */}
+                <div className="register-google">
+                    <GoogleLogin onSuccess={(response) => { if (response.credential) GoogleRegister(response.credential); else setErrors({ name: "", email: "", password: "", confirmPassword: "", general: "Google registration failed." }) }} onError={() => setErrors({ name: "", email: "", password: "", confirmPassword: "", general: "Google registration failed." })} width="100%" size="large" theme="outline" shape="rectangular" text="signup_with" />
+                </div>
+                {/* Navigate to login if the user already has an account */}
+                <div className="register-login">
+                    <Texts variant="p">Already have an account?</Texts>
+                    <button className="register-login-button" type="button" onClick={() => navigate("/login", { state: location.state })}>Login</button>
+                </div>
             </div>
-            {/* Google OAuth registration */}
-            <div className="register-google">
-                <GoogleLogin onSuccess={(response) => { if (response.credential) GoogleRegister(response.credential); else setErrors({ name: "", email: "", password: "", confirmPassword: "", general: "Google registration failed." }) }} onError={() => setErrors({ name: "", email: "", password: "", confirmPassword: "", general: "Google registration failed." })} />
-            </div>
-            {/* Navigate to login if the user already has an account */}
-            <div className="register-login">
-                <Texts variant="p">Already have an account?</Texts>
-                <button className="register-login-button" type="button" onClick={() => navigate("/login", { state: location.state })}>Login</button>
-            </div>
-        </div>
+        </AuthLayout>
     )
 }
 

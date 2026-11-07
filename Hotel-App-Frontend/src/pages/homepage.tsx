@@ -99,9 +99,10 @@ const Home = () => {
     }
     return (
         <div className="home-container">
-            <div className="home-welcome">
-                <Texts variant="h1">Welcome to wander Inn</Texts>
-                <Texts variant="p">Find your perfect stays.</Texts>
+        <section className="home-hero">
+            <div className="home-hero-heading">
+                <Texts variant="h1">Find Your Perfect Stay</Texts>
+                <Texts variant="p">Discover comfortable stays at Wander Inn.</Texts>
             </div>
             <div className="home-search">
                 <Texts variant="h2">Find a Hotel</Texts>
@@ -136,6 +137,7 @@ const Home = () => {
                 </div>
                 {error && <Texts variant="p">{error}</Texts>}
             </div>
+            </section>
             <div className="home-hotels">
                 <Texts variant="h2">Our hotel branches</Texts>
                 {loading &&

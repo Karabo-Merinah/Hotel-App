@@ -1,0 +1,37 @@
+.auth-tabs {
+    display: flex;
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 24px;
+    background-color: #F3EEE9;
+    border-radius: 10px;
+    gap: 5px;
+    box-sizing: border-box;
+}
+
+.auth-tab {
+    flex: 1;
+    height: 42px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #71685F;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.auth-tab.active {
+    background-color: #5C4033;
+    color: white;
+}
+
+.auth-tab:not(.active):hover {
+    background-color: #E7DDD4;
+}
+
+.auth-tab:focus-visible {
+    outline: 2px solid #5C4033;
+    outline-offset: 2px;
+}
