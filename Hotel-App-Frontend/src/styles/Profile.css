@@ -33,17 +33,17 @@
 }
 
 .profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #5C4033;
+    color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 90px;
-    height: 90px;
+    font-size: 16px;
+    font-weight: 600;
     flex-shrink: 0;
-    background-color: #FFFFFF;
-    color: #5C4033;
-    border-radius: 50%;
-    font-size: 36px;
-    font-weight: 700;
 }
 
 .profile-user-info {

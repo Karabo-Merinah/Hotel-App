@@ -1,0 +1,124 @@
+.booking-confirmation {
+    min-height: 65vh;
+    padding: 50px 20px;
+    background-color: #FAF7F3;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.booking-confirmation-card {
+    width: 100%;
+    max-width: 650px;
+    padding: 35px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5DED7;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px #0000000D;
+}
+
+.booking-confirmation-card h1 {
+    color: #5C4033;
+    font-size: 30px;
+    margin: 0 0 12px;
+}
+
+.booking-confirmation-card > p {
+    color: #71685F;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.booking-confirmation-details {
+    margin-top: 30px;
+}
+
+.booking-confirmation-details > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 15px 0;
+    border-bottom: 1px solid #EEE8E2;
+}
+
+.booking-confirmation-details span {
+    color: #71685F;
+    font-size: 14px;
+}
+
+.booking-confirmation-details strong {
+    color: #292421;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+}
+
+.booking-confirmation-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 25px 0;
+}
+
+.booking-confirmation-total h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #5C4033;
+}
+
+.booking-payment-button {
+    width: 100%;
+    height: 46px;
+    background-color: #5C4033;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.booking-payment-button:hover {
+    background-color: #493226;
+}
+
+.booking-payment-back {
+    display: block;
+    margin: 18px auto 0;
+    padding: 10px;
+    background: none;
+    border: none;
+    color: #5C4033;
+    font-size: 14px;
+    text-decoration: underline;
+}
+
+.booking-payment-error {
+    color: #B42318 !important;
+}
+
+.booking-payment-message {
+    padding: 14px;
+    background-color: #F3E8DC;
+    color: #5C4033 !important;
+    border-radius: 8px;
+    text-align: center;
+}
+
+@media (max-width: 650px) {
+    .booking-confirmation {
+        padding: 25px 16px;
+    }
+
+    .booking-confirmation-card {
+        padding: 22px 18px;
+    }
+
+    .booking-confirmation-card h1 {
+        font-size: 25px;
+    }
+
+    .booking-confirmation-total h2 {
+        font-size: 18px;
+    }
+}

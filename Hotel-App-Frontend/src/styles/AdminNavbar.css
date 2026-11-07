@@ -1,20 +1,38 @@
-﻿.admin-navbar {
+﻿
+.admin-navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    padding: 18px 32px;
+    padding: 8px 32px;
     min-height: 76px;
     background: #fff;
     border-bottom: 1px solid #e9ded4;
     box-sizing: border-box;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .admin-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.admin-logo-image {
+    width: 130px;
+    height: 60px;
+    object-fit: contain;
+    display: block;
+}
+
+.admin-panel-label {
     color: #5c4033;
-    font-size: 22px;
+    font-size: 14px;
     font-weight: 700;
-    text-decoration: none;
     white-space: nowrap;
 }
 
@@ -22,15 +40,17 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 20px;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .admin-navbar-links a {
     color: #40342c;
     font-size: 14px;
     text-decoration: none;
-    padding: 10px 14px;
+    padding: 10px 12px;
     border-radius: 8px;
+    white-space: nowrap;
     transition: background-color 0.2s ease;
 }
 
@@ -43,118 +63,21 @@
     background: #f5efe9;
     color: #5c4033;
     font-weight: 600;
-    border-bottom: none;
-    padding: 10px 14px;
 }
 
-.admin-desktop-logout,
-.admin-mobile-logout {
+.admin-desktop-logout {
     padding: 10px 16px;
     background: #5c4033;
     color: white;
     border: none;
     border-radius: 7px;
     font: inherit;
+    font-size: 14px;
+    white-space: nowrap;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
-.admin-desktop-logout:hover,
-.admin-mobile-logout:hover {
+.admin-desktop-logout:hover {
     background: #493126;
-}
-
-.admin-menu-button {
-    display: none;
-    background: transparent;
-    border: none;
-    color: #5c4033;
-    cursor: pointer;
-}
-
-.admin-mobile-label {
-    display: none;
-}
-
-.admin-overlay {
-    position: fixed;
-    inset: 0;
-    background: #0007;
-    z-index: 100;
-}
-
-.admin-mobile-menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(330px, 85vw);
-    padding: 25px;
-    background: white;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-    box-sizing: border-box;
-    box-shadow: 4px 0 22px #0002;
-    z-index: 101;
-}
-
-.admin-mobile-menu h3 {
-    color: #5c4033;
-}
-
-.admin-mobile-menu a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    color: #30251f;
-    text-decoration: none;
-    border-bottom: 1px solid #eee4dc;
-}
-
-.admin-mobile-menu a:hover {
-    background: #faf6f1;
-}
-
-.admin-close-button {
-    align-self: flex-end;
-    padding: 8px;
-    background: transparent;
-    border: none;
-    color: #5c4033;
-    cursor: pointer;
-}
-
-.admin-mobile-logout {
-    margin-top: 10px;
-}
-
-@media (max-width: 1100px) {
-    .admin-navbar-links {
-        display: none;
-    }
-
-    .admin-menu-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .admin-panel-label {
-        display: none;
-    }
-
-    .admin-mobile-label {
-        display: inline;
-    }
-}
-@media (max-width: 480px) {
-    .admin-navbar {
-        padding: 16px;
-    }
-
-    .admin-logo {
-        font-size: 18px;
-    }
 }

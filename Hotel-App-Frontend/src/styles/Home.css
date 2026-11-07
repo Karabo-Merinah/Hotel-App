@@ -467,6 +467,95 @@
     gap: 20px;
 }
 
+.home-filter-toggle {
+    margin-top: 16px;
+    padding: 8px 0;
+    border: none;
+    background: none;
+    color: #5C4033;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Additional search filters */
+.home-extra-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+    padding-top: 18px;
+    border-top: 1px solid #EAE3DC;
+}
+
+.home-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.home-filter-field label,
+.home-amenities-filter>label {
+    color: #292421;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.home-filter-field input,
+.home-filter-field select {
+    width: 100%;
+    height: 42px;
+    padding: 8px 10px;
+    border: 1px solid #DED6CE;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    color: #292421;
+    box-sizing: border-box;
+}
+
+.home-amenities-filter {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.home-amenities-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+}
+
+.home-amenity-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #51483F;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.home-amenity-option input {
+    width: 16px;
+    height: 16px;
+    accent-color: #5C4033;
+}
+
+/* Search buttons */
+.home-search-button,
+.home-clear-button {
+    width: 90px;
+    height: 42px;
+    flex-shrink: 0;
+}
+
+.home-search-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 @media (max-width: 1100px) {
     .home-search-fields {
         flex-wrap: wrap;
@@ -484,6 +573,7 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
 
 @media (max-width: 768px) {
     .home-hero {
@@ -541,13 +631,22 @@
         width: 100%;
     }
 
+    .home-extra-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .home-amenities-filter {
+        grid-column: 1;
+    }
+
     .home-search-button,
     .home-clear-button {
+        width: auto;
         flex: 1;
     }
 
     .home-hotels {
-        padding: 25px 16px;
+        grid-template-columns: 1fr;
     }
 
     .home-hotels-grid {

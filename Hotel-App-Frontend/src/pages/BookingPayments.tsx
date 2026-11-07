@@ -6,6 +6,7 @@ import { Texts } from "../components/Texts/texts"
 import { useDispatch, useSelector } from "react-redux"
 import { addBooking } from "../features/bookingSlice"
 import type { RootState } from "../app/store"
+import "../styles/BookingPayment.css"
 
 
 const BookingPayment = () => {
@@ -90,29 +91,33 @@ const BookingPayment = () => {
     }
     return (
         <div className="booking-confirmation">
-            <Texts variant="h1">Confirm Your Booking</Texts>
-            {error && <Texts variant="p">{error}</Texts>}
-            {booking && (
-                <>
-                    <Texts variant="p">Hotel: {booking.hotel_name}</Texts>
-                    <Texts variant="p">Room: {booking.room_type}</Texts>
-                    <Texts variant="p">Check-in: {booking.check_in}</Texts>
-                    <Texts variant="p">Check-out: {booking.check_out}</Texts>
-                    <Texts variant="p">Rooms: {booking.number_of_rooms}</Texts>
-                    <Texts variant="p">Guests: {booking.number_of_guests}</Texts>
-                    <Texts variant="h2"> Total: R{Number(booking.total_price).toFixed(2)}</Texts>
-                    {booking.status === "pending" &&
-                        booking.payment_status === "unpaid" && (
-                            <button onClick={handlePayment} disabled={processing}>{processing ? "Processing..." : "Proceed to Payment"}</button>
-                        )}
-                    {booking.payment_status === "paid" && (
-                        <Texts variant="p">Payment received. Awaiting booking confirmation.</Texts>
-                    )}
-                    {booking.status !== "pending" && (
-                        <Texts variant="p">Booking status: {booking.status}</Texts>
-                    )}
-                </>
-            )}
+            <div className="booking-confirmation-card">
+                <Texts variant="h1">Confirm Your Booking</Texts>
+                <Texts variant="p">Review your reservation details before proceeding to payment.</Texts>
+                {error && <p className="booking-payment-error">{error}</p>}
+                <div className="booking-confirmation-details">
+                    <div><span>Hotel</span><strong>{booking.hotel_name}</strong></div>
+                    <div><span>Room</span><strong>{booking.room_type || "Not available"}</strong></div>
+                    <div><span>Check-in</span><strong>{booking.check_in}</strong></div>
+                    <div><span>Check-out</span><strong>{booking.check_out}</strong></div>
+                    <div><span>Rooms</span><strong>{booking.number_of_rooms}</strong></div>
+                    <div><span>Guests</span><strong>{booking.number_of_guests}</strong></div>
+                </div>
+                <div className="booking-confirmation-total">
+                    <Texts variant="h2">Total Amount</Texts>
+                    <Texts variant="h2">R{Number(booking.total_price).toFixed(2)}</Texts>
+                </div>
+                {booking.status === "pending" && booking.payment_status === "unpaid" && (
+                    <button className="booking-payment-button" type="button" onClick={handlePayment} disabled={processing}>{processing ? "Processing..." : "Proceed to Payment"}</button>
+                )}
+                {booking.payment_status === "paid" && (
+                    <p className="booking-payment-message">Payment received. Awaiting booking confirmation from the admin.</p>
+                )}
+                {booking.status !== "pending" && (
+                    <p className="booking-payment-message">Booking status: {booking.status}</p>
+                )}
+                <button className="booking-payment-back" type="button" onClick={() => navigate("/bookings")}>Back to My Bookings</button>
+            </div>
         </div>
     )
 }

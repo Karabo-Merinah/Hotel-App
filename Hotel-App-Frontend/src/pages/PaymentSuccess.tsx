@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import axios from "axios"
 import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
+import "../styles/PaymentSuccess.css"
 
 const PaymentSuccess = () => {
     const [searchParams] = useSearchParams()
@@ -52,27 +53,36 @@ const PaymentSuccess = () => {
 
         verifyPayment()
     }, [reference])
-
     if (loading) {
-        return <Texts variant="p">Verifying your payment...</Texts>
+        return (
+            <div className="payment-success-page">
+                <Texts variant="p">Verifying your payment...</Texts>
+            </div>
+        )
     }
 
     if (error) {
         return (
             <div className="payment-success-page">
-                <Texts variant="h1">Payment Not Confirmed</Texts>
-                <Texts variant="p">{error}</Texts>
-                <button onClick={() => navigate("/bookings")}> View My Bookings</button>
+                <div className="payment-success-card">
+                    <Texts variant="h1">Payment Not Confirmed</Texts>
+                    <Texts variant="p">{error}</Texts>
+                    <button className="payment-success-button" type="button" onClick={() => navigate("/bookings")}>View My Bookings</button>
+                </div>
             </div>
         )
     }
+
     return (
         <div className="payment-success-page">
-            <Texts variant="h1">Payment Successful!</Texts>
-            <Texts variant="p">Your payment has been received successfully.
-                Your reservation is awaiting confirmation from the admin.  </Texts>
-            <Texts variant="p">You can check your reservation status under My Bookings. </Texts>
-            <button onClick={() => navigate(`/bookings/${bookingId}`)}> View Booking Details</button>
+            <div className="payment-success-card">
+                <div className="payment-success-icon">✓</div>
+                <Texts variant="h1">Payment Successful!</Texts>
+                <Texts variant="p">Your payment has been received successfully.</Texts>
+                <Texts variant="p">Your reservation is awaiting confirmation from the admin.</Texts>
+                <Texts variant="p">You can check your reservation status under My Bookings.</Texts>
+                <button className="payment-success-button" type="button" onClick={() => navigate(`/bookings/${bookingId}`)}>View Booking Details</button>
+            </div>
         </div>
     )
 
