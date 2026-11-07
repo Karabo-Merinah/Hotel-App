@@ -53,6 +53,7 @@ export interface Booking {
     total_price: number | string
     status: string
     created_at: string
+    payment_status: "paid" | "unpaid"
 }
 export interface FavouriteHotel {
     id: number

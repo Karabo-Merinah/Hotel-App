@@ -130,12 +130,30 @@ const BookingDetails = () => {
                     <Texts variant="p">Rooms: {booking.number_of_rooms} </Texts>
                     <Texts variant="p">Status: {booking.status}</Texts>
                     <Texts variant="h2">Total: R{Number(booking.total_price).toFixed(2)}</Texts>
-                    {booking.status === "pending" && (
+                    {booking.status === "pending" && booking.payment_status === "unpaid" && (
                         <button type="button" onClick={() => navigate(`/bookings/${booking.id}/payment`)}>Pay Now</button>
                     )}
-                    {(booking.status === "pending" || booking.status === "confirmed") && booking.check_in > today && (
-                        <button type="button" className="cancel-booking-button" onClick={() => setShowConfirm(true)} disabled={cancelling}>Cancel Booking</button>
+                    {booking.status === "pending" &&
+                        booking.payment_status === "paid" && (
+                            <div className="booking-payment-message">
+                                <Texts variant="h3">Awaiting Booking Confirmation</Texts>
+                                <Texts variant="p">
+                                    Your payment has been received successfully.
+                                    Your booking is awaiting confirmation from the admin.
+                                    No further payment is required.
+                                </Texts>
+                            </div>
+                        )}
+                    {booking.status === "confirmed" && booking.payment_status === "paid" && (
+                        <div className="booking-payment-message">
+                            <Texts variant="h3">Booking Confirmed</Texts>
+                            <Texts variant="p">Your payment has been received and your booking has been confirmed.</Texts>
+                        </div>
                     )}
+                    {(booking.status === "pending" || booking.status === "confirmed") && booking.payment_status === "unpaid" && booking.check_in > today && (
+                        <button type="button" className="cancel-booking-button" onClick={() => setShowConfirm(true)} disabled={cancelling} >Cancel Booking </button>
+                    )
+                    }
                     {canReview && (
                         <button type="button" onClick={() => navigate(`/hotels/${booking.hotel_id}/review`)}>Write a Review</button>
                     )}

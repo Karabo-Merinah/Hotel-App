@@ -69,10 +69,13 @@ const PaymentSuccess = () => {
     return (
         <div className="payment-success-page">
             <Texts variant="h1">Payment Successful!</Texts>
-            <Texts variant="p">Your payment was successful and your booking has been confirmed.</Texts>
-            <button onClick={() => navigate(`/bookings/${bookingId}`)}>View Booking Details</button>
+            <Texts variant="p">Your payment has been received successfully.
+                Your reservation is awaiting confirmation from the admin.  </Texts>
+            <Texts variant="p">You can check your reservation status under My Bookings. </Texts>
+            <button onClick={() => navigate(`/bookings/${bookingId}`)}> View Booking Details</button>
         </div>
     )
+
 }
 
 export default PaymentSuccess

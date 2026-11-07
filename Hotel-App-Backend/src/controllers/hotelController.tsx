@@ -63,7 +63,6 @@ export const getAllHotels = async (req: Request, res: Response) => {
             }
             values.push(guests)
             room_filters = room_filters + " AND capacity>= $" + values.length
-
         }
 
         //returns filter results 

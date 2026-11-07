@@ -186,13 +186,8 @@ export const verifyPayment = async (req: Request, res: Response) => {
             [payment.id]
         )
 
-        // Automatically confirm the booking
-        await client.query(`UPDATE bookings SET status = 'confirmed', updated_at = NOW()
-            WHERE id = $1`,
-            [payment.booking_id]
-        )
         await client.query("COMMIT")
-        return res.status(200).json({message: "Payment successful. Booking confirmed.",
+        return res.status(200).json({message: "Payment received. Your reservation is awaiting admin confirmation.",
             status: "paid", booking_id: payment.booking_id })
     }
     catch (error) {

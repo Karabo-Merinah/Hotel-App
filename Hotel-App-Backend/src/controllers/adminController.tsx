@@ -82,12 +82,10 @@ export const updateAdminBookingStatus = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Invalid reservation status." })
         }
 
-        const result = await connectionPool.query(
-            `UPDATE bookings SET status = $1
-             WHERE id = $2 AND status = 'pending' RETURNING *`,
+        const result = await connectionPool.query(`UPDATE bookings SET status = $1 WHERE id = $2
+        AND status = 'pending' AND ($1 = 'cancelled'OR id IN (SELECT booking_id FROM payments WHERE status = 'paid') )RETURNING *`,
             [status, id]
         )
-
         if (result.rows.length === 0) {
             return res.status(409).json({ message: "Reservation not found or no longer pending." })
         }

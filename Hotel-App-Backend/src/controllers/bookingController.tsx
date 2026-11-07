@@ -4,6 +4,10 @@ import { Pool, PoolClient } from "pg"
 
 const select_booking = `SELECT id,user_id,room_id,TO_CHAR(check_in,'YYYY-MM-DD') AS check_in,
               TO_CHAR(check_out,'YYYY-MM-DD') AS check_out,number_of_rooms,number_of_guests,total_price,status,created_at,
+              (SELECT CASE  WHEN EXISTS (
+               SELECT 1 FROM payments WHERE payments.booking_id = bookings.id
+               AND payments.status = 'paid') THEN 'paid'
+               ELSE 'unpaid' END) AS payment_status,
               (SELECT name FROM users WHERE users.id=bookings.user_id) AS guest_name,
               (SELECT email FROM users WHERE users.id=bookings.user_id) AS guest_email,
               (SELECT hotel_id FROM rooms WHERE rooms.id=bookings.room_id) AS hotel_id,
@@ -552,6 +556,16 @@ export const cancelMyBooking = async (req: Request, res: Response) => {
         if (booking.status !== "pending" && booking.status !== "confirmed") {
             return res.status(400).json({ message: "Only pending or confirmed bookings can be cancelled." })
         }
+
+        // Check if the booking has already been paid
+        const payment_result = await connectionPool.query("SELECT id FROM payments WHERE booking_id=$1 AND status='paid' LIMIT 1",
+            [booking_id]
+        )
+
+        if (payment_result.rows.length > 0) {
+            return res.status(400).json({message: "Paid bookings cannot be cancelled online. Please contact the hotel."})
+        }
+
         if (booking.check_in <= new Date().toISOString().slice(0, 10)) {
             return res.status(400).json({ message: "A booking that has already started can't be cancelled online. Please contact the hotel." })
         }

@@ -53,7 +53,7 @@ const BookingPayment = () => {
 
 
     const handlePayment = async () => {
-        if (!booking || booking.status !== "pending") return
+        if (!booking || booking.status !== "pending" || booking.payment_status !== "unpaid") return
         try {
             setProcessing(true)
             setError("")
@@ -101,8 +101,12 @@ const BookingPayment = () => {
                     <Texts variant="p">Rooms: {booking.number_of_rooms}</Texts>
                     <Texts variant="p">Guests: {booking.number_of_guests}</Texts>
                     <Texts variant="h2"> Total: R{Number(booking.total_price).toFixed(2)}</Texts>
-                    {booking.status === "pending" && (
-                        <button onClick={handlePayment} disabled={processing}>{processing ? "Processing..." : "Proceed to Payment"}</button>
+                    {booking.status === "pending" &&
+                        booking.payment_status === "unpaid" && (
+                            <button onClick={handlePayment} disabled={processing}>{processing ? "Processing..." : "Proceed to Payment"}</button>
+                        )}
+                    {booking.payment_status === "paid" && (
+                        <Texts variant="p">Payment received. Awaiting booking confirmation.</Texts>
                     )}
                     {booking.status !== "pending" && (
                         <Texts variant="p">Booking status: {booking.status}</Texts>
