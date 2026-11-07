@@ -4,15 +4,16 @@ import { Pool, PoolClient } from "pg"
 
 const select_booking = `SELECT id,user_id,room_id,TO_CHAR(check_in,'YYYY-MM-DD') AS check_in,
               TO_CHAR(check_out,'YYYY-MM-DD') AS check_out,number_of_rooms,number_of_guests,total_price,status,created_at,
-              (SELECT CASE  WHEN EXISTS (
-               SELECT 1 FROM payments WHERE payments.booking_id = bookings.id
-               AND payments.status = 'paid') THEN 'paid'
+              (SELECT CASE WHEN EXISTS (
+               SELECT 1 FROM payments WHERE payments.booking_id=bookings.id
+               AND payments.status='paid') THEN 'paid'
                ELSE 'unpaid' END) AS payment_status,
               (SELECT name FROM users WHERE users.id=bookings.user_id) AS guest_name,
               (SELECT email FROM users WHERE users.id=bookings.user_id) AS guest_email,
               (SELECT hotel_id FROM rooms WHERE rooms.id=bookings.room_id) AS hotel_id,
+              (SELECT room_type FROM rooms WHERE rooms.id=bookings.room_id) AS room_type,
               (SELECT name FROM hotels WHERE hotels.id=(SELECT hotel_id FROM rooms WHERE rooms.id=bookings.room_id)) AS hotel_name
-               FROM bookings `
+              FROM bookings `
 
 
 //checks the dates ,rooms and guest sent in booking.

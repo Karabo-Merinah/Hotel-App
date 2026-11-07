@@ -2,83 +2,136 @@ import { Request, Response } from "express"
 import connectionPool from "../config/database"
 
 //gets all hotels with the lowest room price and the photo .
-export const getAllHotels = async (req: Request, res: Response) => {
 
+export const getAllHotels = async (req: Request, res: Response) => {
     try {
+        const values: (string | number)[] = []
+        let room_filters = " AND rooms.is_active=TRUE AND rooms.total_rooms>0"
 
         let query_text = `SELECT id,name,description,city,address,star_rating,latitude,longitude,
-        (SELECT MIN(price_per_night) FROM rooms 
-        WHERE rooms.hotel_id=hotels.id AND is_active=TRUE) AS price_from ,
-        (SELECT image_url FROM hotel_images WHERE hotel_images.hotel_id=hotels.id ORDER BY id LIMIT 1) AS main_image 
+        (SELECT image_url FROM hotel_images WHERE hotel_id=hotels.id ORDER BY id LIMIT 1) AS main_image
         FROM hotels WHERE hotels.is_active=TRUE`
 
-        //filter values
-        const values: any[] = []
-
-        //filters on room 
-        let room_filters = ""
-
-        //filter by location 
+        // Filter by location
         if (req.query.city) {
             values.push("%" + String(req.query.city).trim() + "%")
-            query_text = query_text + " AND (LOWER(city) LIKE LOWER($" + values.length + ") OR LOWER(address) LIKE LOWER($" + values.length + "))"
+            query_text += ` AND (LOWER(city) LIKE LOWER($${values.length}) OR LOWER(address) LIKE LOWER($${values.length}))`
         }
 
-        //filter by ratings 
+        // Filter by star rating
         if (req.query.stars) {
-            const stars = Number(req.query.stars)
-            if (isNaN(stars)) {
-                return res.status(400).json({ message: "Star ratings must be a number." })
+            const stars = parseInt(String(req.query.stars))
+
+            if (isNaN(stars) || String(stars) !== String(req.query.stars) || stars < 1 || stars > 5) {
+                return res.status(400).json({ message: "Star rating must be between 1 and 5." })
             }
+
             values.push(stars)
-            query_text = query_text + " AND star_rating >= $" + values.length
+            query_text += ` AND star_rating >= $${values.length}`
         }
 
-        //filter by lower price per night
-
+        // Filter by minimum price
         if (req.query.minPrice) {
             const minPrice = Number(req.query.minPrice)
-            if (isNaN(minPrice)) {
-                return res.status(400).json({ message: "Minimum price must be a number" })
+
+            if (isNaN(minPrice) || minPrice < 0) {
+                return res.status(400).json({ message: "Minimum price must be zero or greater." })
             }
+
             values.push(minPrice)
-            room_filters = room_filters + " AND price_per_night >= $" + values.length
+            room_filters += ` AND rooms.price_per_night >= $${values.length}`
         }
 
-        //filter by the highest price per night 
+        // Filter by maximum price
         if (req.query.maxPrice) {
             const maxPrice = Number(req.query.maxPrice)
-            if (isNaN(maxPrice)) {
-                return res.status(400).json({ message: "Maximum price must be a number." })
+            if (isNaN(maxPrice) || maxPrice < 0) {
+                return res.status(400).json({ message: "Maximum price must be zero or greater." })
             }
             values.push(maxPrice)
-            room_filters = room_filters + " AND price_per_night <= $" + values.length
+            room_filters += ` AND rooms.price_per_night <= $${values.length}`
         }
 
-        //filter by number of guests
-        if (req.query.guests) {
-            const guests = Number(req.query.guests)
-            if (isNaN(guests)) {
-                return res.status(400).json({ message: "Guests must be a number" })
+        // Validate price range
+        if (req.query.minPrice && req.query.maxPrice) {
+            if (Number(req.query.minPrice) > Number(req.query.maxPrice)) {
+                return res.status(400).json({ message: "Minimum price cannot exceed maximum price." })
             }
+        }
+
+        // Filter by number of guests
+        if (req.query.guests) {
+            const guests = parseInt(String(req.query.guests))
+
+            if (isNaN(guests) || String(guests) !== String(req.query.guests) || guests < 1) {
+                return res.status(400).json({ message: "Guests must be a positive whole number." })
+            }
+
             values.push(guests)
-            room_filters = room_filters + " AND capacity>= $" + values.length
+            room_filters += ` AND rooms.capacity >= $${values.length}`
         }
 
-        //returns filter results 
-        if (room_filters !== "") {
-            query_text = query_text + " AND id IN (SELECT hotel_id FROM rooms WHERE is_active=TRUE" + room_filters + ")"
-        }
-        query_text = query_text + " ORDER BY name"
+        // Filter by amenities
+        if (req.query.amenities) {
+            const amenities = String(req.query.amenities).split(",").map(name => name.trim()).filter(name => name !== "")
 
+            for (const amenity of amenities) {
+                values.push(amenity)
+                query_text += ` AND hotels.id IN (SELECT hotel_id FROM hotel_amenities WHERE amenity_id IN (SELECT id FROM amenities WHERE LOWER(name)=LOWER($${values.length})))`
+            }
+        }
+
+        // Validate number of rooms
+        const number_of_rooms = req.query.number_of_rooms ? parseInt(String(req.query.number_of_rooms)) : 1
+
+        if (isNaN(number_of_rooms) || number_of_rooms < 1 || (req.query.number_of_rooms && String(number_of_rooms) !== String(req.query.number_of_rooms))) {
+            return res.status(400).json({ message: "Number of rooms must be a positive whole number." })
+        }
+
+        values.push(number_of_rooms)
+        room_filters += ` AND rooms.total_rooms >= $${values.length}`
+        const rooms_index = values.length
+
+        // Filter by check-in and check-out dates
+        const check_in = String(req.query.check_in || "")
+        const check_out = String(req.query.check_out || "")
+
+        if (check_in || check_out) {
+            if (!check_in || !check_out) {
+                return res.status(400).json({ message: "Both check-in and check-out dates are required." })
+            }
+            if (isNaN(Date.parse(check_in)) || isNaN(Date.parse(check_out))) {
+                return res.status(400).json({ message: "Invalid check-in or check-out date." })
+            }
+            if (new Date(check_out) <= new Date(check_in)) {
+                return res.status(400).json({ message: "Check-out must be after check-in." })
+            }
+
+            values.push(check_in, check_out)
+            const check_in_index = values.length - 1
+            const check_out_index = values.length
+
+            // Check available rooms for every night of the stay
+            room_filters += ` AND NOT EXISTS ( SELECT 1 FROM generate_series($${check_in_index}::date, $${check_out_index}::date - 1, INTERVAL '1 day') AS stay_date
+                WHERE (SELECT COALESCE(SUM(b.number_of_rooms),0) FROM bookings b
+                WHERE b.room_id=rooms.id AND b.status IN ('pending','confirmed')
+                AND b.check_in<=stay_date AND b.check_out>stay_date)
+                > rooms.total_rooms - $${rooms_index} )`
+        }
+        // Return hotels with matching rooms and their lowest matching price
+        query_text = query_text.replace("FROM hotels WHERE", `, (SELECT MIN(rooms.price_per_night) FROM rooms WHERE rooms.hotel_id=hotels.id${room_filters}) AS price_from
+            FROM hotels WHERE`
+        )
+        query_text += ` AND hotels.id IN (SELECT rooms.hotel_id FROM rooms WHERE rooms.hotel_id=hotels.id${room_filters}) ORDER BY name`
         const result = await connectionPool.query(query_text, values)
         return res.status(200).json(result.rows)
-    }
-    catch (error) {
+    } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Could not get hotels." })
     }
 }
+
+
 
 //get a hotel with its photos ,amenties and rooms.
 
