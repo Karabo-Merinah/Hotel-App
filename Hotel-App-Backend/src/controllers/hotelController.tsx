@@ -8,9 +8,15 @@ export const getAllHotels = async (req: Request, res: Response) => {
         const values: (string | number)[] = []
         let room_filters = " AND rooms.is_active=TRUE AND rooms.total_rooms>0"
 
+
         let query_text = `SELECT id,name,description,city,address,star_rating,latitude,longitude,
-        (SELECT image_url FROM hotel_images WHERE hotel_id=hotels.id ORDER BY id LIMIT 1) AS main_image
-        FROM hotels WHERE hotels.is_active=TRUE`
+    (SELECT image_url FROM hotel_images
+     WHERE hotel_id=hotels.id ORDER BY id LIMIT 1) AS main_image,
+    (SELECT ROUND(AVG(rating), 1)  FROM reviews WHERE hotel_id=hotels.id) AS average_rating,
+    (SELECT COUNT(*)
+     FROM reviews WHERE hotel_id=hotels.id) AS reviews_count
+    FROM hotels WHERE hotels.is_active=TRUE`
+
 
         // Filter by location
         if (req.query.city) {
