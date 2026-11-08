@@ -13,7 +13,6 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
             <div className="auth-form-section">
                 <Link to="/" className="auth-logo-link">
                     <img src={logo} alt="Wander Inn Logo" className="auth-logo" /></Link>
-
                 {children}
             </div>
 

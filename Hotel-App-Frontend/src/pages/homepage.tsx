@@ -28,6 +28,7 @@ const Home = () => {
     const today = new Date().toLocaleDateString("en-CA")
     const availableAmenities = ["Wi-Fi", "Parking", "Swimming Pool", "Restaurant", "Air Conditioning"]
 
+    // fetchs hotels from the backend using optional search filters
     const getHotels = async (params = new URLSearchParams()) => {
         try {
             setLoading(true)
@@ -43,17 +44,19 @@ const Home = () => {
             setLoading(false)
         }
     }
-
+    // load all hotels when the home page opens
     useEffect(() => {
         getHotels()
     }, [])
 
+    // validate search details and search for matching hotels
     const handleSearch = () => {
+        // make sure the user enters a location
         if (city.trim() === "") {
             setError("Please enter a location.")
             return
         }
-
+        // make sure check-in and check-out dates are selected
         if (checkIn === "") {
             setError("Please select a check-in date.")
             return
@@ -63,17 +66,18 @@ const Home = () => {
             setError("Please select a check-out date.")
             return
         }
-
+        // prevents searching with past check-in dates
         if (checkIn < today) {
             setError("Check-in date cannot be in the past.")
             return
         }
+        // Make sure check-out is after check-in
 
         if (checkOut <= checkIn) {
             setError("Check-out date must be after check-in date.")
             return
         }
-
+        // Convert guest and room values to numbers
         const guestCount = parseInt(guests)
         const roomCount = parseInt(numberOfRooms)
 
@@ -104,6 +108,7 @@ const Home = () => {
         params.append("guests", guests)
         params.append("number_of_rooms", numberOfRooms)
 
+        // adds optional filters when selected
         if (minPrice !== "") params.append("minPrice", minPrice)
         if (maxPrice !== "") params.append("maxPrice", maxPrice)
         if (stars !== "") params.append("stars", stars)
@@ -129,6 +134,7 @@ const Home = () => {
         getHotels()
     }
 
+    // Add or remove an amenity from the selected filters
     const toggleAmenity = (name: string) => {
         if (amenities.includes(name)) {
             setAmenities(amenities.filter(item => item !== name))
@@ -172,6 +178,7 @@ const Home = () => {
                             <button className="home-clear-button" onClick={clearSearch}>Clear</button>
                         </div>
                     </div>
+                    {/* Show or hide additional search filters */}
                     <button type="button" className="home-filter-toggle" onClick={() => setShowFilters(!showFilters)}>{showFilters ? "Hide Filters" : "More Filters"}</button>
                     {showFilters && (
                         <div className="home-extra-filters">
@@ -233,6 +240,7 @@ const Home = () => {
                                         <Texts variant="p">Price unavailable</Texts>
                                     )}
                                 </div>
+                                {/* Navigate to hotel details with the selected booking information */}
                                 <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests: parseInt(guests), numberOfRooms: parseInt(numberOfRooms) } })}>View Hotel</button>
                             </div>
                         </div>

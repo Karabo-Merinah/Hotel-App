@@ -8,7 +8,6 @@ import { addBooking } from "../features/bookingSlice"
 import type { RootState } from "../app/store"
 import "../styles/BookingPayment.css"
 
-
 const BookingPayment = () => {
     const { id } = useParams()
     const navigate = useNavigate()

@@ -35,7 +35,6 @@ const EditProfile = () => {
         try {
             setLoading(true)
             setError("")
-
             const response = await api.get("/api/users/me", { headers: { Authorization: `Bearer ${token}` } })
             setName(response.data.name)
             setEmail(response.data.email)

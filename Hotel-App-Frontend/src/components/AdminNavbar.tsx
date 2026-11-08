@@ -16,7 +16,6 @@ const AdminNavbar = () => {
     const logout = () => {
         localStorage.removeItem("token")
         localStorage.removeItem("user")
-
         dispatch(logoutUser())
         dispatch(clearFavourites())
         dispatch(clearBookings())
@@ -31,13 +30,13 @@ const AdminNavbar = () => {
                     <img src={logo} alt="Wander Inn Logo" className="admin-logo-image" />
                     <span className="admin-panel-label">| ADMIN PANEL</span>
                 </div>
-
                 <nav className="admin-navbar-links">
                     <NavLink to="/admin" end>Dashboard</NavLink>
                     <NavLink to="/admin/hotels">Accommodations</NavLink>
                     <NavLink to="/admin/hotels/new">Add Hotel</NavLink>
                     <NavLink to="/admin/bookings">Reservations</NavLink>
                     <NavLink to="/admin/rooms">Room & Pricing</NavLink>
+                    <NavLink to="/admin/reviews">Reviews</NavLink>
                     <NavLink to="/admin/profile">Admin Profile</NavLink>
 
                     <button type="button" className="admin-desktop-logout" onClick={() => setConfirmLogout(true)} >Logout</button>

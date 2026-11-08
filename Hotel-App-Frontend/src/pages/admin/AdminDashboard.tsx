@@ -53,7 +53,7 @@ const AdminDashboard = () => {
                     <Texts variant="p">{stats.active_bookings}</Texts>
                 </div>
                 <div className="admin-stat-card">
-                    <Texts variant="h3">Available rooms</Texts>
+                    <Texts variant="h3">Available Rooms Today</Texts>
                     <Texts variant="p">{stats.available_rooms}</Texts>
                 </div>
                 <div className="admin-stat-card">

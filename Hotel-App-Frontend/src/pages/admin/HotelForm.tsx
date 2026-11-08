@@ -31,13 +31,16 @@ const HotelForm = () => {
     const [confirmImageId, setConfirmImageId] = useState<number | null>(null)
 
 
+    // loads hotel details when editing an existing hotel
     useEffect(() => {
         if (!id) return
         const getHotel = async () => {
             try {
+                // get the selected hotel from the backend
                 const response = await api.get(`/api/hotels/${id}`
                 )
                 const hotel = response.data
+                // fill the form with the hotel's existing details
                 setName(hotel.name || "")
                 setDescription(hotel.description || "")
                 setAddress(hotel.address || "")
@@ -56,16 +59,20 @@ const HotelForm = () => {
         getHotel()
     }, [id])
 
+    // delete a hotel image from the backend
     const deleteHotelImage = async (imageId: number) => {
         try {
             setDeletingImage(true)
             setImageError("")
 
+            // get the admin authentication token
             const token = localStorage.getItem("token")
+            // send the delete request to the backend
             await api.delete(`/api/hotels/images/${imageId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
 
+            // remove the deleted image from the page
             setExistingImages(existingImages.filter((image) => image.id !== imageId))
             setPopup("Hotel image deleted successfully.")
         }
@@ -78,8 +85,10 @@ const HotelForm = () => {
             setConfirmImageId(null)
         }
     }
+    // save a new hotel or update an existing hotel
     const saveHotel = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        // clear previous errors and start loading
         setError("")
         setImageError("")
         setLoading(true)
@@ -94,6 +103,7 @@ const HotelForm = () => {
         }
         try {
             if (id) {
+                // update the existing hotel
                 await api.put(`/api/hotels/${id}`, hotelData, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
@@ -101,10 +111,11 @@ const HotelForm = () => {
             } else {
                 const response = await api.post("/api/hotels", hotelData, { headers: { Authorization: `Bearer ${token}` } }
                 )
+                // upload any newly selected images
                 await uploadHotelImages(response.data.id)
             }
             navigate("/admin/hotels", {
-                state: {popup: id ? "Hotel updated successfully!" : "Hotel added successfully!" }
+                state: { popup: id ? "Hotel updated successfully!" : "Hotel added successfully!" }
             })
         } catch (error) {
             console.log(error)
@@ -114,7 +125,9 @@ const HotelForm = () => {
         }
     }
 
+    // upload selected hotel images
     const uploadHotelImages = async (hotelId: number) => {
+        // skip uploading when no images are selected
         if (selectedImages.length === 0) {
             return
         }
@@ -123,6 +136,7 @@ const HotelForm = () => {
             setImageError("")
 
             const token = localStorage.getItem("token")
+            // upload each selected image
             for (const image of selectedImages) {
                 const formData = new FormData()
                 formData.append("image", image)
@@ -148,6 +162,7 @@ const HotelForm = () => {
 
     return (
         <div className="admin-hotel-form-page">
+            {/* Ask for confirmation before deleting a hotel image */}
             {popup && <Popup message={popup} type="success" onClose={() => setPopup("")} />}
             {confirmImageId !== null && (
                 <ConfirmDialog title="Delete Hotel Image" message="Are you sure you want to delete this hotel image?" onConfirm={() => deleteHotelImage(confirmImageId)} onClose={() => setConfirmImageId(null)} loading={deletingImage} />
@@ -192,6 +207,7 @@ const HotelForm = () => {
                     )}
                     {imageError && <Texts variant="p">{imageError}</Texts>}
                 </div>
+                {/* Hotel location coordinates */}
                 <div className="admin-hotel-form-row">
                     <div>
                         <label htmlFor="hotel-latitude">Latitude</label>

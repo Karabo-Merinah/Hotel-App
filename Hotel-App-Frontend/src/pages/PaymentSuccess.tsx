@@ -12,22 +12,28 @@ const PaymentSuccess = () => {
     const [error, setError] = useState("")
     const [bookingId, setBookingId] = useState<number | null>(null)
 
+     // get the payment reference from the URL
     const reference = searchParams.get("reference")
 
     useEffect(() => {
+        // verify the payment with the backend
         const verifyPayment = async () => {
+            // check if the payment reference exists
             if (!reference) {
                 setError("Payment reference is missing.")
                 setLoading(false)
                 return
             }
+            // get the user's authentication token
             const token = localStorage.getItem("token")
+             // prevent verification if the user is not logged in
             if (!token) {
                 setError("Please log in to verify your payment.")
                 setLoading(false)
                 return
             }
             try {
+                 // sends the payment reference to the backend for verification
                 const response = await api.get(`/api/payments/verify/${encodeURIComponent(reference)}`,
                     { headers: { Authorization: `Bearer ${token}` } })
 
@@ -50,9 +56,10 @@ const PaymentSuccess = () => {
                 setLoading(false)
             }
         }
-
+        // runs payment verification when the page loads
         verifyPayment()
     }, [reference])
+     // display a loading message while verifying payment
     if (loading) {
         return (
             <div className="payment-success-page">
@@ -72,13 +79,13 @@ const PaymentSuccess = () => {
             </div>
         )
     }
-
     return (
         <div className="payment-success-page">
             <div className="payment-success-card">
                 <div className="payment-success-icon">✓</div>
                 <Texts variant="h1">Payment Successful!</Texts>
                 <Texts variant="p">Your payment has been received successfully.</Texts>
+                 {/* Inform the user that admin approval is still required */}
                 <Texts variant="p">Your reservation is awaiting confirmation from the admin.</Texts>
                 <Texts variant="p">You can check your reservation status under My Bookings.</Texts>
                 <button className="payment-success-button" type="button" onClick={() => navigate(`/bookings/${bookingId}`)}>View Booking Details</button>

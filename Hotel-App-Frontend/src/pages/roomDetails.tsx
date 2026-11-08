@@ -20,6 +20,8 @@ const RoomDetails = () => {
     const [checkingAvailability, setCheckingAvailability] = useState(false)
     const [bookingError, setBookingError] = useState("")
     const [currentImage, setCurrentImage] = useState(0)
+    // Store errors when checking room availability
+    const [availabilityError, setAvailabilityError] = useState("")
 
     // Get the selected room from the backend
     const getRoom = async () => {
@@ -39,34 +41,40 @@ const RoomDetails = () => {
         }
     }
 
-    // Checks how many rooms are available for the selected dates
-    const checkAvailability = async () => {
 
-        // Stop if the user has not selected check-in and check-out dates
+    // Check how many rooms are available for the selected dates
+    const checkAvailability = async () => {
+        // Clear previous availability and errors
+        setAvailableRooms(null)
+        setAvailabilityError("")
+        setBookingError("")
+        // Stop if the user has not selected dates
         if (!checkIn || !checkOut) {
-            setAvailableRooms(null)
+            setCheckingAvailability(false)
             return
         }
         try {
             // Show loading while checking availability
             setCheckingAvailability(true)
-            // Send the room ID and selected dates to the backend
+            // Send the selected dates to the backend
             const response = await api.get(`/api/bookings/rooms/${id}/availability`, {
                 params: { check_in: checkIn, check_out: checkOut }
             })
-            // Store the number of available rooms returned by the backend
+            // Store the number of available rooms
             setAvailableRooms(response.data.available_rooms)
         }
         catch (error) {
-            // Handle errors when availability cannot be checked
             console.log(error)
+            // Show an error if availability could not be checked
             setAvailableRooms(null)
+            setAvailabilityError("Could not check room availability. Please try again.")
         }
         finally {
-            // Stop loading after the request finishes
+            // Stop loading after checking availability
             setCheckingAvailability(false)
         }
     }
+
 
     useEffect(() => {
         getRoom()
@@ -106,6 +114,17 @@ const RoomDetails = () => {
         //check if the dates are filled in
         if (!checkIn || !checkOut) {
             setBookingError("Please select check-in and check-out dates first.")
+            return
+        }
+        // Check that the check-out date is after check-in
+        if (checkOut <= checkIn) {
+            setBookingError("Check-out date must be after check-in.")
+            return
+        }
+        // Prevent booking dates in the past
+        const today = new Date().toLocaleDateString("en-CA")
+        if (checkIn < today) {
+            setBookingError("Check-in date cannot be in the past.")
             return
         }
         // Check if the selected rooms can accommodate the guests
@@ -167,8 +186,7 @@ const RoomDetails = () => {
                     <div className="room-information-top">
                         <Texts variant="h2">{room.room_type}</Texts>
                         <Texts variant="p">{room.description}</Texts>
-                        <Texts variant="p">Capacity: {room.capacity} guests</Texts>
-                        <Texts variant="p">Total Rooms: {room.total_rooms}</Texts>
+                        <Texts variant="p">Capacity: {room.capacity} guests per room</Texts>
                     </div>
                     <div className="room-information-bottom">
                         <div className="room-booking-details">
@@ -176,16 +194,22 @@ const RoomDetails = () => {
                                 <Texts variant="h2">R{room.price_per_night}</Texts>
                                 <Texts variant="p">per night</Texts>
                             </div>
+                            {/* Show the number of rooms available for the selected dates */}
+
+                            {/* Display room availability or an error message */}
                             {checkingAvailability ? (
                                 <Texts variant="p">Checking availability...</Texts>
+                            ) : availabilityError ? (
+                                <Texts variant="p">{availabilityError}</Texts>
                             ) : availableRooms !== null ? (
-                                <Texts variant="p">Available Rooms: {availableRooms}</Texts>
+                                <Texts variant="p"> {availableRooms > 0 ? `${availableRooms} rooms available for your selected dates` : "No rooms available for your selected dates"}</Texts>
                             ) : (
                                 <Texts variant="p">Select dates to check room availability.</Texts>
                             )}
                         </div>
-                        <button className="room-book-button" onClick={checkRoomCapacity} disabled={checkingAvailability || (availableRooms !== null && availableRooms < numberOfRooms)}>
-                            {availableRooms !== null && availableRooms < numberOfRooms ? "Not Available" : "Select Room"}
+                        {/* Prevent booking when availability has not been confirmed */}
+                        <button className="room-book-button" onClick={checkRoomCapacity} disabled={checkingAvailability || availableRooms === null || availableRooms < numberOfRooms}>
+                            {checkingAvailability ? "Checking..." : availableRooms !== null && availableRooms < numberOfRooms ? "Not Available" : "Select Room"}
                         </button>
                     </div>
                     {bookingError && (
