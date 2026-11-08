@@ -352,7 +352,6 @@ export const getAllBookings = async (req: Request, res: Response) => {
 }
 
 //admin approves or cancels the booking 
-
 export const updateBookingStatus = async (req: Request, res: Response) => {
     try {
         const booking_id = Number(req.params.id)
@@ -384,6 +383,19 @@ export const updateBookingStatus = async (req: Request, res: Response) => {
         }
         if (booking.status === new_status) {
             return res.status(400).json({ message: "The booking is already " + new_status })
+        }
+                // Only paid bookings can be confirmed
+        if (new_status === "confirmed") {
+            const payment_result = await connectionPool.query(
+                "SELECT id FROM payments WHERE booking_id=$1 AND status='paid' LIMIT 1",
+                [booking_id]
+            )
+
+            if (payment_result.rows.length === 0) {
+                return res.status(400).json({
+                    message: "Payment is required before confirming a booking."
+                })
+            }
         }
 
         await connectionPool.query("UPDATE bookings SET status=$1 , updated_at=NOW() WHERE id=$2", [new_status, booking_id])
@@ -564,7 +576,7 @@ export const cancelMyBooking = async (req: Request, res: Response) => {
         )
 
         if (payment_result.rows.length > 0) {
-            return res.status(400).json({message: "Paid bookings cannot be cancelled online. Please contact the hotel."})
+            return res.status(400).json({ message: "Paid bookings cannot be cancelled online. Please contact the hotel." })
         }
 
         if (booking.check_in <= new Date().toISOString().slice(0, 10)) {

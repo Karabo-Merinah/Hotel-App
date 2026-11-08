@@ -121,3 +121,18 @@ export const deleteReview = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Could not delete the review." })
     }
 }
+
+// Admin views all hotel reviews
+export const getAllReviews = async (req: Request, res: Response) => {
+    try {
+        const result = await connectionPool.query(`SELECT id, rating, comment, created_at,
+            (SELECT name FROM users WHERE users.id = reviews.user_id) AS reviewer_name,
+            (SELECT name FROM hotels WHERE hotels.id = reviews.hotel_id) AS hotel_name
+            FROM reviews ORDER BY created_at DESC `)
+        return res.status(200).json(result.rows)
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not get reviews." })
+    }
+}

@@ -38,8 +38,8 @@ export const registerUser = async (req: Request, res: Response) => {
         }
 
         // Check password length
-        if (password.length < 8 || password.length > 10) {
-            return res.status(400).json({ message: "Password must contain 8 to 10 characters." })
+        if (password.length < 8 ) {
+            return res.status(400).json({ message: "Password must contain at least 8 characters." })
         }
         // Check lowercase letter
         const hasLowercase = password.split("").some((letter: string) => letter >= "a" && letter <= "z")
