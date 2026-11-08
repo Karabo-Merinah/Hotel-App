@@ -32,6 +32,7 @@ import Contact from "./pages/Contact"
 import PrivacyPolicy from "./pages/PrivacyPolicy"
 import Terms from "./pages/Terms"
 import AdminReviews from "./pages/admin/AdminReviews"
+import Services from "./pages/Services"
 
 const ProtectedBooking = () => {
   const location = useLocation()
@@ -64,7 +65,7 @@ const UserLayout = () => {
         <Route path="/rooms/:id" element={<RoomDetails />} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-
+        <Route path="/services" element={<Services />} />
         {/* protected pages  */}
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />

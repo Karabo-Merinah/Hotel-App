@@ -1,0 +1,17 @@
+/* Google Maps link */
+.hotel-google-maps-link {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 10px 16px;
+    background-color: #5C4033;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Hover effect */
+.hotel-google-maps-link:hover {
+    background-color: #463126;
+}

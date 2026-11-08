@@ -2,6 +2,7 @@ import { type HotelMapProps } from "../types/hotel"
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
+import "../styles/HotelMap.css"
 
 // Import the marker images
 import markerIcon from "leaflet/dist/images/marker-icon.png"
@@ -12,19 +13,20 @@ const icon = L.icon({iconUrl: markerIcon,shadowUrl: markerShadow,iconSize: [25, 
 })
 
 const HotelMap = ({ name, address, latitude, longitude }: HotelMapProps) => {
+    // Create a Google Maps link using the hotel's coordinates
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude}%2C${longitude}`
     return (
         <div className="hotel-map">
-            {/* Display the map at the hotel's location */}
+            {/* Display the hotel location on the map */}
             <MapContainer center={[latitude, longitude]} zoom={15} scrollWheelZoom={false} style={{ height: "350px", width: "100%" }}>
-                {/* Display the map background */}
                 <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {/* Show the hotel's location marker */}
+                {/* Display the hotel's marker */}
                 <Marker position={[latitude, longitude]} icon={icon}>
-                    {/* Show hotel details when the marker is clicked */}
                     <Popup>{name} - {address}</Popup>
                 </Marker>
-
             </MapContainer>
+            {/* Open the hotel location in Google Maps */}
+            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="hotel-google-maps-link">Check place on Google Maps</a>
         </div>
     )
 }

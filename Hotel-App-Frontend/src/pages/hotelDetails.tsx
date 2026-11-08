@@ -260,8 +260,6 @@ const HotelDetails = () => {
             {/* Hotel description and general information */}
             <Texts variant="p">{hotel.description}</Texts>
             <Texts variant="p">City: {hotel.city}</Texts>
-            <Texts variant="p">Address: {hotel.address}</Texts>
-            <Texts variant="p">Rating: {hotel.star_rating} Stars</Texts>
             <div className="hotel-amenities">
                 <Texts variant="h2">Hotel Amenities</Texts>
                 {hotel.amenities && hotel.amenities.length > 0 ? (
@@ -328,16 +326,19 @@ const HotelDetails = () => {
                     </>
                 )}
             </div>
-
-            {/* Display the hotel's location on the map */}
+            {/* Display the hotel's address and location on the map */}
             <div className="hotel-location">
                 <Texts variant="h2">Hotel Location</Texts>
+                {/* Display the hotel's address */}
+                <Texts variant="p">{hotel.address}, {hotel.city}</Texts>
+                {/* Display the map when coordinates are available */}
                 {hotel.latitude != null && hotel.longitude != null ? (
                     <HotelMap name={hotel.name} address={hotel.address} latitude={parseFloat(String(hotel.latitude))} longitude={parseFloat(String(hotel.longitude))} />
                 ) : (
                     <Texts variant="p">Hotel location is not available.</Texts>
                 )}
             </div>
+
         </div>
     )
 }

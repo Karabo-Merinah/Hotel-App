@@ -231,7 +231,8 @@ const Home = () => {
                             <Texts variant="h3">{hotel.name}</Texts>
                             <Texts variant="p">{hotel.city}, {hotel.address}</Texts>
                             <Texts variant="p">{hotel.description}</Texts>
-                            <Texts variant="p">Rating: {hotel.star_rating} Stars</Texts>
+                            {/* Display the average rating from guest reviews */}
+                            <Texts variant="p"> {Number(hotel.reviews_count) > 0 ? `Guest Rating: ${hotel.average_rating}/5 (${hotel.reviews_count} reviews)` : "No ratings yet"}</Texts>
                             <div className="hotel-card-bottom">
                                 <div className="hotel-card-price">
                                     {hotel.price_from !== null && hotel.price_from !== undefined ? (
