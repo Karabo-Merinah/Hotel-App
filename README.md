@@ -232,7 +232,7 @@ Preview showing hotel listings and the search form.
 ![Home page](./Hotel-App-Frontend/hotel_homepage.png)
 
 ### Hotel Details
-
+![alt text](image.png)
 Preview showing hotel information and images.
 
 ![Hotel details](./Hotel-App-Frontend/hotel_details.png)
@@ -241,7 +241,7 @@ Preview showing hotel information and images.
 
 ### Room Details
 
-Preview showing room details and images.
+Previe![alt text](image.png)w showing room details and images.
 
 ![Room details](./Hotel-App-Frontend/room_details.png)
 
