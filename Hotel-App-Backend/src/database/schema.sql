@@ -16,10 +16,8 @@ CREATE TABLE hotels (
     description TEXT,
     address VARCHAR(255) NOT NULL,
     city VARCHAR(100) NOT NULL,
-    latitude NUMERIC(9, 6) NOT NULL CHECK (latitude BETWEEN -90 AND 90),
-    longitude NUMERIC(9, 6) NOT NULL CHECK (
-        longitude BETWEEN -180 AND 180
-    ),
+    latitude NUMERIC(9, 6) CHECK (latitude BETWEEN -90 AND 90),
+    longitude NUMERIC(9, 6) CHECK (longitude BETWEEN -180 AND 180),
     star_rating INTEGER CHECK (star_rating BETWEEN 1 AND 5),
     policies TEXT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,

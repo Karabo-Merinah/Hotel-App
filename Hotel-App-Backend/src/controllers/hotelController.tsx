@@ -224,29 +224,12 @@ export const getHotelById = async (req: Request, res: Response) => {
     }
 }
 
-//checks the hotel details  sent by admin  by handling possible errors.
+// Validate hotel information provided by the admin
 const getHotelDataErrors = (hotelData: any) => {
-    //checks if the hotel name,address,city are not empty . 
     if (!hotelData.name || !hotelData.address || !hotelData.city) {
-        return "Name,address and city are required."
+        return "Name, address and city are required."
     }
-    const latitude = parseFloat(hotelData.latitude)
-    const longitude = parseFloat(hotelData.longitude)
-
-    //checks if the map coordinates are provided and their scale 
-
-    if (isNaN(latitude) || isNaN(longitude)) {
-        return "Latitude and longitude are required and must be a number."
-    }
-    if (latitude < -90 || latitude > 90) {
-        return "Latitude  must be between -90 and 90"
-    }
-    if (longitude < -180 || longitude > 180) {
-        return "Longitude must be between -180 and 180"
-    }
-
     const starRating = parseInt(hotelData.star_rating)
-
     if (isNaN(starRating) || starRating < 1 || starRating > 5) {
         return "Star rating must be a number from 1 to 5."
     }
@@ -263,15 +246,17 @@ export const createHotel = async (req: Request, res: Response) => {
             return res.status(400).json({ message: errorMessage })
         }
 
+        // Save hotel using its address and city
         const result = await connectionPool.query(
-            `INSERT INTO hotels(name,description,address,city,latitude,longitude,star_rating,policies)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`, [hotelData.name.trim(), hotelData.description, hotelData.address.trim(), hotelData.city.trim(), parseFloat(hotelData.latitude), parseFloat(hotelData.longitude), parseInt(hotelData.star_rating), hotelData.policies]
+            `INSERT INTO hotels (name, description, address, city, star_rating, policies)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [hotelData.name.trim(),hotelData.description,hotelData.address.trim(),hotelData.city.trim(),parseInt(hotelData.star_rating),hotelData.policies]
         )
         return res.status(201).json(result.rows[0])
     }
     catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Could not create the hotel" })
+        return res.status(500).json({ message: "Could not create the hotel." })
     }
 }
 
