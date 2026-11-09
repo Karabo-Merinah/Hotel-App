@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllHotels, getHotelById, createHotel, updateHotel, deleteHotel, getHotelSearchOptions } from "../controllers/hotelController";
+import { getAllHotels, getHotelById, createHotel, updateHotel, deleteHotel, getHotelSearchOptions,getHotelLocations} from "../controllers/hotelController";
 import { requiresLogin, requiresAdmin } from "../middleware/authMiddleware";
 import { getAllAmenties, addHotelImage, deleteHotelImage, setHotelAmenities } from "../controllers/hotelInformationController";
 import upload from "../middleware/uploadMiddleware"
@@ -29,5 +29,5 @@ hotel_router.delete("/images/:imageId", requiresLogin, requiresAdmin, deleteHote
 
 // Admin hotel amenities management
 hotel_router.put("/:id/amenities", requiresLogin, requiresAdmin, setHotelAmenities)
-
+hotel_router.get("/locations", getHotelLocations)
 export default hotel_router;

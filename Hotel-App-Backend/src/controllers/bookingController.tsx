@@ -192,10 +192,7 @@ export const createBooking = async (req: Request, res: Response) => {
 
         if (room_result.rows.length === 0) {
             await client.query("ROLLBACK")
-
-            return res.status(404).json({
-                message: "Room not found."
-            })
+            return res.status(404).json({ message: "Room not found." })
         }
 
         const room = room_result.rows[0]
@@ -255,13 +252,11 @@ export const createBooking = async (req: Request, res: Response) => {
 
         // Complete transaction
         await client.query("COMMIT")
-
         const booking_id = result.rows[0].id
 
         // Send notification
         const hotel_name = await getHotelNameByRoom(room_id)
-
-        await addNotification(user_id, "Your booking at " + hotel_name + " is waiting for approval.")
+        await addNotification(user_id, "Your booking at " + hotel_name + " was created. Please complete your payment to confirm your reservation.")
 
         // Return booking details
         const new_booking = await connectionPool.query(select_booking + "WHERE id = $1", [booking_id])
@@ -351,76 +346,62 @@ export const getAllBookings = async (req: Request, res: Response) => {
     }
 }
 
-//admin approves or cancels the booking 
+// Admin cancels a booking
 export const updateBookingStatus = async (req: Request, res: Response) => {
     try {
         const booking_id = Number(req.params.id)
 
-        if (isNaN(booking_id)) {
-            return res.status(400).json({ message: "Booking id must be a number." })
+        if (isNaN(booking_id) || booking_id <= 0) {
+            return res.status(400).json({ message: "Invalid booking ID." })
         }
+
         const new_status = req.body.status
-
-        if (new_status !== "confirmed" && new_status !== "cancelled") {
-            return res.status(400).json({ message: "Status must be either confirmed or cancelled." })
+        if (new_status !== "cancelled") {
+            return res.status(400).json({ message: "Admins can only cancel bookings." })
         }
-
-        const booking_results = await connectionPool.query(
-            "SELECT id,user_id,room_id,status FROM bookings WHERE id=$1", [booking_id]
+        const booking_result = await connectionPool.query("SELECT id, user_id, room_id, status FROM bookings WHERE id=$1",
+            [booking_id]
         )
 
-        if (booking_results.rows.length === 0) {
+        if (booking_result.rows.length === 0) {
             return res.status(404).json({ message: "Booking not found." })
         }
-        const booking = booking_results.rows[0]
 
+        const booking = booking_result.rows[0]
 
-        if (booking.status === "cancelled") {
-            return res.status(400).json({ message: "A cancelled booking cannot be changed." })
-        }
-        if (booking.status === "completed") {
-            return res.status(400).json({ message: "A completed booking cannot be changed." })
-        }
-        if (booking.status === new_status) {
-            return res.status(400).json({ message: "The booking is already " + new_status })
-        }
-                // Only paid bookings can be confirmed
-        if (new_status === "confirmed") {
-            const payment_result = await connectionPool.query(
-                "SELECT id FROM payments WHERE booking_id=$1 AND status='paid' LIMIT 1",
-                [booking_id]
-            )
-
-            if (payment_result.rows.length === 0) {
-                return res.status(400).json({
-                    message: "Payment is required before confirming a booking."
-                })
-            }
+        if (booking.status === "cancelled" || booking.status === "completed") {
+            return res.status(400).json({ message: "This booking cannot be cancelled." })
         }
 
-        await connectionPool.query("UPDATE bookings SET status=$1 , updated_at=NOW() WHERE id=$2", [new_status, booking_id])
+        // Paid bookings require a separate refund process
+        const payment_result = await connectionPool.query("SELECT id FROM payments WHERE booking_id=$1 AND status='paid' LIMIT 1",
+            [booking_id]
+        )
 
-        //gives user feedback 
+        if (payment_result.rows.length > 0) {
+            return res.status(409).json({ message: "This booking has been paid. Please handle the refund before cancelling." })
+        }
+        await connectionPool.query(
+            "UPDATE bookings SET status='cancelled', updated_at=NOW() WHERE id=$1",
+            [booking_id]
+        )
         const hotel_name = await getHotelNameByRoom(booking.room_id)
-        if (new_status === "confirmed") {
-            await addNotification(booking.user_id, "Your booking at " + hotel_name + " is confirmed.")
-        }
-        else {
-            await addNotification(booking.user_id, "Your booking at " + hotel_name + " was cancelled.")
-        }
-
+        await addNotification(
+            booking.user_id, "Your booking at " + hotel_name + " was cancelled."
+        )
         const updated_booking = await connectionPool.query(
-            select_booking + "WHERE id=$1", [booking_id]
+            select_booking + "WHERE id=$1",
+            [booking_id]
         )
         return res.status(200).json(updated_booking.rows[0])
     }
-
     catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Could not update the booking status." })
+        return res.status(500).json({
+            message: "Could not update the booking status."
+        })
     }
 }
-
 
 //updates booking
 
@@ -470,12 +451,18 @@ export const updateBooking = async (req: Request, res: Response) => {
         const booking = booking_result.rows[0]
 
         // Cancelled or completed bookings cannot be updated
-        if (booking.status === "cancelled" ||
-            booking.status === "completed") {
+        if (booking.status !== "pending") {
+            await client.query("ROLLBACK")
+            return res.status(400).json({ message: "Only pending bookings can be updated." })
+        }
+        // Prevent editing bookings with payments in progress
+        const payment_result = await client.query(`SELECT id FROM payments WHERE booking_id = $1
+     AND status IN ('pending', 'paid') LIMIT 1`, [booking_id])
 
+        if (payment_result.rows.length > 0) {
             await client.query("ROLLBACK")
 
-            return res.status(400).json({ message: "This booking cannot be updated." })
+            return res.status(409).json({message: "This booking cannot be updated because a payment is in progress or has been completed."})
         }
 
         // Lock the selected room

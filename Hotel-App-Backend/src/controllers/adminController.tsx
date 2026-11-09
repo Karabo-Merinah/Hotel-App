@@ -1,4 +1,3 @@
-
 import { Request, Response } from "express"
 import connectionPool from "../config/database"
 
@@ -91,37 +90,5 @@ export const getAdminBookingById = async (req: Request, res: Response) => {
         // Handle errors when retrieving reservation details
         console.log(error)
         return res.status(500).json({ message: "Could not load reservation details." })
-    }
-}
-
-// Allow the admin to confirm or cancel a pending reservation
-export const updateAdminBookingStatus = async (req: Request, res: Response) => {
-    try {
-        // Get the reservation ID and new status
-        const id = parseInt(req.params.id as string)
-        const { status } = req.body
-
-        // Only allow confirmed or cancelled as the new status
-        if (status !== "confirmed" && status !== "cancelled") {
-            return res.status(400).json({ message: "Invalid reservation status." })
-        }
-        // Update only pending reservations
-        // Confirmation requires a paid payment, but cancellation does not
-        const result = await connectionPool.query(`UPDATE bookings SET status = $1 WHERE id = $2
-        AND status = 'pending' AND ($1 = 'cancelled' OR id IN (SELECT booking_id FROM payments WHERE status = 'paid')) RETURNING *`,
-            [status, id]
-        )
-        // Return an error if the reservation was not updated
-        if (result.rows.length === 0) {
-            return res.status(409).json({ message: "Reservation not found, no longer pending, or payment is required for confirmation." })
-        }
-        // Return the updated reservation
-        return res.status(200).json({
-            message: "Reservation updated successfully.", booking: result.rows[0]
-        })
-    } catch (error) {
-        // Handle errors when updating the reservation
-        console.log(error)
-        return res.status(500).json({ message: "Could not update reservation." })
     }
 }

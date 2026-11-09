@@ -136,17 +136,31 @@ export const getAllHotels = async (req: Request, res: Response) => {
     }
 }
 
+export const getHotelLocations = async (req: Request, res: Response) => {
+    try {
+        const result = await connectionPool.query(`
+            SELECT DISTINCT city
+            FROM hotels
+            WHERE is_active = TRUE
+            ORDER BY city
+        `)
+
+        return res.status(200).json(result.rows)
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not load hotel locations." })
+    }
+}
+
 // Get the maximum guests and rooms allowed for hotel searches
 export const getHotelSearchOptions = async (req: Request, res: Response) => {
     try {
         // Get limits from active rooms in active hotels
-        const result = await connectionPool.query(`SELECT COALESCE(MAX(capacity), 1) AS max_guests,
-                COALESCE(MAX(total_rooms), 1) AS max_rooms FROM rooms
-            WHERE is_active = TRUE AND total_rooms > 0
-            AND hotel_id IN (SELECT id FROM hotels WHERE is_active = TRUE)`)
+        const result = await connectionPool.query(`SELECT COALESCE(MAX(capacity), 1) AS max_guests, COALESCE(MAX(total_rooms), 1) AS max_rooms FROM rooms
+            WHERE is_active = TRUE AND total_rooms > 0 AND hotel_id IN (SELECT id FROM hotels WHERE is_active = TRUE)`)
         return res.status(200).json({
-            max_guests: parseInt(result.rows[0].max_guests),
-            max_rooms: parseInt(result.rows[0].max_rooms)
+            max_guests: parseInt(result.rows[0].max_guests), max_rooms: parseInt(result.rows[0].max_rooms)
         })
     }
     catch (error) {
@@ -325,6 +339,16 @@ export const deleteHotel = async (req: Request, res: Response) => {
                 return res.status(404).json({ message: "Hotel not found." })
             }
             return res.status(200).json({ message: "This hotel has bookings, so it was hidden (deactivated) instead of deleted." })
+        }
+        // Check if the room has bookings
+        const bookings = await connectionPool.query(
+            "SELECT id FROM bookings WHERE room_id = $1 LIMIT 1",
+            [hotel_id]
+        )
+        if (bookings.rows.length > 0) {
+            return res.status(409).json({
+                message: "This room cannot be deleted because it has bookings. You can deactivate it instead."
+            })
         }
         const result = await connectionPool.query(
             "DELETE FROM hotels WHERE id=$1 RETURNING id", [hotel_id]

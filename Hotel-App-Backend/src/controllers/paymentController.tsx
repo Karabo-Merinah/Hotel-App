@@ -83,7 +83,7 @@ export const createPayment = async (req: Request, res: Response) => {
                 // Convert the amount from rands to cents
                 amount: Math.round(amount * 100), currency, reference,
                 // Page the user returns to after payment
-                callback_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/payment/success`
+                callback_url: `${process.env.CLIENT_URL}/payment/success`
             }
             )
 
@@ -113,46 +113,41 @@ export const verifyPayment = async (req: Request, res: Response) => {
         const user_id = res.locals.userId
         const reference = String(req.params.reference)
         // Find the payment belonging to the logged-in user
-        const payment_result = await connectionPool.query( `SELECT payments.id, payments.booking_id, payments.amount,
-            payments.currency, payments.status
-            FROM payments, bookings
-            WHERE payments.booking_id = bookings.id
-            AND payments.payment_reference = $1
-            AND bookings.user_id = $2`,
+        const payment_result = await connectionPool.query(`SELECT payments.id, payments.booking_id, payments.amount,
+        payments.currency, payments.status,bookings.status AS booking_status
+     FROM payments, bookings WHERE payments.booking_id = bookings.id
+     AND payments.payment_reference = $1 AND bookings.user_id = $2`,
             [reference, user_id]
         )
-
         if (payment_result.rows.length === 0) {
             return res.status(404).json({ message: "Payment not found." })
         }
         const payment = payment_result.rows[0]
         if (payment.status === "paid") {
-            return res.status(200).json({message: "Payment already verified.",
-                status: "paid",
-                booking_id: payment.booking_id
+            return res.status(200).json({
+                message: "Payment already verified.", status: "paid",
+                booking_status: payment.booking_status, booking_id: payment.booking_id
             })
         }
         if (payment.status === "failed") {
-            return res.status(409).json({message: "This payment has already failed."})
+            return res.status(409).json({ message: "This payment has already failed." })
         }
 
         // Verify the payment with Paystack
-        const paystack = await paystackRequest( `/transaction/verify/${encodeURIComponent(reference)}`, "GET"
+        const paystack = await paystackRequest(`/transaction/verify/${encodeURIComponent(reference)}`, "GET"
         )
 
         const expected_amount = Math.round(Number(payment.amount) * 100)
 
         // Confirm that the payment details match
-        if (
-            paystack.status !== "success" ||
-            paystack.reference !== reference ||
-            Number(paystack.amount) !== expected_amount ||
+        if (paystack.status !== "success" || paystack.reference !== reference || Number(paystack.amount) !== expected_amount ||
             paystack.currency !== payment.currency
         ) {
             if (paystack.status === "failed" || paystack.status === "abandoned") {
                 await markPaymentFailed(reference)
             }
-            return res.status(200).json({message: "Payment has not been confirmed.",
+            return res.status(200).json({
+                message: "Payment has not been confirmed.",
                 status: "pending",
                 booking_id: payment.booking_id
             })
@@ -168,7 +163,7 @@ export const verifyPayment = async (req: Request, res: Response) => {
         if (booking_result.rows.length === 0 ||
             booking_result.rows[0].status !== "pending") {
             await client.query("ROLLBACK")
-            return res.status(409).json({message: "This booking cannot be confirmed."})
+            return res.status(409).json({ message: "This booking cannot be confirmed." })
         }
 
         // Prevent duplicate successful payments
@@ -178,24 +173,37 @@ export const verifyPayment = async (req: Request, res: Response) => {
 
         if (paid_result.rows.length > 0) {
             await client.query("ROLLBACK")
-            return res.status(409).json({message: "This booking has already been paid."})
+            return res.status(409).json({ message: "This booking has already been paid." })
         }
-
         // Mark the payment as paid
         await client.query(`UPDATE payments SET status = 'paid', updated_at = NOW() WHERE id = $1`,
             [payment.id]
         )
-
+        // Automatically confirm the booking
+        await client.query(`UPDATE bookings SET status = 'confirmed' WHERE id = $1`,
+            [payment.booking_id]
+        )
         await client.query("COMMIT")
-        return res.status(200).json({message: "Payment received. Your reservation is awaiting admin confirmation.",
-            status: "paid", booking_id: payment.booking_id })
+
+        // Notify the user after successful payment
+        try {
+            await connectionPool.query("INSERT INTO notifications (user_id, message) VALUES ($1, $2)",
+                [user_id,"Your payment was successful. Your booking is confirmed."]
+            )
+        } catch (error) {
+            console.log("Notification error:", error)
+        }
+        return res.status(200).json({message: "Payment successful. Your booking is confirmed.",
+            status: "paid",booking_status: "confirmed",
+            booking_id: payment.booking_id
+        })
     }
     catch (error) {
         console.log(error)
         if (client) {
             await client.query("ROLLBACK").catch(console.log)
         }
-        return res.status(502).json({ message: "Could not verify payment. Please try again."})
+        return res.status(502).json({ message: "Could not verify payment. Please try again." })
     }
     finally {
         if (client) {
