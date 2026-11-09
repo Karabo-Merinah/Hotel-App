@@ -8,7 +8,6 @@ export const getAllHotels = async (req: Request, res: Response) => {
         const values: (string | number)[] = []
         let room_filters = " AND rooms.is_active=TRUE AND rooms.total_rooms>0"
 
-
         let query_text = `SELECT id,name,description,city,address,star_rating,latitude,longitude,
     (SELECT image_url FROM hotel_images
      WHERE hotel_id=hotels.id ORDER BY id LIMIT 1) AS main_image,
@@ -137,7 +136,24 @@ export const getAllHotels = async (req: Request, res: Response) => {
     }
 }
 
-
+// Get the maximum guests and rooms allowed for hotel searches
+export const getHotelSearchOptions = async (req: Request, res: Response) => {
+    try {
+        // Get limits from active rooms in active hotels
+        const result = await connectionPool.query(`SELECT COALESCE(MAX(capacity), 1) AS max_guests,
+                COALESCE(MAX(total_rooms), 1) AS max_rooms FROM rooms
+            WHERE is_active = TRUE AND total_rooms > 0
+            AND hotel_id IN (SELECT id FROM hotels WHERE is_active = TRUE)`)
+        return res.status(200).json({
+            max_guests: parseInt(result.rows[0].max_guests),
+            max_rooms: parseInt(result.rows[0].max_rooms)
+        })
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Could not load hotel search options." })
+    }
+}
 
 //get a hotel with its photos ,amenties and rooms.
 
