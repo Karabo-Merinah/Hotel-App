@@ -111,9 +111,9 @@ const RoomDetails = () => {
         if (!room) return
         //clears previous booking errors
         setBookingError("")
-        //check if the dates are filled in
+        // Check if booking dates are missing
         if (!checkIn || !checkOut) {
-            setBookingError("Please select check-in and check-out dates first.")
+            navigate("/#search", { state: { message: "Please select check-in and check-out dates first." } })
             return
         }
         // Check that the check-out date is after check-in
@@ -208,7 +208,7 @@ const RoomDetails = () => {
                             )}
                         </div>
                         {/* Prevent booking when availability has not been confirmed */}
-                        <button className="room-book-button" onClick={checkRoomCapacity} disabled={checkingAvailability || availableRooms === null || availableRooms < numberOfRooms}>
+                        <button className="room-book-button" onClick={checkRoomCapacity} disabled={checkingAvailability || (checkIn !== "" && checkOut !== "" && (availableRooms === null || availableRooms < numberOfRooms))}>
                             {checkingAvailability ? "Checking..." : availableRooms !== null && availableRooms < numberOfRooms ? "Not Available" : "Select Room"}
                         </button>
                     </div>

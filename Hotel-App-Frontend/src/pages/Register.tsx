@@ -187,7 +187,7 @@ const Register = () => {
                     <div className="register-password">
                         <label htmlFor="password">Password</label>
                         <div className="register-password-wrapper">
-                            <input id="password" className="register-password-input" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)} minLength={8} maxLength={10} required />
+                            <input id="password" className="register-password-input" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)} minLength={8} required />
                             <button type="button" className="register-password-toggle" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                         </div>
                         {passwordFocused && (

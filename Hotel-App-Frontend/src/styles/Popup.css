@@ -14,11 +14,15 @@
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
     cursor: pointer;
 }
-.popup-success,
-.popup-error {
+.popup-success{
     background: #f5efe9;
     color: #5c4033;
     border-color: #e9ded4;
+}
+.popup-error{
+    background-color:#FFFFFF;
+    color:red;
+    border-color: red;
 }
 .popup span {
     flex: 1;

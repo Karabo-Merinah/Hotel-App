@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react"
 import api from "../../api/axios"
 import type { Hotel } from "../../types/hotel"
@@ -7,6 +6,7 @@ import "../../styles/ManageRooms.css"
 import { Texts } from "../../components/Texts/texts"
 import Popup from "../../components/Popup"
 import ConfirmDialog from "../../components/ConfirmDialog"
+import axios from "axios"
 
 const ManageRooms = () => {
     const [hotels, setHotels] = useState<Hotel[]>([])
@@ -24,8 +24,10 @@ const ManageRooms = () => {
     const [selectedImages, setSelectedImages] = useState<File[]>([])
     const [existingImages, setExistingImages] = useState<{ id: number, image_url: string }[]>([])
     const [popup, setPopup] = useState("")
+    const [popupType, setPopupType] = useState<"success" | "error">("success")
     const [confirmImageId, setConfirmImageId] = useState<number | null>(null)
     const [deletingImage, setDeletingImage] = useState(false)
+
 
     const token = localStorage.getItem("token")
     // Clear the room form
@@ -144,10 +146,17 @@ const ManageRooms = () => {
             })
             setExistingImages(existingImages.filter((image) => image.id !== imageId))
             setPopup("Room image deleted successfully.")
-        } catch (error) {
-            console.log(error)
-            setError("Could not delete room image.")
-        } finally {
+            setPopupType("success")
+        }
+        catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 409) {
+                setPopup(error.response.data.message)
+            } else {
+                setPopup("Could not delete room image.")
+            }
+            setPopupType("error")
+        }
+        finally {
             setDeletingImage(false)
             setConfirmImageId(null)
         }
@@ -216,7 +225,7 @@ const ManageRooms = () => {
 
     return (
         <div className="admin-room-page">
-            {popup && <Popup message={popup} type="success" onClose={() => setPopup("")} />}
+            {popup && <Popup message={popup} type={popupType} onClose={() => setPopup("")} />}
             {confirmImageId !== null && (
                 <ConfirmDialog title="Delete Room Image" message="Are you sure you want to delete this room image?" onConfirm={() => deleteRoomImage(confirmImageId)} onClose={() => setConfirmImageId(null)} loading={deletingImage} />
             )}
