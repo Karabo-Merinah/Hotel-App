@@ -208,18 +208,16 @@ export const googleAuth = async (req: Request, res: Response) => {
                 return res.status(409).json({ message: "An account with this email already exists. Please log in using your existing method." })
             }
             // Register the Google user
-            const result = await connectionPool.query(`INSERT INTO users (name,email,provider,provider_id)
-                VALUES ($1,$2,$3,$4) RETURNING id,name,email,role`,
-                [name, email, "google", provider_id]
-            )
+            const result = await connectionPool.query(`INSERT INTO users (name,email,provider,provider_id) VALUES ($1,$2,$3,$4) RETURNING id,name,email,role`,
+                [name, email, "google", provider_id])
             user = result.rows[0]
         }
         // Generate the same JWT used by normal login
         const token = create_token(user.id, user.role)
         return res.status(200).json({ user, token })
     }
-    catch (error) {
-        console.log(error)
-        return res.status(401).json({ message: "Google authentication failed." })
-    }
+   catch (error) {
+    console.log("Google authentication error:", error)
+    return res.status(500).json({message: "Could not complete Google authentication."})
+}
 }

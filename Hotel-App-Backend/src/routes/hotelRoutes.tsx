@@ -14,7 +14,7 @@ hotel_router.get("/amenities/list", getAllAmenties)
 
 // Get maximum guest and room options for the search dropdowns
 hotel_router.get("/search-options", getHotelSearchOptions)
-
+hotel_router.get("/locations", getHotelLocations)
 // Get hotel details by ID
 hotel_router.get("/:id", getHotelById);
 
@@ -22,12 +22,9 @@ hotel_router.get("/:id", getHotelById);
 hotel_router.post("/", requiresLogin, requiresAdmin, createHotel);
 hotel_router.put("/:id", requiresLogin, requiresAdmin, updateHotel);
 hotel_router.delete("/:id", requiresLogin, requiresAdmin, deleteHotel);
-
 // Admin hotel image management
 hotel_router.post("/:id/images", requiresLogin, requiresAdmin, upload.single("image"), addHotelImage)
 hotel_router.delete("/images/:imageId", requiresLogin, requiresAdmin, deleteHotelImage)
-
 // Admin hotel amenities management
 hotel_router.put("/:id/amenities", requiresLogin, requiresAdmin, setHotelAmenities)
-hotel_router.get("/locations", getHotelLocations)
 export default hotel_router;
