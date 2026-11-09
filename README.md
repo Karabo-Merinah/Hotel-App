@@ -115,7 +115,7 @@ Admin routes:
 - Redux Toolkit and React Redux (state management)
 - Axios (backend API requests)
 - Google OAuth (`@react-oauth/google`)
-- React Leaflet and Leaflet (maps)
+- Google maps
 - Lucide React (icons)
 - CSS (styling and responsive layouts)
 - Oxlint (linting)
@@ -207,18 +207,7 @@ The frontend is deployed using Netlify and connects to a backend hosted on Rende
 - Frontend: https://wander-hotel-app.netlify.app/
 - Backend API: https://wander-inn-backend.onrender.com/
 
-For a Netlify deployment from the `Hotel-App` repository, use:
 
-- Base directory: `Hotel-App-Frontend`
-- Build command: `npm run build`
-- Publish directory: `dist` (relative to the base directory)
-
-Set the following environment variables in Netlify:
-
-```env
-VITE_API_URL=https://wander-inn-backend.onrender.com
-VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
-```
 
 The project includes `public/_redirects` to support React Router pages when refreshing or opening a direct URL on Netlify. The backend must allow the deployed Netlify origin in its CORS configuration.
 
@@ -251,6 +240,14 @@ Preview showing the admin dashboard.
 
 ![Admin dashboard](./Hotel-App-Frontend/admin_dashboard.png)
 
+### Admin credentials for testing 
+
+## username
+kaybee@gmail.com
+
+## password 
+
+Kayy@123 
 
 ## What I Have Learnt
 
