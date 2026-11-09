@@ -32,15 +32,15 @@
     box-sizing: border-box;
 }
 
-.admin-hotel-form > h2 {
+.admin-hotel-form>h2 {
     color: #5c4033;
     margin: 0 0 8px;
     padding-bottom: 14px;
     border-bottom: 1px solid #eee4dc;
 }
 
-.admin-hotel-form > label,
-.hotel-form-images > label,
+.admin-hotel-form>label,
+.hotel-form-images>label,
 .admin-hotel-form-row label {
     font-weight: 600;
     font-size: 14px;
@@ -90,7 +90,7 @@
     color: #5c4033;
 }
 
-.hotel-form-images > p {
+.hotel-form-images>p {
     margin: 0;
     color: #766b63;
     font-size: 13px;
@@ -139,7 +139,7 @@
     gap: 8px;
 }
 
-.hotel-selected-images > div {
+.hotel-selected-images>div {
     padding: 7px 12px;
     background: white;
     border: 1px solid #e9ded4;
@@ -157,7 +157,7 @@
     gap: 20px;
 }
 
-.admin-hotel-form-row > div {
+.admin-hotel-form-row>div {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -203,6 +203,31 @@
     color: #a12e2e;
 }
 
+.hotel-form-amenities {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.hotel-amenities-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.hotel-amenity-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.hotel-amenity-checkbox input {
+    width: 16px;
+    height: 16px;
+    accent-color: #5C4033;
+}
+
 @media (max-width: 650px) {
     .admin-hotel-form-page {
         width: calc(100% - 28px);
@@ -227,5 +252,10 @@
 
     .admin-hotel-form-actions button {
         width: 100%;
+    }
+}
+@media (max-width: 600px) {
+    .hotel-amenities-checkboxes {
+        grid-template-columns: 1fr;
     }
 }

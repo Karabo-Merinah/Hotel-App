@@ -11,6 +11,7 @@ const RoomDetails = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
+    const isAdminView = location.pathname.startsWith("/admin")
     //gets the search details from home page
     const { checkIn = "", checkOut = "", guests = 1, numberOfRooms = 1 } = location.state || {}
     const [room, setRoom] = useState<Room | null>(null)
@@ -20,7 +21,6 @@ const RoomDetails = () => {
     const [checkingAvailability, setCheckingAvailability] = useState(false)
     const [bookingError, setBookingError] = useState("")
     const [currentImage, setCurrentImage] = useState(0)
-    // Store errors when checking room availability
     const [availabilityError, setAvailabilityError] = useState("")
 
     // Get the selected room from the backend
@@ -158,8 +158,9 @@ const RoomDetails = () => {
         <div className="room-details">
             <div className="room-details-header">
                 <Texts variant="h1">{room.room_type}</Texts>
-                <button className="room-back-button" onClick={() => navigate(`/hotels/${room.hotel_id}`, { state: { checkIn, checkOut, guests, numberOfRooms } })}>
-                    Back to Hotel
+                {/* Return admins to the dashboard and customers to hotel details */}
+                <button className="room-back-button" onClick={() => navigate(isAdminView ? "/admin" : `/hotels/${room.hotel_id}`, { state: { checkIn, checkOut, guests, numberOfRooms } })}>
+                    {isAdminView ? "Back to Dashboard" : "Back to Hotel"}
                 </button>
             </div>
             <div className="room-details-card">
@@ -207,10 +208,12 @@ const RoomDetails = () => {
                                 <Texts variant="p">Select dates to check room availability.</Texts>
                             )}
                         </div>
-                        {/* Prevent booking when availability has not been confirmed */}
-                        <button className="room-book-button" onClick={checkRoomCapacity} disabled={checkingAvailability || (checkIn !== "" && checkOut !== "" && (availableRooms === null || availableRooms < numberOfRooms))}>
-                            {checkingAvailability ? "Checking..." : availableRooms !== null && availableRooms < numberOfRooms ? "Not Available" : "Select Room"}
-                        </button>
+                        {/* Only customers can select rooms for booking */}
+                        {!isAdminView && (
+                            <button className="room-book-button" onClick={checkRoomCapacity} disabled={checkingAvailability || (checkIn !== "" && checkOut !== "" && (availableRooms === null || availableRooms < numberOfRooms))}>
+                                {checkingAvailability ? "Checking..." : availableRooms !== null && availableRooms < numberOfRooms ? "Not Available" : "Select Room"}
+                            </button>
+                        )}
                     </div>
                     {bookingError && (
                         <Texts variant="p">{bookingError}</Texts>

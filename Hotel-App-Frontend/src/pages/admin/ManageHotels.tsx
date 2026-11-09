@@ -74,7 +74,7 @@ const ManageHotels = () => {
                         </div>
                         <div className="manage-hotel-actions">
                             <button onClick={() => navigate(`/admin/hotels/${hotel.id}/edit`)}>Edit</button>
-                            <button onClick={() => navigate(`/hotels/${hotel.id}`)}>View Details</button>
+                            <button onClick={() => navigate(`/admin/hotels/${hotel.id}`)}>View Details</button>
                         </div>
                     </div>
                 ))}

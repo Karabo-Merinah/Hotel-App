@@ -11,13 +11,10 @@ import ConfirmDialog from "../../components/ConfirmDialog"
 const HotelForm = () => {
     const { id } = useParams()
     const navigate = useNavigate()
-
     const [name, setName] = useState("")
     const [description, setDescription] = useState("")
     const [address, setAddress] = useState("")
     const [city, setCity] = useState("")
-    const [latitude, setLatitude] = useState("")
-    const [longitude, setLongitude] = useState("")
     const [starRating, setStarRating] = useState("1")
     const [policies, setPolicies] = useState("")
     const [loading, setLoading] = useState(false)
@@ -29,7 +26,8 @@ const HotelForm = () => {
     const [deletingImage, setDeletingImage] = useState(false)
     const [popup, setPopup] = useState("")
     const [confirmImageId, setConfirmImageId] = useState<number | null>(null)
-
+    const [amenities, setAmenities] = useState<{ id: number; name: string }[]>([])
+    const [selectedAmenities, setSelectedAmenities] = useState<number[]>([])
 
     // loads hotel details when editing an existing hotel
     useEffect(() => {
@@ -45,11 +43,12 @@ const HotelForm = () => {
                 setDescription(hotel.description || "")
                 setAddress(hotel.address || "")
                 setCity(hotel.city || "")
-                setLatitude(String(hotel.latitude || ""))
-                setLongitude(String(hotel.longitude || ""))
                 setStarRating(String(hotel.star_rating || 1))
                 setPolicies(hotel.policies || "")
                 setExistingImages(hotel.images || [])
+                setSelectedAmenities(
+                    (hotel.amenities || []).map((amenity: { id: number }) => amenity.id)
+                )
             } catch (error) {
                 console.log(error)
                 setError("Could not load hotel details.")
@@ -58,6 +57,22 @@ const HotelForm = () => {
 
         getHotel()
     }, [id])
+
+    // Get all available hotel amenities
+    useEffect(() => {
+        const getAmenities = async () => {
+            try {
+                const response = await api.get("/api/hotels/amenities/list")
+                setAmenities(response.data)
+            }
+            catch (error) {
+                console.log(error)
+                setError("Could not load hotel amenities.")
+            }
+        }
+
+        getAmenities()
+    }, [])
 
     // delete a hotel image from the backend
     const deleteHotelImage = async (imageId: number) => {
@@ -85,6 +100,26 @@ const HotelForm = () => {
             setConfirmImageId(null)
         }
     }
+
+    //adds checkbox for amenities
+    const toggleAmenity = (amenityId: number) => {
+        if (selectedAmenities.includes(amenityId)) {
+            setSelectedAmenities(selectedAmenities.filter(id => id !== amenityId))
+        }
+        else {
+            setSelectedAmenities([...selectedAmenities, amenityId])
+        }
+    }
+
+    const saveHotelAmenities = async (hotelId: number) => {
+    const token = localStorage.getItem("token")
+
+    await api.put(
+        `/api/hotels/${hotelId}/amenities`,
+        { amenity_ids: selectedAmenities },
+        { headers: { Authorization: `Bearer ${token}` } }
+    )
+}
     // save a new hotel or update an existing hotel
     const saveHotel = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -96,8 +131,6 @@ const HotelForm = () => {
 
         const hotelData = {
             name, description, address, city,
-            latitude: parseFloat(latitude),
-            longitude: parseFloat(longitude),
             star_rating: parseInt(starRating),
             policies
         }
@@ -108,11 +141,15 @@ const HotelForm = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 await uploadHotelImages(parseInt(id))
-            } else {
+                await saveHotelAmenities(parseInt(id))
+            }
+             else {
+                //creates new hotel
                 const response = await api.post("/api/hotels", hotelData, { headers: { Authorization: `Bearer ${token}` } }
                 )
                 // upload any newly selected images
                 await uploadHotelImages(response.data.id)
+                await saveHotelAmenities(response.data.id)
             }
             navigate("/admin/hotels", {
                 state: { popup: id ? "Hotel updated successfully!" : "Hotel added successfully!" }
@@ -207,17 +244,6 @@ const HotelForm = () => {
                     )}
                     {imageError && <Texts variant="p">{imageError}</Texts>}
                 </div>
-                {/* Hotel location coordinates */}
-                <div className="admin-hotel-form-row">
-                    <div>
-                        <label htmlFor="hotel-latitude">Latitude</label>
-                        <input id="hotel-latitude" type="number" step="any" min="-90" max="90" value={latitude} onChange={(e) => setLatitude(e.target.value)} required />
-                    </div>
-                    <div>
-                        <label htmlFor="hotel-longitude">Longitude</label>
-                        <input id="hotel-longitude" type="number" step="any" min="-180" max="180" value={longitude} onChange={(e) => setLongitude(e.target.value)} required />
-                    </div>
-                </div>
                 <label htmlFor="hotel-rating">Star Rating</label>
                 <select id="hotel-rating" value={starRating} onChange={(e) => setStarRating(e.target.value)}>
                     <option value="1">1 Star</option>
@@ -226,6 +252,16 @@ const HotelForm = () => {
                     <option value="4">4 Stars</option>
                     <option value="5">5 Stars</option>
                 </select>
+                {/* Hotel amenities */}
+                <div className="hotel-form-amenities">
+                    <Texts variant="h3">Hotel Amenities</Texts>
+                    <div className="hotel-amenities-checkboxes">
+                        {amenities.map((amenity) => (
+                            <label key={amenity.id} className="hotel-amenity-checkbox">
+                                <input type="checkbox" checked={selectedAmenities.includes(amenity.id)} onChange={() => toggleAmenity(amenity.id)} />{amenity.name}</label>
+                        ))}
+                    </div>
+                </div>
                 <label htmlFor="hotel-policies">Hotel Policies</label>
                 <textarea id="hotel-policies" value={policies} onChange={(e) => setPolicies(e.target.value)} rows={4} />
                 <div className="admin-hotel-form-actions">

@@ -7,6 +7,7 @@ import { clearFavourites } from "../features/favouriteSlice"
 import { clearBookings } from "../features/bookingSlice"
 import ConfirmDialog from "../components/ConfirmDialog"
 import logo from "../assets/wander_inn_logo.png"
+import { ExternalLink } from "lucide-react"
 
 const AdminNavbar = () => {
     const navigate = useNavigate()
@@ -37,8 +38,8 @@ const AdminNavbar = () => {
                     <NavLink to="/admin/bookings">Reservations</NavLink>
                     <NavLink to="/admin/rooms">Room & Pricing</NavLink>
                     <NavLink to="/admin/reviews">Reviews</NavLink>
+                     <a href="/" target="_blank" rel="noopener noreferrer" className="admin-view-website"><ExternalLink size={16} /> View Website</a>
                     <NavLink to="/admin/profile">Admin Profile</NavLink>
-
                     <button type="button" className="admin-desktop-logout" onClick={() => setConfirmLogout(true)} >Logout</button>
                 </nav>
             </header>

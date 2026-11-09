@@ -54,39 +54,41 @@ const UserLayout = () => {
     <div className="app-layout">
       {!hideNavbar && <Navbar />}
       <main className="app-main">
-      <Routes>
-        {/* public pages  */}
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/hotels/:id" element={<HotelDetails />} />
-        <Route path="/rooms/:id" element={<RoomDetails />} />
-        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/services" element={<Services />} />
-        {/* protected pages  */}
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-        <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
-        <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
-        <Route path="/bookings/new/:roomId" element={<ProtectedBooking />} />
-        <Route path="/bookings/:id/payment" element={<ProtectedRoute><BookingPayment /></ProtectedRoute>} />
-        <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
-        <Route path="/favourites" element={<ProtectedRoute><Favourites /></ProtectedRoute>} />
-        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-        <Route path="/hotels/:hotelId/review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
-        <Route path="/admin" element={<AdminRoute><AdminNavbar /><AdminDashboard /></AdminRoute>} />
-        <Route path="/admin/hotels" element={<AdminRoute><AdminNavbar /><ManageHotels /></AdminRoute>} />
-        <Route path="/admin/hotels/new" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
-        <Route path="/admin/hotels/:id/edit" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
-        <Route path="/admin/bookings" element={<AdminRoute><AdminNavbar /><ManageBookings /></AdminRoute>} />
-        <Route path="/admin/bookings/:id" element={<AdminRoute><AdminNavbar /><AdminBookingDetails /></AdminRoute>} />
-        <Route path="/admin/rooms" element={<AdminRoute><AdminNavbar /><ManageRooms /></AdminRoute>} />
-        <Route path="/admin/profile" element={<AdminRoute><AdminNavbar /><AdminProfilePage /></AdminRoute>} />
-        <Route path="/admin/reviews" element={<AdminRoute><AdminNavbar /><AdminReviews /></AdminRoute>} />
-      </Routes>     
+        <Routes>
+          {/* public pages  */}
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/hotels/:id" element={<HotelDetails />} />
+          <Route path="/rooms/:id" element={<RoomDetails />} />
+          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/services" element={<Services />} />
+          {/* protected pages  */}
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+          <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+          <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
+          <Route path="/bookings/new/:roomId" element={<ProtectedBooking />} />
+          <Route path="/bookings/:id/payment" element={<ProtectedRoute><BookingPayment /></ProtectedRoute>} />
+          <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
+          <Route path="/favourites" element={<ProtectedRoute><Favourites /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/hotels/:hotelId/review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
+          <Route path="/admin" element={<AdminRoute><AdminNavbar /><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/hotels" element={<AdminRoute><AdminNavbar /><ManageHotels /></AdminRoute>} />
+          <Route path="/admin/hotels/new" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
+          <Route path="/admin/hotels/:id/edit" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
+          <Route path="/admin/hotels/:id" element={<AdminRoute><AdminNavbar /><HotelDetails /></AdminRoute>} />
+          <Route path="/admin/bookings" element={<AdminRoute><AdminNavbar /><ManageBookings /></AdminRoute>} />
+          <Route path="/admin/bookings/:id" element={<AdminRoute><AdminNavbar /><AdminBookingDetails /></AdminRoute>} />
+          <Route path="/admin/rooms" element={<AdminRoute><AdminNavbar /><ManageRooms /></AdminRoute>} />
+          <Route path="/admin/rooms/:id" element={<AdminRoute><AdminNavbar /><RoomDetails /></AdminRoute>} />
+          <Route path="/admin/profile" element={<AdminRoute><AdminNavbar /><AdminProfilePage /></AdminRoute>} />
+          <Route path="/admin/reviews" element={<AdminRoute><AdminNavbar /><AdminReviews /></AdminRoute>} />
+        </Routes>
       </main>
       {!hideFooter && <Footer />}
     </div>

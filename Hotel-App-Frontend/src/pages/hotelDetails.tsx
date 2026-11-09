@@ -1,4 +1,3 @@
-
 import type { Hotel, Room, HotelReviews } from "../types/hotel"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
@@ -21,6 +20,7 @@ const HotelDetails = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
+    const isAdminView = location.pathname.startsWith("/admin")
     const { checkIn = "", checkOut = "", guests = 1, numberOfRooms = 1 } = location.state || {}
     const [hotel, setHotel] = useState<Hotel | null>(null)
     const [loading, setLoading] = useState(true)
@@ -244,18 +244,19 @@ const HotelDetails = () => {
             {confirmRemove && (
                 <ConfirmDialog title="Remove Favourite" message="Are you sure you want to remove this hotel from your favourites?" onConfirm={toggleFavourite} onClose={() => setConfirmRemove(false)} loading={updatingFavourite} />
             )}
-
-            <Texts variant="h1">{hotel.name}</Texts>
+            <div className="hotel-details-header">
+                <Texts variant="h1">{hotel.name}</Texts>
+                <div className="hotel-actions">
+                    {!isAdminView && (
+                        <button type="button" className="hotel-favourite-button" onClick={() => isFavourite ? setConfirmRemove(true) : toggleFavourite()} disabled={updatingFavourite} title={isFavourite ? "Remove from Favourites" : "Add to Favourites"} aria-label={isFavourite ? "Remove from Favourites" : "Add to Favourites"}><Heart size={22} fill={isFavourite ? "#c0392b" : "none"} color={isFavourite ? "#c0392b" : "#333"} /></button>
+                    )}
+                    <button type="button" className="hotel-share-button" onClick={shareHotel} title="Share Accommodation" aria-label="Share Accommodation"><Share2 size={22} /></button>
+                </div>
+            </div>
             <div className="hotel-images">
                 {hotel.images && hotel.images.map((image) => (
                     <img key={image.id} src={image.image_url} alt={hotel.name} />
                 ))}
-            </div>
-
-            {/* Favourite and share buttons */}
-            <div className="hotel-actions">
-                <button type="button" className="hotel-favourite-button" onClick={() => isFavourite ? setConfirmRemove(true) : toggleFavourite()} disabled={updatingFavourite} title={isFavourite ? "Remove from Favourites" : "Add to Favourites"} aria-label={isFavourite ? "Remove from Favourites" : "Add to Favourites"}><Heart size={22} fill={isFavourite ? "#c0392b" : "none"} color={isFavourite ? "#c0392b" : "#333"} /></button>
-                <button type="button" className="hotel-share-button" onClick={shareHotel} title="Share Accommodation" aria-label="Share Accommodation"><Share2 size={22} /></button>
             </div>
             {/* Hotel description and general information */}
             <Texts variant="p">{hotel.description}</Texts>
@@ -275,6 +276,15 @@ const HotelDetails = () => {
                     <Texts variant="p">No amenities listed.</Texts>
                 )}
             </div>
+            {/* Display hotel policies */}
+            <div className="hotel-policies">
+                <Texts variant="h2">Hotel Policies</Texts>
+                {hotel.policies ? (
+                    <Texts variant="p">{hotel.policies}</Texts>
+                ) : (
+                    <Texts variant="p">No hotel policies available.</Texts>
+                )}
+            </div>
 
             {/* Display available rooms for the selected hotel */}
             <div className="hotel-rooms">
@@ -291,7 +301,8 @@ const HotelDetails = () => {
                             <Texts variant="p">{room.description}</Texts>
                             <Texts variant="p">Capacity: {room.capacity} guests</Texts>
                             <Texts variant="p">Price: R{room.price_per_night} per night</Texts>
-                            <button onClick={() => navigate(`/rooms/${room.id}`, { state: { checkIn, checkOut, guests, numberOfRooms } })}>View Room</button>
+                            {/* Keep admins on the admin side when viewing room details */}
+                            <button onClick={() => navigate(isAdminView ? `/admin/rooms/${room.id}` : `/rooms/${room.id}`, { state: { checkIn, checkOut, guests, numberOfRooms } })}>View Room</button>
                         </div>
                     ))
                 )}
@@ -332,8 +343,9 @@ const HotelDetails = () => {
                 {/* Display the hotel's address */}
                 <Texts variant="p">{hotel.address}, {hotel.city}</Texts>
                 {/* Display the map when coordinates are available */}
-                {hotel.latitude != null && hotel.longitude != null ? (
-                    <HotelMap name={hotel.name} address={hotel.address} latitude={parseFloat(String(hotel.latitude))} longitude={parseFloat(String(hotel.longitude))} />
+                {/* Display the map using the hotel's address */}
+                {hotel.address && hotel.city ? (
+                    <HotelMap name={hotel.name} address={hotel.address} city={hotel.city} />
                 ) : (
                     <Texts variant="p">Hotel location is not available.</Texts>
                 )}

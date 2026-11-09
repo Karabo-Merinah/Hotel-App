@@ -1,31 +1,18 @@
-import { type HotelMapProps } from "../types/hotel"
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
-import L from "leaflet"
-import "leaflet/dist/leaflet.css"
 import "../styles/HotelMap.css"
+import type { HotelMapProps } from "../types/hotel"
 
-// Import the marker images
-import markerIcon from "leaflet/dist/images/marker-icon.png"
-import markerShadow from "leaflet/dist/images/marker-shadow.png"
+const HotelMap = ({ name, address, city }: HotelMapProps) => {
+    const location = encodeURIComponent(`${address}, ${city}, South Africa`)
 
-// Create the marker icon
-const icon = L.icon({iconUrl: markerIcon,shadowUrl: markerShadow,iconSize: [25, 41], iconAnchor: [12, 41]
-})
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${location}`
 
-const HotelMap = ({ name, address, latitude, longitude }: HotelMapProps) => {
-    // Create a Google Maps link using the hotel's coordinates
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude}%2C${longitude}`
     return (
         <div className="hotel-map">
-            {/* Display the hotel location on the map */}
-            <MapContainer center={[latitude, longitude]} zoom={15} scrollWheelZoom={false} style={{ height: "350px", width: "100%" }}>
-                <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {/* Display the hotel's marker */}
-                <Marker position={[latitude, longitude]} icon={icon}>
-                    <Popup>{name} - {address}</Popup>
-                </Marker>
-            </MapContainer>
-            {/* Open the hotel location in Google Maps */}
+            {/* Display hotel location using its address */}
+            <iframe title={`${name} Location`} src={`https://www.google.com/maps?q=${location}&output=embed`}
+                width="100%" height="350" style={{ border: 0, borderRadius: "10px" }} loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"/>
+            {/* Open hotel location in Google Maps */}
             <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="hotel-google-maps-link">Check place on Google Maps</a>
         </div>
     )

@@ -21,9 +21,9 @@ export interface Hotel {
     main_image?: string | null
     price_from?: number | string | null
     amenities?: Amenity[]
-    // Guest ratings calculated from reviews
     average_rating?: string | null
     reviews_count?: string
+    policies: string | null
 }
 
 export interface Room {
@@ -91,6 +91,5 @@ export interface HotelReviews {
 export interface HotelMapProps {
     name: string
     address: string
-    latitude: number
-    longitude: number
+    city: string
 }

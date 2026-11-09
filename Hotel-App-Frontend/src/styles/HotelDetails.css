@@ -53,7 +53,8 @@
     margin: 20px 0;
 }
 
-.hotel-favourite-button, .hotel-share-button {
+.hotel-favourite-button,
+.hotel-share-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -66,11 +67,15 @@
     color: #5C4033;
 }
 
-.hotel-favourite-button:hover, .hotel-share-button:hover {
+.hotel-favourite-button:hover,
+.hotel-share-button:hover {
     background-color: #FFFFFF;
 }
 
-.hotel-amenities, .hotel-location, .hotel-rooms, .hotel-reviews {
+.hotel-amenities,
+.hotel-location,
+.hotel-rooms,
+.hotel-reviews {
     margin-top: 35px;
     padding-top: 25px;
     border-top: 1px solid #E5E5E5;
@@ -87,20 +92,24 @@
     align-items: center;
     gap: 10px;
 }
+
 .hotel-amenity span {
     font-size: 13px;
     color: #51483F;
 }
+
 .amenity-icon {
     flex-shrink: 0;
     color: #333333;
 }
+
 .hotel-location .leaflet-container {
     width: 100%;
     height: 350px;
     border-radius: 8px;
 }
-.hotel-location > p {
+
+.hotel-location>p {
     margin-bottom: 16px;
 }
 
@@ -151,6 +160,35 @@
     margin: 6px 0;
 }
 
+.hotel-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.hotel-details-header h1 {
+    margin: 0;
+}
+
+.hotel-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.hotel-policies {
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.hotel-policies p {
+    white-space: pre-line;
+    line-height: 1.7;
+}
+
 @media (max-width: 768px) {
     .hotel-details {
         width: 94%;
@@ -179,13 +217,28 @@
         height: 280px;
     }
 
-    .room-card, .review-card {
+    .room-card,
+    .review-card {
         padding: 16px;
     }
 }
+
+@media (max-width: 600px) {
+    .hotel-details-header {
+        align-items: flex-start;
+    }
+
+    .hotel-details-header h1 {
+        font-size: 24px;
+    }
+
+    .hotel-actions {
+        gap: 8px;
+    }
+}
+
 @media (max-width: 400px) {
     .hotel-amenities-list {
         grid-template-columns: 1fr;
     }
 }
-

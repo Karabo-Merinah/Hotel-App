@@ -1,5 +1,4 @@
-﻿
-.admin-navbar {
+﻿.admin-navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -77,7 +76,13 @@
     cursor: pointer;
     flex-shrink: 0;
 }
-
 .admin-desktop-logout:hover {
     background: #493126;
+}
+.admin-view-website {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    white-space: nowrap;
 }
