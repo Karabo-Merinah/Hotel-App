@@ -51,11 +51,11 @@ const UserLayout = () => {
   const hideFooter = hideNavbar
 
   return (
-    <>
+    <div className="app-layout">
       {!hideNavbar && <Navbar />}
+      <main className="app-main">
       <Routes>
         {/* public pages  */}
-
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
@@ -86,9 +86,10 @@ const UserLayout = () => {
         <Route path="/admin/rooms" element={<AdminRoute><AdminNavbar /><ManageRooms /></AdminRoute>} />
         <Route path="/admin/profile" element={<AdminRoute><AdminNavbar /><AdminProfilePage /></AdminRoute>} />
         <Route path="/admin/reviews" element={<AdminRoute><AdminNavbar /><AdminReviews /></AdminRoute>} />
-      </Routes>
+      </Routes>     
+      </main>
       {!hideFooter && <Footer />}
-    </>
+    </div>
   )
 }
 

@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../api/axios"
 import { Texts } from "../components/Texts/texts"
@@ -23,8 +22,12 @@ const Home = () => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [searched, setSearched] = useState(false)
-
+    // Store maximum guests and rooms from the backend
+    const [maxGuests, setMaxGuests] = useState(1)
+    const [maxRooms, setMaxRooms] = useState(1)
     const navigate = useNavigate()
+    // Reference to the hotel results section
+    const resultsRef = useRef<HTMLDivElement>(null)
     const today = new Date().toLocaleDateString("en-CA")
     const availableAmenities = ["Wi-Fi", "Parking", "Swimming Pool", "Restaurant", "Air Conditioning"]
 
@@ -42,11 +45,38 @@ const Home = () => {
         }
         finally {
             setLoading(false)
+            if (params.toString() !== "") {
+                setTimeout(() => {
+                    resultsRef.current?.scrollIntoView({
+                        behavior: "smooth", block: "start"
+                    })
+                }, 100)
+            }
         }
     }
     // load all hotels when the home page opens
     useEffect(() => {
         getHotels()
+    }, [])
+
+    // load guest and room limits when the page opens
+    useEffect(() => {
+        const getSearchOptions = async () => {
+            try {
+                const response = await api.get("/api/hotels/search-options")
+
+                console.log("Search options:", response.data)
+
+                setMaxGuests(response.data.max_guests)
+                setMaxRooms(response.data.max_rooms)
+            }
+            catch (error) {
+                console.log("Could not load search options:", error)
+                setError("Could not load guest and room options.")
+            }
+        }
+
+        getSearchOptions()
     }, [])
 
     // validate search details and search for matching hotels
@@ -143,113 +173,129 @@ const Home = () => {
         }
     }
 
-    return (
-        <div className="home-container">
-            <section className="home-hero">
-                <div className="home-hero-heading">
-                    <Texts variant="h1">Find Your Perfect Stay</Texts>
-                    <Texts variant="p">Discover comfortable stays at Wander Inn.</Texts>
-                </div>
-                <div className="home-search">
-                    <Texts variant="h2">Find a Hotel</Texts>
-                    <div className="home-search-fields">
-                        <div className="search-location">
-                            <Texts variant="span">Location</Texts>
-                            <input className="home-search-input" type="text" placeholder="Enter city e.g. Polokwane" value={city} onChange={(e) => setCity(e.target.value)} />
-                        </div>
-                        <div className="search-check-in">
-                            <Texts variant="span">Check-in</Texts>
-                            <input className="home-check-in-input" min={today} type="date" value={checkIn} onChange={(e) => { setCheckIn(e.target.value); setCheckOut("") }} />
-                        </div>
-                        <div className="search-check-out">
-                            <Texts variant="span">Check-out</Texts>
-                            <input className="home-check-out-input" min={checkIn || today} type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
-                        </div>
-                        <div className="search-guests">
-                            <Texts variant="span">Guests per room</Texts>
-                            <input className="home-guests-input" type="number" min="1" step="1" value={guests} onChange={(e) => setGuests(e.target.value)} />
-                        </div>
-                        <div className="search-rooms">
-                            <Texts variant="span">Rooms</Texts>
-                            <input className="home-rooms-input" type="number" min="1" step="1" value={numberOfRooms} onChange={(e) => setNumberOfRooms(e.target.value)} />
-                        </div>
-                        <div className="home-search-actions">
-                            <button className="home-search-button" onClick={handleSearch} disabled={loading}><Search size={18} /> Search</button>
-                            <button className="home-clear-button" onClick={clearSearch}>Clear</button>
-                        </div>
-                    </div>
-                    {/* Show or hide additional search filters */}
-                    <button type="button" className="home-filter-toggle" onClick={() => setShowFilters(!showFilters)}>{showFilters ? "Hide Filters" : "More Filters"}</button>
-                    {showFilters && (
-                        <div className="home-extra-filters">
-                            <div className="home-filter-field">
-                                <label htmlFor="minPrice">Minimum Price (R)</label>
-                                <input id="minPrice" type="number" min="0" placeholder="Minimum price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
-                            </div>
-                            <div className="home-filter-field">
-                                <label htmlFor="maxPrice">Maximum Price (R)</label>
-                                <input id="maxPrice" type="number" min="0" placeholder="Maximum price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
-                            </div>
-                            <div className="home-filter-field">
-                                <label htmlFor="stars">Minimum Star Rating</label>
-                                <select id="stars" value={stars} onChange={(e) => setStars(e.target.value)}>
-                                    <option value="">Any rating</option>
-                                    <option value="1">1 star and above</option>
-                                    <option value="2">2 stars and above</option>
-                                    <option value="3">3 stars and above</option>
-                                    <option value="4">4 stars and above</option>
-                                    <option value="5">5 stars</option>
-                                </select>
-                            </div>
-                            <div className="home-amenities-filter">
-                                <label>Amenities</label>
-                                <div className="home-amenities-options">
-                                    {availableAmenities.map(name => (
-                                        <label key={name} className="home-amenity-option">
-                                            <input type="checkbox" checked={amenities.includes(name)} onChange={() => toggleAmenity(name)} /> {name}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    {error && <p className="home-search-error">{error}</p>}
-                </div>
-            </section>
-            <div className="home-hotels">
-                <Texts variant="h2">{searched ? "Search Results" : "Our hotel branches"}</Texts>
-                {loading && <Texts variant="p">Loading hotels...</Texts>}
-                {!loading && !error && hotels.length === 0 && <EmptyHotels />}
-                {!loading && !error && hotels.map(hotel => (
-                    <div className="hotel-card" key={hotel.id}>
-                        {hotel.main_image ? (
-                            <img className="hotel-card-image" src={hotel.main_image} alt={hotel.name} />
-                        ) : (
-                            <div className="hotel-card-no-image">No image available</div>
-                        )}
-                        <div className="hotel-card-content">
-                            <Texts variant="h3">{hotel.name}</Texts>
-                            <Texts variant="p">{hotel.city}, {hotel.address}</Texts>
-                            <Texts variant="p">{hotel.description}</Texts>
-                            {/* Display the average rating from guest reviews */}
-                            <Texts variant="p"> {Number(hotel.reviews_count) > 0 ? `Guest Rating: ${hotel.average_rating}/5 (${hotel.reviews_count} reviews)` : "No ratings yet"}</Texts>
-                            <div className="hotel-card-bottom">
-                                <div className="hotel-card-price">
-                                    {hotel.price_from !== null && hotel.price_from !== undefined ? (
-                                        <Texts variant="p">From R{hotel.price_from} / night</Texts>
-                                    ) : (
-                                        <Texts variant="p">Price unavailable</Texts>
-                                    )}
-                                </div>
-                                {/* Navigate to hotel details with the selected booking information */}
-                                <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests: parseInt(guests), numberOfRooms: parseInt(numberOfRooms) } })}>View Hotel</button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    )
-}
+        const guestOptions = []
+        for (let i = 1; i <= maxGuests; i++) {
+            guestOptions.push(
+                <option key={i} value={i}>{i} {i === 1 ? "Guest" : "Guests"}</option>
+            )
+        }
 
-export default Home
+        const roomOptions = []
+        for (let i = 1; i <= maxRooms && i <= 5; i++) {
+            roomOptions.push(
+                <option key={i} value={i}>{i} {i === 1 ? "Room" : "Rooms"} </option>
+            )
+        }
+
+        return (
+            <div className="home-container">
+                <section className="home-hero">
+                    <div className="home-hero-heading">
+                        <Texts variant="h1">Find Your Perfect Stay</Texts>
+                        <Texts variant="p">Discover comfortable stays at Wander Inn.</Texts>
+                    </div>
+                    <div className="home-search">
+                        <Texts variant="h2">Find a Hotel</Texts>
+                        <div className="home-search-fields">
+                            <div className="search-location">
+                                <Texts variant="span">Location</Texts>
+                                <input className="home-search-input" type="text" placeholder="Enter city e.g. Polokwane" value={city} onChange={(e) => setCity(e.target.value)} />
+                            </div>
+                            <div className="search-check-in">
+                                <Texts variant="span">Check-in</Texts>
+                                <input className="home-check-in-input" min={today} type="date" value={checkIn} onChange={(e) => { setCheckIn(e.target.value); setCheckOut("") }} />
+                            </div>
+                            <div className="search-check-out">
+                                <Texts variant="span">Check-out</Texts>
+                                <input className="home-check-out-input" min={checkIn || today} type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
+                            </div>
+                            {/* Select guests per room */}
+                            <div className="search-guests">
+                                <Texts variant="span">Guests per room</Texts>
+                                <select className="home-guests-input" value={guests} onChange={(e) => setGuests(e.target.value)}> {guestOptions}</select>
+                            </div>
+                            {/* Select number of rooms */}
+                            <div className="search-rooms">
+                                <Texts variant="span">Rooms</Texts>
+                                <select className="home-rooms-input" value={numberOfRooms} onChange={(e) => setNumberOfRooms(e.target.value)}> {roomOptions} </select>
+                            </div>
+                            <div className="home-search-actions">
+                                <button className="home-search-button" onClick={handleSearch} disabled={loading}><Search size={18} /> Search</button>
+                                <button className="home-clear-button" onClick={clearSearch}>Clear</button>
+                            </div>
+                        </div>
+                        {/* Show or hide additional search filters */}
+                        <button type="button" className="home-filter-toggle" onClick={() => setShowFilters(!showFilters)}>{showFilters ? "Hide Filters" : "More Filters"}</button>
+                        {showFilters && (
+                            <div className="home-extra-filters">
+                                <div className="home-filter-field">
+                                    <label htmlFor="minPrice">Minimum Price (R)</label>
+                                    <input id="minPrice" type="number" min="0" placeholder="Minimum price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
+                                </div>
+                                <div className="home-filter-field">
+                                    <label htmlFor="maxPrice">Maximum Price (R)</label>
+                                    <input id="maxPrice" type="number" min="0" placeholder="Maximum price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
+                                </div>
+                                <div className="home-filter-field">
+                                    <label htmlFor="stars">Minimum Star Rating</label>
+                                    <select id="stars" value={stars} onChange={(e) => setStars(e.target.value)}>
+                                        <option value="">Any rating</option>
+                                        <option value="1">1 star and above</option>
+                                        <option value="2">2 stars and above</option>
+                                        <option value="3">3 stars and above</option>
+                                        <option value="4">4 stars and above</option>
+                                        <option value="5">5 stars</option>
+                                    </select>
+                                </div>
+                                <div className="home-amenities-filter">
+                                    <label>Amenities</label>
+                                    <div className="home-amenities-options">
+                                        {availableAmenities.map(name => (
+                                            <label key={name} className="home-amenity-option">
+                                                <input type="checkbox" checked={amenities.includes(name)} onChange={() => toggleAmenity(name)} /> {name}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {error && <p className="home-search-error">{error}</p>}
+                    </div>
+                </section>
+                <div className="home-hotels" ref={resultsRef}>
+                    <Texts variant="h2">{searched ? "Search Results" : "Our hotel branches"}</Texts>
+                    {loading && <Texts variant="p">Loading hotels...</Texts>}
+                    {!loading && !error && hotels.length === 0 && <EmptyHotels />}
+                    {!loading && !error && hotels.map(hotel => (
+                        <div className="hotel-card" key={hotel.id}>
+                            {hotel.main_image ? (
+                                <img className="hotel-card-image" src={hotel.main_image} alt={hotel.name} />
+                            ) : (
+                                <div className="hotel-card-no-image">No image available</div>
+                            )}
+                            <div className="hotel-card-content">
+                                <Texts variant="h3">{hotel.name}</Texts>
+                                <Texts variant="p">{hotel.city}, {hotel.address}</Texts>
+                                <Texts variant="p">{hotel.description}</Texts>
+                                {/* Display the average rating from guest reviews */}
+                                <Texts variant="p"> {Number(hotel.reviews_count) > 0 ? `Guest Rating: ${hotel.average_rating}/5 (${hotel.reviews_count} reviews)` : "No ratings yet"}</Texts>
+                                <div className="hotel-card-bottom">
+                                    <div className="hotel-card-price">
+                                        {hotel.price_from !== null && hotel.price_from !== undefined ? (
+                                            <Texts variant="p">From R{hotel.price_from} / night</Texts>
+                                        ) : (
+                                            <Texts variant="p">Price unavailable</Texts>
+                                        )}
+                                    </div>
+                                    {/* Navigate to hotel details with the selected booking information */}
+                                    <button className="hotel-view-button" onClick={() => navigate(`/hotels/${hotel.id}`, { state: { checkIn, checkOut, guests: parseInt(guests), numberOfRooms: parseInt(numberOfRooms) } })}>View Hotel</button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
+    }
+
+    export default Home
