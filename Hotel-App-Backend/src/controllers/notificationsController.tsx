@@ -62,3 +62,26 @@ export const markAllNotificationsRead=async(req:Request,res:Response)=>{
         return res.status(500).json({message:"Could not update the notifications."})
     }
 }
+
+// Admin sends a notification to all users
+
+export const sendNotification = async (req: Request, res: Response) => {
+    try {
+        const message = req.body.message
+        if (!message || !message.trim()) {
+            return res.status(400).json({message: "Notification message is required."})
+        }
+        if (message.length > 500) {
+            return res.status(400).json({message: "Notification must not exceed 500 characters."
+            })
+        }
+        await connectionPool.query(`INSERT INTO notifications (user_id, message) SELECT id, $1 FROM users WHERE role='user'`,
+            [message.trim()]
+        )
+        return res.status(201).json({ message: "Notification sent to all users."})
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({message: "Could not send notification."})
+    }
+}

@@ -65,28 +65,59 @@ export const getProfile = async (req: Request, res: Response) => {
 //changing password 
 export const changePassword = async (req: Request, res: Response) => {
     try {
-        const current_password = req.body.current_password
-        const new_password = req.body.new_password
+        const user_id = res.locals.userId
+        const { current_password, new_password, confirm_password } = req.body
 
-        if (!String(new_password) || new_password.length < 8) {
-            return res.status(400).json({ message: "New password must be at least 8 characters." })
+        if (!current_password || !new_password || !confirm_password) {
+            return res.status(400).json({ message: "All fields are required." })
         }
 
-        const user = await connectionPool.query("SELECT password_hash FROM users WHERE id=$1", [res.locals.userId])
-        const old_hashedpassword = user.rows[0].password_hash
-
-        //accounts created with google don't have password  
-        if (old_hashedpassword) {
-            if (!String(current_password) || !await bcrypt.compare(current_password, old_hashedpassword)) {
-                return res.status(401).json({ message: "Current password is incorrect." })
-            }
+        if (new_password !== confirm_password) {
+            return res.status(400).json({message: "Passwords do not match." })
         }
-        await connectionPool.query("UPDATE users SET password_hash=$1 WHERE id=$2",
-            [await bcrypt.hash(new_password, 10), res.locals.userId])
-        return res.status(200).json({ message: "Password updated." })
+
+        if (new_password.length < 8) {
+            return res.status(400).json({message: "Password must be at least 8 characters."})
+        }
+
+        const result = await connectionPool.query("SELECT password_hash FROM users WHERE id = $1",
+            [user_id]
+        )
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: "User not found."
+            })
+        }
+
+        const user = result.rows[0]
+
+        if (!user.password_hash) {
+            return res.status(400).json({message: "Password change is unavailable for this account." })
+        }
+
+        const isMatch = await bcrypt.compare(current_password,user.password_hash
+        )
+
+        if (!isMatch) {
+            return res.status(400).json({message: "Current password is incorrect." })
+        }
+
+        const isSamePassword = await bcrypt.compare(new_password,user.password_hash
+        )
+        if (isSamePassword) {
+            return res.status(400).json({message: "New password cannot be the same as the current password."
+            })
+        }
+        const hashedPassword = await bcrypt.hash(new_password, 10)
+        await connectionPool.query( "UPDATE users SET password_hash = $1 WHERE id = $2", [hashedPassword, user_id]
+        )
+        return res.status(200).json({  message: "Password changed successfully."})
     }
     catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Could not change the password." })
+        return res.status(500).json({
+            message: "Could not change password."
+        })
     }
 }
