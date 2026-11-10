@@ -41,18 +41,17 @@ export const createPayment = async (req: Request, res: Response) => {
 
         if (existing_payment.rows.length > 0) {
             const payment = existing_payment.rows[0]
-
             if (payment.status === "paid") {
-                return res.status(409).json({ message: "This booking has already been paid." })
+                req.params.reference = payment.payment_reference
+                return verifyPayment(req, res)
             }
-
             const paystack = await paystackRequest(`/transaction/verify/${encodeURIComponent(payment.payment_reference)}`, "GET"
             )
 
             if (paystack.status === "success") {
-                return res.status(409).json({ message: "Payment was successful. Please verify your payment before trying again." })
+                req.params.reference = payment.payment_reference
+                return verifyPayment(req, res)
             }
-
             if (paystack.status !== "failed" && paystack.status !== "abandoned") {
                 return res.status(409).json({ message: "A payment is already in progress. Please complete or resolve it before trying again." })
             }
@@ -130,16 +129,18 @@ export const verifyPayment = async (req: Request, res: Response) => {
              WHERE id = $1 AND status = 'pending' 
              AND EXISTS (SELECT 1 FROM payments WHERE booking_id = $1 AND id = $2 AND status = 'paid'
              )
-             RETURNING status`,[payment.booking_id, payment.id]
+             RETURNING status`, [payment.booking_id, payment.id]
                 )
 
                 if (result.rows.length > 0) {
-                    return res.status(200).json({ message: "Payment already verified. Your booking is now confirmed.", status: "paid", booking_status: "confirmed", booking_id: payment.booking_id
+                    return res.status(200).json({
+                        message: "Payment already verified. Your booking is now confirmed.", status: "paid", booking_status: "confirmed", booking_id: payment.booking_id
                     })
                 }
                 return res.status(409).json({ message: "Booking status changed. Please refresh and check your booking." })
             }
-            return res.status(200).json({ message: "Payment already verified.", status: "paid", booking_status: payment.booking_status, booking_id: payment.booking_id
+            return res.status(200).json({
+                message: "Payment already verified.", status: "paid", booking_status: payment.booking_status, booking_id: payment.booking_id
             })
         }
         if (payment.status === "failed") {
