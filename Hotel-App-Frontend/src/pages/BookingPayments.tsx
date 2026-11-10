@@ -110,7 +110,9 @@ const BookingPayment = () => {
                     <button className="booking-payment-button" type="button" onClick={handlePayment} disabled={processing}>{processing ? "Processing..." : "Proceed to Payment"}</button>
                 )}
                 {booking.payment_status === "paid" && (
-                    <p className="booking-payment-message">Payment received. Awaiting booking confirmation from the admin.</p>
+                    <p className="booking-payment-message">
+                        Payment received. Your booking has been confirmed.
+                    </p>
                 )}
                 {booking.status !== "pending" && (
                     <p className="booking-payment-message">Booking status: {booking.status}</p>
