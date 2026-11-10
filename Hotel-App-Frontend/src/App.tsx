@@ -33,6 +33,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy"
 import Terms from "./pages/Terms"
 import AdminReviews from "./pages/admin/AdminReviews"
 import Services from "./pages/Services"
+import ChangePassword from "./pages/ChangePassword"
+import AdminNotifications from "./pages/admin/AdminNotifications"
 
 const ProtectedBooking = () => {
   const location = useLocation()
@@ -68,6 +70,7 @@ const UserLayout = () => {
           <Route path="/services" element={<Services />} />
           {/* protected pages  */}
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/profile/change-password" element={ <ProtectedRoute> <ChangePassword /></ProtectedRoute>}/>
           <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
           <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
           <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
@@ -88,6 +91,7 @@ const UserLayout = () => {
           <Route path="/admin/rooms/:id" element={<AdminRoute><AdminNavbar /><RoomDetails /></AdminRoute>} />
           <Route path="/admin/profile" element={<AdminRoute><AdminNavbar /><AdminProfilePage /></AdminRoute>} />
           <Route path="/admin/reviews" element={<AdminRoute><AdminNavbar /><AdminReviews /></AdminRoute>} />
+          <Route path="/admin/notifications"element={<AdminRoute> <AdminNavbar /><AdminNotifications /></AdminRoute>}/>
         </Routes>
       </main>
       {!hideFooter && <Footer />}
