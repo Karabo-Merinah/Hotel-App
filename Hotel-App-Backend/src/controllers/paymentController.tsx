@@ -124,9 +124,22 @@ export const verifyPayment = async (req: Request, res: Response) => {
         }
         const payment = payment_result.rows[0]
         if (payment.status === "paid") {
-            return res.status(200).json({
-                message: "Payment already verified.", status: "paid",
-                booking_status: payment.booking_status, booking_id: payment.booking_id
+            // Payment was previously verified, but the booking may still be pending
+            if (payment.booking_status === "pending") {
+                const result = await connectionPool.query(`UPDATE bookings SET status = 'confirmed'
+             WHERE id = $1 AND status = 'pending' 
+             AND EXISTS (SELECT 1 FROM payments WHERE booking_id = $1 AND id = $2 AND status = 'paid'
+             )
+             RETURNING status`,[payment.booking_id, payment.id]
+                )
+
+                if (result.rows.length > 0) {
+                    return res.status(200).json({ message: "Payment already verified. Your booking is now confirmed.", status: "paid", booking_status: "confirmed", booking_id: payment.booking_id
+                    })
+                }
+                return res.status(409).json({ message: "Booking status changed. Please refresh and check your booking." })
+            }
+            return res.status(200).json({ message: "Payment already verified.", status: "paid", booking_status: payment.booking_status, booking_id: payment.booking_id
             })
         }
         if (payment.status === "failed") {
@@ -188,13 +201,14 @@ export const verifyPayment = async (req: Request, res: Response) => {
         // Notify the user after successful payment
         try {
             await connectionPool.query("INSERT INTO notifications (user_id, message) VALUES ($1, $2)",
-                [user_id,"Your payment was successful. Your booking is confirmed."]
+                [user_id, "Your payment was successful. Your booking is confirmed."]
             )
         } catch (error) {
             console.log("Notification error:", error)
         }
-        return res.status(200).json({message: "Payment successful. Your booking is confirmed.",
-            status: "paid",booking_status: "confirmed",
+        return res.status(200).json({
+            message: "Payment successful. Your booking is confirmed.",
+            status: "paid", booking_status: "confirmed",
             booking_id: payment.booking_id
         })
     }
