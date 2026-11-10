@@ -65,10 +65,19 @@ const BookingPayment = () => {
                 })
                 return
             }
-            const response = await api.post("/api/payments", { booking_id: booking.id },
-                { headers: { Authorization: `Bearer ${token}` } }
+            const response = await api.post("/api/payments",{ booking_id: booking.id },{ headers: { Authorization: `Bearer ${token}` } }
             )
-            window.location.href = response.data.authorization_url
+
+            if (response.data.status === "paid" && response.data.booking_status === "confirmed"
+            ) {
+                navigate(`/bookings/${booking.id}`)
+            }
+            else if (response.data.authorization_url) {
+                window.location.href = response.data.authorization_url
+            }
+            else {
+                setError("Could not confirm the payment status.")
+            }
         }
         catch (error) {
             if (axios.isAxiosError(error)) {
