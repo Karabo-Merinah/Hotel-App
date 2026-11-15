@@ -209,8 +209,7 @@ The frontend is deployed using Netlify and connects to a backend hosted on Rende
 
 
 
-The project includes `public/_redirects` to support React Router pages when refreshing or opening a direct URL on Netlify. The backend must allow the deployed Netlify origin in its CORS configuration.
-
+The project includes `public/_redirects` to support React Router pages when refreshing or opening a direct URL on Netlify. 
 
 ## App Preview
 
@@ -228,8 +227,6 @@ Preview showing hotel information and images.
 ![Hotel details](./Hotel-App-Frontend/hotel_details_2.png)
 
 ### Room Details
-
-![alt text](image.png)
 
  showing room details and images.
 
