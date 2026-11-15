@@ -95,21 +95,12 @@ const AdminBookingDetails = () => {
                     <Texts variant="h3">{formatDate(booking.check_out)}</Texts>
                 </div>
             </div>
-
             <Texts variant="h2">Reservation information</Texts>
-
             <div className="admin-booking-information">
-                <div>
-                    Room: {booking.room_type} • Rooms: {booking.number_of_rooms}
-                    {" • "}Guests: {booking.number_of_guests}
+                <div> Room: {booking.room_type} • Rooms: {booking.number_of_rooms} Guests: {booking.number_of_guests}
                 </div>
-                <div>
-                    Total: R{booking.total_price}
-                </div>
-                <div>
-                    Status: {booking.status}
-                    {" • "}Contact: {booking.guest_email}
-                </div>
+                <div>Total: R{booking.total_price}</div>
+                <div>Status: {booking.status}   Contact: {booking.guest_email} </div>
             </div>
             {error && <p className="admin-booking-error">{error}</p>}
             <div className="admin-booking-detail-actions">

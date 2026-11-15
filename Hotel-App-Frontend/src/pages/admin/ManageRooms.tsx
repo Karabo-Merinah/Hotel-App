@@ -229,7 +229,7 @@ const ManageRooms = () => {
             {confirmImageId !== null && (
                 <ConfirmDialog title="Delete Room Image" message="Are you sure you want to delete this room image?" onConfirm={() => deleteRoomImage(confirmImageId)} onClose={() => setConfirmImageId(null)} loading={deletingImage} />
             )}
-            <Texts variant="h1">Room & Pricing</Texts>
+            <Texts variant="h1">Room and Pricing</Texts>
             <form className="admin-room-form" onSubmit={saveRoom}>
                 {/* Select hotel */}
                 <div className="admin-room-field">

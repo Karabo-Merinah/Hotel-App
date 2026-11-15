@@ -26,12 +26,14 @@ const BookingPayment = () => {
             setError("")
             const token = localStorage.getItem("token")
 
+             // redirects to login if the user is not authenticated
             if (!token) {
                 navigate("/login", {
                     state: { from: `/bookings/${id}/payment` }
                 })
                 return
             }
+             // request booking details from the backend
             const response = await api.get(`/api/bookings/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             )
@@ -47,18 +49,21 @@ const BookingPayment = () => {
             setLoading(false)
         }
     }
+     // fetch booking details when the page opens or booking ID changes
     useEffect(() => {
         getBooking()
     }, [id])
 
 
     const handlePayment = async () => {
+          // only allow payment for pending and unpaid bookings
         if (!booking || booking.status !== "pending" || booking.payment_status !== "unpaid") return
         try {
             setProcessing(true)
             setError("")
             const token = localStorage.getItem("token")
 
+             // redirect to login if the token is missing
             if (!token) {
                 navigate("/login", {
                     state: { from: `/bookings/${id}/payment` }
@@ -67,11 +72,12 @@ const BookingPayment = () => {
             }
             const response = await api.post("/api/payments",{ booking_id: booking.id },{ headers: { Authorization: `Bearer ${token}` } }
             )
-
+// if payment is already completed, open booking details
             if (response.data.status === "paid" && response.data.booking_status === "confirmed"
             ) {
                 navigate(`/bookings/${booking.id}`)
             }
+               // redirect the user to the payment gateway
             else if (response.data.authorization_url) {
                 window.location.href = response.data.authorization_url
             }
@@ -80,6 +86,7 @@ const BookingPayment = () => {
             }
         }
         catch (error) {
+            // display the error message returned by the backend
             if (axios.isAxiosError(error)) {
                 setError(error.response?.data?.message || "Could not initialize payment.")
             } else {
@@ -103,6 +110,7 @@ const BookingPayment = () => {
                 <Texts variant="h1">Confirm Your Booking</Texts>
                 <Texts variant="p">Review your reservation details before proceeding to payment.</Texts>
                 {error && <p className="booking-payment-error">{error}</p>}
+                  {/* Display the selected booking information */}
                 <div className="booking-confirmation-details">
                     <div><span>Hotel</span><strong>{booking.hotel_name}</strong></div>
                     <div><span>Room</span><strong>{booking.room_type || "Not available"}</strong></div>
@@ -115,17 +123,21 @@ const BookingPayment = () => {
                     <Texts variant="h2">Total Amount</Texts>
                     <Texts variant="h2">R{Number(booking.total_price).toFixed(2)}</Texts>
                 </div>
+                 {/* show payment button only for pending and unpaid bookings */}
                 {booking.status === "pending" && booking.payment_status === "unpaid" && (
                     <button className="booking-payment-button" type="button" onClick={handlePayment} disabled={processing}>{processing ? "Processing..." : "Proceed to Payment"}</button>
                 )}
+                 {/* display confirmation when payment has been received */}
                 {booking.payment_status === "paid" && (
                     <p className="booking-payment-message">
                         Payment received. Your booking has been confirmed.
                     </p>
                 )}
+                  {/* display booking status when it is no longer pending */}
                 {booking.status !== "pending" && (
                     <p className="booking-payment-message">Booking status: {booking.status}</p>
                 )}
+                  {/* returns to the user's booking history */}
                 <button className="booking-payment-back" type="button" onClick={() => navigate("/bookings")}>Back to My Bookings</button>
             </div>
         </div>

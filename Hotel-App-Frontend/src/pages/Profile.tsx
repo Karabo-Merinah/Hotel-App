@@ -50,7 +50,7 @@ const Profile = () => {
         getProfile()
     }, [])
 
-    // Close the popup after 3 seconds
+    // Close the popup 
     useEffect(() => {
         if (!popup) return
 
@@ -109,7 +109,6 @@ const Profile = () => {
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/favourites")}> Favourites<span>›</span></button>
                 <button className="profile-settings-item" type="button" onClick={() => navigate("/notifications")}>Notifications<span>›</span></button>
             </div>
-            <button className="profile-logout-button" type="button" onClick={() => setConfirmLogout(true)}>Logout</button>
         </div>
     )
 }

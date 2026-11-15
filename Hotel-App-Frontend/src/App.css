@@ -2,9 +2,18 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background-color: #FAF7F3;
 }
+
 .app-main {
     flex: 1;
     width: 100%;
     min-width: 0;
+}
+
+.admin-content {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    min-width: 0;
+    box-sizing: border-box;
 }

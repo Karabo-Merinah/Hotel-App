@@ -1,88 +1,82 @@
-﻿.admin-navbar {
+﻿.admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    background-color: #FFFFFF;
+    border-right: 1px solid #E9DED4;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    padding: 8px 32px;
-    min-height: 76px;
-    background: #fff;
-    border-bottom: 1px solid #e9ded4;
+    flex-direction: column;
+    padding: 25px 15px;
     box-sizing: border-box;
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
+    z-index: 100;
 }
 
 .admin-logo {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-    white-space: nowrap;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #E9DED4;
 }
 
 .admin-logo-image {
-    width: 130px;
-    height: 60px;
+    width: 150px;
+    height: 70px;
     object-fit: contain;
-    display: block;
 }
 
 .admin-panel-label {
-    color: #5c4033;
-    font-size: 14px;
+    color: #5C4033;
+    font-size: 13px;
     font-weight: 700;
-    white-space: nowrap;
 }
 
 .admin-navbar-links {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 12px;
-    flex-shrink: 0;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 25px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .admin-navbar-links a {
-    color: #40342c;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    color: #40342C;
     font-size: 14px;
     text-decoration: none;
-    padding: 10px 12px;
     border-radius: 8px;
-    white-space: nowrap;
-    transition: background-color 0.2s ease;
 }
 
 .admin-navbar-links a:hover {
-    background: #f5efe9;
-    color: #5c4033;
+    background-color: #F5EFE9;
+    color: #5C4033;
 }
 
 .admin-navbar-links a.active {
-    background: #f5efe9;
-    color: #5c4033;
+    background-color: #5C4033;
+    color: #FFFFFF;
     font-weight: 600;
 }
 
 .admin-desktop-logout {
-    padding: 10px 16px;
-    background: #5c4033;
-    color: white;
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #5C4033;
+    color: #FFFFFF;
     border: none;
-    border-radius: 7px;
-    font: inherit;
+    border-radius: 8px;
     font-size: 14px;
-    white-space: nowrap;
     cursor: pointer;
-    flex-shrink: 0;
 }
+
 .admin-desktop-logout:hover {
-    background: #493126;
-}
-.admin-view-website {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-    white-space: nowrap;
+    background-color: #493126;
 }

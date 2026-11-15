@@ -35,7 +35,9 @@ import AdminReviews from "./pages/admin/AdminReviews"
 import Services from "./pages/Services"
 import ChangePassword from "./pages/ChangePassword"
 import AdminNotifications from "./pages/admin/AdminNotifications"
+import "./App.css"
 
+//protects the booking page so only logged in users can book
 const ProtectedBooking = () => {
   const location = useLocation()
   const token = localStorage.getItem("token")
@@ -49,12 +51,18 @@ const ProtectedBooking = () => {
 
 const UserLayout = () => {
   const location = useLocation()
-  const hideNavbar = location.pathname === "/login" || location.pathname === "/register" || location.pathname.startsWith("/admin")
+  // check whether the current page belongs to the admin panel
+  const isAdmin = location.pathname.startsWith("/admin")
+  // hide the normal navbar on login, register and admin pages
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/register" || isAdmin
+  // hide the normal footer on login, register and admin pages
   const hideFooter = hideNavbar
 
   return (
     <div className="app-layout">
+      {/* Display navbar on user pages only */}
       {!hideNavbar && <Navbar />}
+      {/* Main content */}
       <main className="app-main">
         <Routes>
           {/* public pages  */}
@@ -65,12 +73,15 @@ const UserLayout = () => {
           <Route path="/terms" element={<Terms />} />
           <Route path="/hotels/:id" element={<HotelDetails />} />
           <Route path="/rooms/:id" element={<RoomDetails />} />
+          <Route path="/services" element={<Services />} />
+
+          {/* authentication pages */}
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/services" element={<Services />} />
-          {/* protected pages  */}
+
+          {/* protected user pages  */}
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/profile/change-password" element={ <ProtectedRoute> <ChangePassword /></ProtectedRoute>}/>
+          <Route path="/profile/change-password" element={<ProtectedRoute> <ChangePassword /></ProtectedRoute>} />
           <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
           <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
           <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetails /></ProtectedRoute>} />
@@ -80,18 +91,28 @@ const UserLayout = () => {
           <Route path="/favourites" element={<ProtectedRoute><Favourites /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/hotels/:hotelId/review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
-          <Route path="/admin" element={<AdminRoute><AdminNavbar /><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/hotels" element={<AdminRoute><AdminNavbar /><ManageHotels /></AdminRoute>} />
-          <Route path="/admin/hotels/new" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
-          <Route path="/admin/hotels/:id/edit" element={<AdminRoute><AdminNavbar /><HotelForm /></AdminRoute>} />
-          <Route path="/admin/hotels/:id" element={<AdminRoute><AdminNavbar /><HotelDetails /></AdminRoute>} />
-          <Route path="/admin/bookings" element={<AdminRoute><AdminNavbar /><ManageBookings /></AdminRoute>} />
-          <Route path="/admin/bookings/:id" element={<AdminRoute><AdminNavbar /><AdminBookingDetails /></AdminRoute>} />
-          <Route path="/admin/rooms" element={<AdminRoute><AdminNavbar /><ManageRooms /></AdminRoute>} />
-          <Route path="/admin/rooms/:id" element={<AdminRoute><AdminNavbar /><RoomDetails /></AdminRoute>} />
-          <Route path="/admin/profile" element={<AdminRoute><AdminNavbar /><AdminProfilePage /></AdminRoute>} />
-          <Route path="/admin/reviews" element={<AdminRoute><AdminNavbar /><AdminReviews /></AdminRoute>} />
-          <Route path="/admin/notifications"element={<AdminRoute> <AdminNavbar /><AdminNotifications /></AdminRoute>}/>
+
+
+          {/* ADMIN MANAGEMENT */}
+          {/* Admin dashboard */}
+          <Route path="/admin" element={<AdminRoute><AdminNavbar /><div className="admin-content"><AdminDashboard /></div></AdminRoute>} />
+          {/* Hotel management */}
+          <Route path="/admin/hotels" element={<AdminRoute><AdminNavbar /><div className="admin-content"><ManageHotels /></div></AdminRoute>} />
+          <Route path="/admin/hotels/new" element={<AdminRoute><AdminNavbar /><div className="admin-content"><HotelForm /></div></AdminRoute>} />
+          <Route path="/admin/hotels/:id/edit" element={<AdminRoute><AdminNavbar /><div className="admin-content"><HotelForm /></div></AdminRoute>} />
+          <Route path="/admin/hotels/:id" element={<AdminRoute><AdminNavbar /><div className="admin-content"><HotelDetails /></div></AdminRoute>} />
+          {/* Booking management */}
+          <Route path="/admin/bookings" element={<AdminRoute><AdminNavbar /><div className="admin-content"><ManageBookings /></div></AdminRoute>} />
+          <Route path="/admin/bookings/:id" element={<AdminRoute><AdminNavbar /><div className="admin-content"><AdminBookingDetails /></div></AdminRoute>} />
+          {/* Room management */}
+          <Route path="/admin/rooms" element={<AdminRoute><AdminNavbar /><div className="admin-content"><ManageRooms /></div></AdminRoute>} />
+          <Route path="/admin/rooms/:id" element={<AdminRoute><AdminNavbar /><div className="admin-content"><RoomDetails /></div></AdminRoute>} />
+          {/* admin profile */}
+          <Route path="/admin/profile" element={<AdminRoute><AdminNavbar /><div className="admin-content"><AdminProfilePage /></div></AdminRoute>} />
+          {/* reviews management */}
+          <Route path="/admin/reviews" element={<AdminRoute><AdminNavbar /><div className="admin-content"><AdminReviews /></div></AdminRoute>} />
+          {/* admin notifications */}
+          <Route path="/admin/notifications" element={<AdminRoute><AdminNavbar /><div className="admin-content"><AdminNotifications /></div></AdminRoute>} />
         </Routes>
       </main>
       {!hideFooter && <Footer />}

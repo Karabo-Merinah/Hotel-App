@@ -39,9 +39,7 @@ const PaymentSuccess = () => {
                     }
                 )
 
-                if (
-                    response.data.status === "paid" &&
-                    response.data.booking_status === "confirmed"
+                if (response.data.status === "paid" && response.data.booking_status === "confirmed"
                 ) {
                     setBookingId(response.data.booking_id)
                 }
