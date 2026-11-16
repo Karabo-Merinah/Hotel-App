@@ -208,7 +208,6 @@ The frontend is deployed using Netlify and connects to a backend hosted on Rende
 - Backend API: https://wander-inn-backend.onrender.com/
 
 
-
 The project includes `public/_redirects` to support React Router pages when refreshing or opening a direct URL on Netlify. 
 
 ## App Preview
@@ -247,19 +246,37 @@ kaybee@gmail.com
 
 Kayy@123 
 
+### Figma links 
+
+## Moodboard 
+
+[Moodboard](https://www.figma.com/design/yF4EaShNOXXdKmGf3A3pQn/HOTEL_APP_MOODBOARD?node-id=0-1&t=2b6y7aF9D5hrKeBy-1)
+
+## Userflow
+
+[User flow](https://www.figma.com/design/WeSVeyL5KTxdEQsxvW1smb/Hotel-app-user-flow?node-id=0-1&t=2b6y7aF9D5hrKeBy-1)
+
+
+## Site map 
+[Site map](https://www.figma.com/design/ViJOXcuj5XYY5RzWjv1G5I/hotel-app-site-map?node-id=0-1&t=2b6y7aF9D5hrKeBy-1)
+
+
+## Wireframe 
+[Wireframe](https://www.figma.com/design/bfpTZwFozSk6Q7kZIu9I0f/Wireframe-Hotel-app?node-id=0-1&t=afTNePkVfzp0eOoM-1)
+
 ## What I Have Learnt
 
 - Building a multi-page React application with TypeScript and Vite.
 - Using React Router to manage public, protected and admin routes.
 - Managing authentication, bookings and favourites with Redux Toolkit.
 - Sending API requests with Axios and handling loading and error states.
-- Implementing email/password login and Google authentication in a frontend
--Using OAuth 
+- Implementing email/password login and Google authentication in a frontend using OAuth 
 - Working with hotel and room image galleries.
-- Displaying maps using React Leaflet.
+- Displaying maps using Google Maps.
 - Building booking and payment-related user interfaces.
 - Creating responsive layouts for desktop and mobile devices.
 - Understanding CORS configuration when frontend and backend are hosted on different domains.
+
 
 ## Future Improvements
 
